@@ -4,5 +4,5 @@
   "cookingtime": 100,
   "experience": 0.1,
   "ingredient": "ad_astra:moon_iron_ore",
-  "result": "minecraft:iron_ingot"
+  "result": {"id": "minecraft:iron_ingot"}
 }

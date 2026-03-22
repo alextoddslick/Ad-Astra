@@ -3,9 +3,7 @@
   "cookingtime": 1,
   "energy": 30,
   "input": {
-    "ingredient": {
-      "tag": "ad_astra:oxygen"
-    },
+    "ingredient": {"tag": "ad_astra:oxygen"},
     "millibuckets": 25
   },
   "result": {

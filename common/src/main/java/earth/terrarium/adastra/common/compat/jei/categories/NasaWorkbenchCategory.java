@@ -14,6 +14,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -77,7 +78,7 @@ public record NasaWorkbenchCategory(IGuiHelper guiHelper) implements IRecipeCate
 
     @Override
     public void draw(NasaWorkbenchRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        graphics.blit(NasaWorkbenchScreen.TEXTURE, 1, -4, 0, 0, 177, 140, 177, 224);
-        graphics.blit(NasaWorkbenchScreen.TEXTURE, 1, 136, 0, 217, 177, 7, 177, 224);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, NasaWorkbenchScreen.TEXTURE, 1, -4, 0, 0, 177, 140, 177, 224);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, NasaWorkbenchScreen.TEXTURE, 1, 136, 0, 217, 177, 7, 177, 224);
     }
 }

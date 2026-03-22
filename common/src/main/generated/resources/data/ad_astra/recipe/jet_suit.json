@@ -2,21 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:calorite_plates"
-    },
-    "C": {
-      "item": "ad_astra:etrionic_capacitor"
-    },
-    "E": {
-      "item": "ad_astra:calorite_engine"
-    },
-    "N": {
-      "item": "ad_astra:netherite_space_suit"
-    },
-    "T": {
-      "item": "ad_astra:calorite_tank"
-    }
+    "#": "#ad_astra:calorite_plates",
+    "C": "ad_astra:etrionic_capacitor",
+    "E": "ad_astra:calorite_engine",
+    "N": "ad_astra:netherite_space_suit",
+    "T": "ad_astra:calorite_tank"
   },
   "pattern": [
     "# #",

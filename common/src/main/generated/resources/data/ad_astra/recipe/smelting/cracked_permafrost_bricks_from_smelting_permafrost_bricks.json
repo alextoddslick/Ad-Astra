@@ -4,5 +4,5 @@
   "cookingtime": 200,
   "experience": 0.1,
   "ingredient": "ad_astra:permafrost_bricks",
-  "result": "ad_astra:cracked_permafrost_bricks"
+  "result": {"id": "ad_astra:cracked_permafrost_bricks"}
 }

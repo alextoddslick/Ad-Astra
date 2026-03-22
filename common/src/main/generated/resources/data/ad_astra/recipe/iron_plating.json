@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:iron_plates"
-    }
+    "#": "#ad_astra:iron_plates"
   },
   "pattern": [
     "###",

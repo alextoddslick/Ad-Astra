@@ -4,5 +4,5 @@
   "cookingtime": 100,
   "experience": 0.1,
   "ingredient": "ad_astra:glacio_lapis_ore",
-  "result": "minecraft:lapis_lazuli"
+  "result": {"id": "minecraft:lapis_lazuli"}
 }

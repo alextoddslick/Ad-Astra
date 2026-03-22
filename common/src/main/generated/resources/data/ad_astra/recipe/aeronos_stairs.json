@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "ad_astra:aeronos_planks"
-    }
+    "#": "ad_astra:aeronos_planks"
   },
   "pattern": [
     "#  ",

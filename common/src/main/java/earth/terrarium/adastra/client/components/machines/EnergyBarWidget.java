@@ -43,7 +43,8 @@ public class EnergyBarWidget extends ConfigurationWidget implements CursorWidget
         float ratio = energy / (float) capacity;
         int x = this.getX();
         int y = this.getY();
-        try (var ignored = new CloseableScissor(graphics, x, y + GuiUtils.ENERGY_BAR_HEIGHT - (int) (GuiUtils.ENERGY_BAR_HEIGHT * ratio), GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT)) {
+        int scissorY = y + GuiUtils.ENERGY_BAR_HEIGHT - (int) (GuiUtils.ENERGY_BAR_HEIGHT * ratio);
+        try (var ignored = new CloseableScissor(graphics, x, scissorY, x + GuiUtils.ENERGY_BAR_WIDTH, scissorY + GuiUtils.ENERGY_BAR_HEIGHT)) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiUtils.ENERGY_BAR, x, y, GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT);
         }
 

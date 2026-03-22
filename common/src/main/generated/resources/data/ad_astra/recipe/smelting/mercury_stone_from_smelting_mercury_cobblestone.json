@@ -4,5 +4,5 @@
   "cookingtime": 200,
   "experience": 0.1,
   "ingredient": "ad_astra:mercury_cobblestone",
-  "result": "ad_astra:mercury_stone"
+  "result": {"id": "ad_astra:mercury_stone"}
 }

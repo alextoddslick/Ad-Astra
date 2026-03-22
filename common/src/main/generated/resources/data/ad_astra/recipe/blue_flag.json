@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:blue_wool"
-    },
-    "|": {
-      "item": "ad_astra:steel_rod"
-    }
+    "#": "minecraft:blue_wool",
+    "|": "ad_astra:steel_rod"
   },
   "pattern": [
     "|##",

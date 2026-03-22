@@ -1,6 +1,5 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
   "ingredient": "ad_astra:permafrost_bricks",
-  "result": "ad_astra:permafrost_tiles"
+  "result": {"count": 1, "id": "ad_astra:permafrost_tiles"}
 }

@@ -1,6 +1,24 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "ad_astra:block/launch_pad",
+	"parent": "minecraft:block/block",
+	"textures": {
+		"0": "ad_astra:block/launch_pad",
+		"particle": "ad_astra:block/launch_pad"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 0.55556], "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 0.55556], "texture": "#0"},
+				"south": {"uv": [0, 0, 16, 0.55556], "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 0.55556], "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#0"}
+			}
+		}
+	],
 	"gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
@@ -26,7 +44,7 @@
 		"gui": {
 			"rotation": [30, 225, 0],
 			"translation": [0, 2, 0],
-			"scale": [0.23, 0.23, 0.23]
+			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {
 			"rotation": [90, 0, 0],

@@ -169,7 +169,7 @@ public class FuelRefineryBlockEntity extends RecipeMachineBlockEntity<RefiningRe
         // Cannot use quickCheck here because RefiningRecipe.matches() always returns true
         // (fluid-based recipes can't check fluids via RecipeInput). Iterate all recipes instead.
         FluidResource inputResource = getFluidContainer().get(0).getResource();
-        if (!inputResource.isBlank()) {
+        if (!inputResource.isBlank() && level().getServer() != null) {
             for (var holder : level().getServer().getRecipeManager().getRecipes()) {
                 if (holder.value().getType() != ModRecipeTypes.REFINING.get()) continue;
                 RefiningRecipe r = (RefiningRecipe) holder.value();

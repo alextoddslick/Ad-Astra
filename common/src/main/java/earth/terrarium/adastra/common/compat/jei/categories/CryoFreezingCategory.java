@@ -19,6 +19,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -63,8 +64,8 @@ public record CryoFreezingCategory(IGuiHelper guiHelper) implements IRecipeCateg
 
     @Override
     public void draw(CryoFreezingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        graphics.blit(CryoFreezerScreen.TEXTURE, 1, -4, 0, 0, 177, 96, 177, 181);
-        graphics.blit(CryoFreezerScreen.TEXTURE, 1, 92, 0, 174, 177, 7, 177, 181);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CryoFreezerScreen.TEXTURE, 1, -4, 0, 0, 177, 96, 177, 181);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CryoFreezerScreen.TEXTURE, 1, 92, 0, 174, 177, 7, 177, 181);
 
         new EnergyBarDrawable(mouseX, mouseY, -recipe.energy(), MachineConfig.OSTRUM.energyCapacity, MachineConfig.OSTRUM.maxEnergyInOut, 0).draw(graphics, 144, 55);
 

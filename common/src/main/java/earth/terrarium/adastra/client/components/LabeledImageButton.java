@@ -19,9 +19,6 @@ public class LabeledImageButton extends ImageButton {
 
     @Override
     public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // TODO: 1.21.11 - RenderSystem.setShaderColor/enableBlend/disableBlend are removed.
-        // The inactive tinting effect needs to be reimplemented using the new rendering pipeline
-        // (e.g., via a tinted render pipeline or by using GuiGraphics color parameters).
         super.renderContents(graphics, mouseX, mouseY, partialTick);
 
         int color = active ? 0xffffff : 0xa0a0a0;

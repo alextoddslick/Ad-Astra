@@ -6,6 +6,7 @@
     "mixins": [
         "common.BlockBehaviourPropertiesMixin",
         "common.BlockItemNameMixin",
+        "common.InventoryMixin",
         "common.ItemPropertiesMixin",
         "common.EntityBelowWorldMixin",
         "common.LivingEntityAccessor",

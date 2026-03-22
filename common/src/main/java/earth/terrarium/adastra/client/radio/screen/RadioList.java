@@ -181,10 +181,10 @@ public class RadioList extends AbstractWidget {
             int textStart = left + 3;
             if ((favorite || hovered) && this.info != null) {
                 String text = favorite ? "\u2605" : "\u2606";
-                graphics.drawString(Minecraft.getInstance().font, text, textStart, top + 3, favorite ? 0xFFAA00 : 0xFFFFFF);
+                graphics.drawString(Minecraft.getInstance().font, text, textStart, top + 3, favorite ? 0xFFFFAA00 : 0xFFFFFFFF);
                 textStart += Minecraft.getInstance().font.width(text) + 2;
             }
-            graphics.drawString(Minecraft.getInstance().font, getName(), textStart, top + 3, 0xFFFFFF);
+            graphics.drawString(Minecraft.getInstance().font, getName(), textStart, top + 3, 0xFFFFFFFF);
 
             if (hovered) {
                 if (info != null) {

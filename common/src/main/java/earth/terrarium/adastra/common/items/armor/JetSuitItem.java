@@ -87,16 +87,23 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
 
     protected void upwardsFlight(Player player) {
         double acceleration = sigmoidAcceleration(player.tickCount, 5.0, 1.0, 2.0);
-        acceleration /= 25.0f;
-        player.addDeltaMovement(new Vec3(0, Math.max(0.0025, acceleration), 0));
+        acceleration /= 50.0f;
+        player.push(new Vec3(0, Math.max(0.00125, acceleration), 0));
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
+        // push() sets needsSync which only sends velocity to OTHER tracking players,
+        // not to the player themselves. For players, movement is client-authoritative,
+        // so we must set hurtMarked to force the server velocity to be sent to
+        // the player's own client via ClientboundSetEntityMotionPacket (sendToTrackingPlayersAndSelf).
+        player.hurtMarked = true;
     }
 
     protected void fullFlight(Player player) {
-        Vec3 movement = player.getLookAngle().normalize().scale(0.075);
-        if (player.getDeltaMovement().length() > 2.0) return;
-        player.addDeltaMovement(movement);
+        Vec3 movement = player.getLookAngle().normalize().scale(0.0375);
+        if (player.getDeltaMovement().length() > 1.0) return;
+        player.push(movement);
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
+        // Same as upwardsFlight: force velocity sync to the player's own client.
+        player.hurtMarked = true;
         if (!player.isFallFlying()) {
             player.startFallFlying();
         }

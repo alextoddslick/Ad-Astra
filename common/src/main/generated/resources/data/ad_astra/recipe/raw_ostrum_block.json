@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:raw_ostrum"
-    }
+    "#": "#ad_astra:raw_ostrum"
   },
   "pattern": [
     "###",

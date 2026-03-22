@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:iron_ingot"
-    },
-    "C": {
-      "item": "minecraft:coal_block"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    }
+    "#": "minecraft:iron_ingot",
+    "C": "minecraft:coal_block",
+    "F": "minecraft:furnace"
   },
   "pattern": [
     "###",

@@ -162,9 +162,9 @@ public abstract class MachineScreen<M extends BaseContainerMenu<E>, E extends Co
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0x2a262b, false);
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0xFF2a262b, false);
         Component label = canConfigure() ? this.sideConfigWidget.getMessage() : this.playerInventoryTitle;
-        graphics.drawString(font, label, this.inventoryLabelX, this.inventoryLabelY, 0x2a262b, false);
+        graphics.drawString(font, label, this.inventoryLabelX, this.inventoryLabelY, 0xFF2a262b, false);
     }
 
     public void drawHorizontalProgressBar(GuiGraphics graphics, Identifier texture, int mouseX, int mouseY, int xOffset, int yOffset, int width, int height, int progress, int maxProgress, boolean reverse) {

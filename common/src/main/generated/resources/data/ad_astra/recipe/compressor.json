@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:iron_ingot"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    }
+    "#": "minecraft:iron_ingot",
+    "P": "minecraft:piston"
   },
   "pattern": [
     "#P#",

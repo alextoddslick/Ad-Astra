@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "ad_astra:block/etrionic_blast_furnace_on"
+    "model": "ad_astra:block/etrionic_blast_furnace"
   }
 }

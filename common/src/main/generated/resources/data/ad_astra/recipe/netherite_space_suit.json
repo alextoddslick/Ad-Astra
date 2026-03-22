@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:ostrum_plates"
-    },
-    "N": {
-      "item": "minecraft:netherite_chestplate"
-    },
-    "O": {
-      "item": "ad_astra:oxygen_gear"
-    },
-    "T": {
-      "item": "ad_astra:large_gas_tank"
-    }
+    "#": "#ad_astra:ostrum_plates",
+    "N": "minecraft:netherite_chestplate",
+    "O": "ad_astra:oxygen_gear",
+    "T": "ad_astra:large_gas_tank"
   },
   "pattern": [
     "# #",

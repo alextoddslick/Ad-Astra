@@ -1,6 +1,5 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 2,
   "ingredient": "ad_astra:venus_sandstone_bricks",
-  "result": "ad_astra:venus_sandstone_brick_slab"
+  "result": {"count": 2, "id": "ad_astra:venus_sandstone_brick_slab"}
 }

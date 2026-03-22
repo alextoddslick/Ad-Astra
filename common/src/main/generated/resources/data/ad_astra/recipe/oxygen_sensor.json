@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:ostrum_plates"
-    },
-    "F": {
-      "item": "ad_astra:fan"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
-    }
+    "#": "#ad_astra:ostrum_plates",
+    "F": "ad_astra:fan",
+    "R": "minecraft:redstone_block"
   },
   "pattern": [
     "#F#",

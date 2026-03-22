@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:desh_plates"
-    },
-    "D": {
-      "tag": "ad_astra:desh_ingots"
-    }
+    "#": "#ad_astra:desh_plates",
+    "D": "#ad_astra:desh_ingots"
   },
   "pattern": [
     "###",

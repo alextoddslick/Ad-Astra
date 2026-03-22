@@ -17,8 +17,9 @@ public class PlatformUtilsImpl {
     }
 
     public static Supplier<Item> createSpawnEggItem(Supplier<? extends EntityType<? extends Mob>> type, int primaryColor, int secondaryColor, Item.Properties properties) {
-        // 1.21.11: SpawnEggItem constructor now only takes Item.Properties.
-        // Entity type, colors are now configured via data-driven components on the item.
-        return () -> new SpawnEggItem(properties);
+        // 1.21.11: SpawnEggItem constructor takes only Item.Properties.
+        // Entity type is set via Item.Properties.spawnEgg() which adds the ENTITY_DATA component.
+        // Colors are now baked into the spawn egg texture (no longer data-driven tints).
+        return () -> new SpawnEggItem(properties.spawnEgg(type.get()));
     }
 }

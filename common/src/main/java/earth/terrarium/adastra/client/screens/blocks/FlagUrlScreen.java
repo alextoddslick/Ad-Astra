@@ -60,7 +60,7 @@ public class FlagUrlScreen extends Screen {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         int x = this.width / 2 - 100;
         int y = this.height / 2 - 20;
-        graphics.drawString(font, ConstantComponents.FLAG_URL, x, y - 10, 0xFFFFFF);
+        graphics.drawString(font, ConstantComponents.FLAG_URL, x, y - 10, 0xFFFFFFFF);
     }
 
     @Override

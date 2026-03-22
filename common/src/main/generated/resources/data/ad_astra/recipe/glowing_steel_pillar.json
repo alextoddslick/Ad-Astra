@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "ad_astra:steel_pillar"
-    },
-    {
-      "item": "minecraft:glowstone_dust"
-    }
+    "ad_astra:steel_pillar",
+    "minecraft:glowstone_dust"
   ],
   "result": {
     "id": "ad_astra:glowing_steel_pillar"

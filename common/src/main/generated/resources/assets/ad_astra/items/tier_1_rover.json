@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/tier_1_rover",
+    "model": {
+      "type": "ad_astra:rover"
+    }
+  }
+}

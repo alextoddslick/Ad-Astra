@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "ad_astra:ostrum_plating"
-    }
+    "ad_astra:ostrum_plating"
   ],
   "result": {
     "id": "ad_astra:ostrum_plating_button"

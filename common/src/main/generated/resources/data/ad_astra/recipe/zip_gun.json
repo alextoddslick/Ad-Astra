@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:steel_plates"
-    },
-    "G": {
-      "item": "ad_astra:large_gas_tank"
-    },
-    "|": {
-      "tag": "ad_astra:steel_rods"
-    }
+    "#": "#ad_astra:steel_plates",
+    "G": "ad_astra:large_gas_tank",
+    "|": "#ad_astra:steel_rods"
   },
   "pattern": [
     "##|",

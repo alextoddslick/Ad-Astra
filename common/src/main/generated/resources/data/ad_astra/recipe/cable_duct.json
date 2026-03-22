@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:steel_plates"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "S": {
-      "item": "ad_astra:steel_cable"
-    }
+    "#": "#ad_astra:steel_plates",
+    "C": "minecraft:copper_ingot",
+    "S": "ad_astra:steel_cable"
   },
   "pattern": [
     "#C#",

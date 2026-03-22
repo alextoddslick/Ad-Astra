@@ -8,6 +8,10 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import earth.terrarium.adastra.client.dimension.AdAstraPlanetRenderers;
 import earth.terrarium.adastra.client.models.armor.SpaceSuitModel;
+import earth.terrarium.adastra.client.models.blocks.GlobeCubeModel;
+import earth.terrarium.adastra.client.models.blocks.GravityNormalizerToeModel;
+import earth.terrarium.adastra.client.models.blocks.GravityNormalizerTopModel;
+import earth.terrarium.adastra.client.models.blocks.OxygenDistributorTopModel;
 import earth.terrarium.adastra.client.models.entities.mobs.*;
 import earth.terrarium.adastra.client.models.entities.vehicles.LanderModel;
 import earth.terrarium.adastra.client.models.entities.vehicles.RocketModel;
@@ -85,6 +89,7 @@ public class AdAstraClient {
 
     public static void init() {
         AdAstra.CONFIGURATOR.register(AdAstraConfigClient.class);
+        earth.terrarium.adastra.client.registry.ModClientFluidProperties.init();
         registerScreens();
         registerBlockEntityRenderers();
         registerItemProperties();
@@ -120,8 +125,8 @@ public class AdAstraClient {
 
     private static void registerBlockEntityRenderers() {
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.ENERGIZER.get(), c -> new EnergizerBlockEntityRenderer());
-        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.GLOBE.get(), c -> new GlobeBlockEntityRenderer());
-        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.OXYGEN_DISTRIBUTOR.get(), c -> new OxygenDistributorBlockEntityRenderer());
+        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.GLOBE.get(), c -> new GlobeBlockEntityRenderer(c));
+        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.OXYGEN_DISTRIBUTOR.get(), c -> new OxygenDistributorBlockEntityRenderer(c));
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.GRAVITY_NORMALIZER.get(), c -> new GravityNormalizerBlockEntityRenderer());
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.FLAG.get(), c -> new FlagBlockEntityRenderer());
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.SLIDING_DOOR.get(), c -> new SlidingDoorBlockEntityRenderer());
@@ -150,6 +155,12 @@ public class AdAstraClient {
         RocketModel.register(consumer);
         consumer.register(LanderModel.LAYER, LanderModel::createBodyLayer);
         SpaceSuitModel.register(consumer);
+
+        // Block entity model layers
+        consumer.register(GlobeCubeModel.LAYER, GlobeCubeModel::createBodyLayer);
+        consumer.register(OxygenDistributorTopModel.LAYER, OxygenDistributorTopModel::createBodyLayer);
+        consumer.register(GravityNormalizerTopModel.LAYER, GravityNormalizerTopModel::createBodyLayer);
+        consumer.register(GravityNormalizerToeModel.LAYER, GravityNormalizerToeModel::createBodyLayer);
 
         consumer.register(LunarianModel.LAYER_LOCATION, LunarianModel::createBodyLayer);
         consumer.register(CorruptedLunarianModel.LAYER_LOCATION, CorruptedLunarianModel::createBodyLayer);
@@ -186,12 +197,19 @@ public class AdAstraClient {
     }
 
     public static void onRegisterModels(Consumer<Identifier> consumer) {
-        ModBlocks.GLOBES.stream().forEach(b -> consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_cube".formatted(b.getId().getPath()))));
         consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(ModBlocks.AIRLOCK.getId().getPath())));
         consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(ModBlocks.REINFORCED_DOOR.getId().getPath())));
-        consumer.accept(OxygenDistributorBlockEntityRenderer.TOP);
-        consumer.accept(GravityNormalizerBlockEntityRenderer.TOP);
-        consumer.accept(GravityNormalizerBlockEntityRenderer.TOE);
+
+        // Globe cube models (per-planet, with correct textures baked in)
+        ModBlocks.GLOBES.stream().forEach(block ->
+            consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_cube".formatted(block.getId().getPath()))));
+
+        // Oxygen distributor spinning top
+        consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/oxygen_distributor_top"));
+
+        // Gravity normalizer spinning top and toe pieces
+        consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/gravity_normalizer_top"));
+        consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/gravity_normalizer_toe"));
     }
 
     /**
@@ -211,16 +229,9 @@ public class AdAstraClient {
         consumer.accept(ModItems.OXYGEN_DISTRIBUTOR.get(), oxygenRenderer::renderByItem);
         var gravityRenderer = new GravityNormalizerBlockEntityRenderer.ItemRenderer();
         consumer.accept(ModItems.GRAVITY_NORMALIZER.get(), gravityRenderer::renderByItem);
-        var roverRenderer = new RoverRenderer.ItemRenderer();
-        consumer.accept(ModItems.ROVER.get(), roverRenderer::renderByItem);
-        var tier1Renderer = new RocketRenderer.ItemRenderer(RocketModel.TIER_1_LAYER, RocketRenderer.TIER_1_TEXTURE);
-        consumer.accept(ModItems.TIER_1_ROCKET.get(), tier1Renderer::renderByItem);
-        var tier2Renderer = new RocketRenderer.ItemRenderer(RocketModel.TIER_2_LAYER, RocketRenderer.TIER_2_TEXTURE);
-        consumer.accept(ModItems.TIER_2_ROCKET.get(), tier2Renderer::renderByItem);
-        var tier3Renderer = new RocketRenderer.ItemRenderer(RocketModel.TIER_3_LAYER, RocketRenderer.TIER_3_TEXTURE);
-        consumer.accept(ModItems.TIER_3_ROCKET.get(), tier3Renderer::renderByItem);
-        var tier4Renderer = new RocketRenderer.ItemRenderer(RocketModel.TIER_4_LAYER, RocketRenderer.TIER_4_TEXTURE);
-        consumer.accept(ModItems.TIER_4_ROCKET.get(), tier4Renderer::renderByItem);
+        // TODO: 1.21.11 - BuiltinItemRendererRegistry removed. Rover and rocket item
+        // rendering needs minecraft:special model type or alternative approach.
+        // Items use flat placeholder textures in creative menu for now.
     }
 
     public static void onRegisterHud(Consumer<ClientPlatformUtils.RenderHud> consumer) {

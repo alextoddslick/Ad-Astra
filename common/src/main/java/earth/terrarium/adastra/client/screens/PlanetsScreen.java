@@ -1,6 +1,5 @@
 package earth.terrarium.adastra.client.screens;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.client.closables.CloseableScissor;
 import earth.terrarium.adastra.AdAstra;
@@ -235,7 +234,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     private void renderButtons(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int scrollPixels = (int) scrollAmount;
 
-        try (var ignored = new CloseableScissor(graphics, 0, height / 2 - 43, 112, 131)) {
+        try (var ignored = new CloseableScissor(graphics, 0, height / 2 - 43, 112, height / 2 - 43 + 131)) {
             for (var button : buttons) {
                 button.render(graphics, mouseX, mouseY, partialTick);
             }
@@ -249,7 +248,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
         if (pageIndex == 2 && selectedPlanet != null) {
             int spaceStationScrollPixels = (int) spaceStationScrollAmount;
 
-            try (var ignored = new CloseableScissor(graphics, 112, height / 2 - 2, 112, 90)) {
+            try (var ignored = new CloseableScissor(graphics, 112, height / 2 - 2, 224, height / 2 + 88)) {
                 for (var button : spaceStationButtons) {
                     button.render(graphics, mouseX, mouseY, partialTick);
                 }
@@ -270,9 +269,14 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         graphics.fill(0, 0, width, height, 0xff000419);
 
-        // TODO: 1.21.11 - BufferUploader.drawWithShader() is removed. The diamond pattern line
-        // rendering needs to use the new pipeline (e.g., MultiBufferSource with a line RenderType,
-        // or GuiGraphics.fill for thin rectangles). For now, the diamond pattern is skipped.
+        // Draw subtle diamond grid pattern
+        int gridSize = 30;
+        int gridColor = 0x20ffffff;
+        for (int x = 0; x < width; x += gridSize) {
+            for (int y = 0; y < height; y += gridSize) {
+                graphics.fill(x, y, x + 1, y + 1, gridColor);
+            }
+        }
 
         AdAstraClientEvents.RenderSolarSystemEvent.fire(graphics, selectedSolarSystem, width, height);
         renderSelectionMenu(graphics);
@@ -281,41 +285,34 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     protected void renderSelectionMenu(GuiGraphics graphics) {
         if (pageIndex == 2) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTION_MENU, 7, height / 2 - 88, 209, 177);
-            graphics.drawCenteredString(font, ConstantComponents.SPACE_STATION, 163, height / 2 - 15, 0xffffff);
+            graphics.drawCenteredString(font, ConstantComponents.SPACE_STATION, 163, height / 2 - 15, 0xFFffffff);
         } else {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SMALL_SELECTION_MENU, 7, height / 2 - 88, 105, 177);
         }
 
         if (pageIndex == 2 && selectedPlanet != null) {
             var title = Component.translatableWithFallback("planet.%s.%s".formatted(selectedPlanet.dimension().identifier().getNamespace(), selectedPlanet.dimension().identifier().getPath()), title(selectedPlanet.dimension().identifier().getPath()));
-            graphics.drawCenteredString(font, title, 57, height / 2 - 60, 0xffffff);
+            graphics.drawCenteredString(font, title, 57, height / 2 - 60, 0xFFffffff);
         } else if (pageIndex == 1 && selectedSolarSystem != null) {
             var title = Component.translatableWithFallback("solar_system.%s.%s".formatted(selectedSolarSystem.getNamespace(), selectedSolarSystem.getPath()), title(selectedSolarSystem.getPath()));
-            graphics.drawCenteredString(font, title, 57, height / 2 - 60, 0xffffff);
+            graphics.drawCenteredString(font, title, 57, height / 2 - 60, 0xFFffffff);
         } else {
-            graphics.drawCenteredString(font, ConstantComponents.CATALOG, 57, height / 2 - 60, 0xffffff);
+            graphics.drawCenteredString(font, ConstantComponents.CATALOG, 57, height / 2 - 60, 0xFFffffff);
         }
     }
 
-    public static void drawCircles(int start, int count, int color, BufferBuilder bufferBuilder, int width, int height) {
+    public static void drawCircles(GuiGraphics graphics, int start, int count, int color, int width, int height) {
         for (int i = 1 + start; i < count + start + 1; i++) {
-            drawCircle(bufferBuilder, width / 2f, height / 2f, 30 * i, 75, color);
+            drawCircle(graphics, width / 2f, height / 2f, 30 * i, 120, color);
         }
     }
 
-    public static void drawCircle(BufferBuilder bufferBuilder, double x, double y, double radius, int sides, int color) {
-        for (double r = radius - 0.5; r <= radius + 0.5; r += 0.1) {
-            for (int i = 0; i < sides; i++) {
-                double angle = i * 2.0 * Math.PI / sides;
-                double nextAngle = (i + 1) * 2.0 * Math.PI / sides;
-                double x1 = x + r * Math.cos(angle);
-                double y1 = y + r * Math.sin(angle);
-                double x2 = x + r * Math.cos(nextAngle);
-                double y2 = y + r * Math.sin(nextAngle);
-
-                bufferBuilder.addVertex((float) x1, (float) y1, 0).setColor(color);
-                bufferBuilder.addVertex((float) x2, (float) y2, 0).setColor(color);
-            }
+    public static void drawCircle(GuiGraphics graphics, double x, double y, double radius, int sides, int color) {
+        for (int i = 0; i < sides; i++) {
+            double angle = i * 2.0 * Math.PI / sides;
+            int px = (int) Math.round(x + radius * Math.cos(angle));
+            int py = (int) Math.round(y + radius * Math.sin(angle));
+            graphics.fill(px, py, px + 1, py + 1, color);
         }
     }
 
@@ -390,10 +387,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     static {
         AdAstraClientEvents.RenderSolarSystemEvent.register((graphics, solarSystem, width, height) -> {
             if (PlanetConstants.SOLAR_SYSTEM.equals(solarSystem)) {
-                // TODO: 1.21.11 - BufferUploader.drawWithShader() removed.
-                // Orbit circle rendering needs to use the new pipeline.
-                // BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-                // drawCircles(0, 4, 0xff24327b, bufferBuilder, width, height);
+                drawCircles(graphics, 0, 4, 0xff24327b, width, height);
 
                 graphics.blit(RenderPipelines.GUI_TEXTURED, DimensionRenderingUtils.SUN, width / 2 - 8, height / 2 - 8, 0, 0, 16, 16, 16, 16);
                 float rotation = Util.getMillis() / 100f;
@@ -410,10 +404,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
 
         AdAstraClientEvents.RenderSolarSystemEvent.register((graphics, solarSystem, width, height) -> {
             if (PlanetConstants.PROXIMA_CENTAURI.equals(solarSystem)) {
-                // TODO: 1.21.11 - BufferUploader.drawWithShader() removed.
-                // Orbit circle rendering needs to use the new pipeline.
-                // BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-                // drawCircles(1, 1, 0xff008080, bufferBuilder, width, height);
+                drawCircles(graphics, 1, 1, 0xff008080, width, height);
 
                 graphics.blit(RenderPipelines.GUI_TEXTURED, DimensionRenderingUtils.BLUE_SUN, width / 2 - 8, height / 2 - 8, 0, 0, 16, 16, 16, 16);
                 float rotation = Util.getMillis() / 100f % 360f;

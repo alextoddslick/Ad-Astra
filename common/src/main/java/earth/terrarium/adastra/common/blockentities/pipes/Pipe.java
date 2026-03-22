@@ -27,7 +27,6 @@ public interface Pipe {
         LongSet visitedNodes = new LongOpenHashSet();
         LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
         queue.enqueue(startPos.asLong());
-
         while (!queue.isEmpty()) {
             long currentPosLong = queue.dequeueLong();
             BlockPos pipePos = BlockPos.of(currentPosLong);
@@ -35,7 +34,9 @@ public interface Pipe {
             BlockState pipeState = pipeEntity.getBlockState();
 
             Direction[] directions = pipeEntity.connectedDirections();
-            if (directions == null) continue;
+            if (directions == null) {
+                directions = Direction.values();
+            }
             for (var direction : directions) {
                 BlockPos pos = pipePos.relative(direction);
                 long longPos = pos.asLong();
@@ -74,6 +75,8 @@ public interface Pipe {
 
             long rate = transferRate / consumers.size();
             for (var consumerEntry : consumers.entrySet()) {
+                // Skip self-transfer (same block is both source and consumer)
+                if (consumerEntry.getKey().equals(sourceEntry.getKey())) continue;
                 var pos = consumerEntry.getKey();
                 var consumerDirection = consumerEntry.getValue();
                 var consumerEntity = level.getBlockEntity(pos);

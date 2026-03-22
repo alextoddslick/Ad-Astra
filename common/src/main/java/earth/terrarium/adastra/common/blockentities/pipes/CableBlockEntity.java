@@ -1,7 +1,10 @@
 package earth.terrarium.adastra.common.blockentities.pipes;
 
+import earth.terrarium.adastra.common.blockentities.machines.CoalGeneratorBlockEntity;
+import earth.terrarium.adastra.common.blockentities.machines.SolarPanelBlockEntity;
 import earth.terrarium.adastra.common.blocks.properties.PipeProperty;
 import earth.terrarium.common_storage_lib.energy.EnergyApi;
+import earth.terrarium.common_storage_lib.storage.base.ValueStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,23 +17,36 @@ public class CableBlockEntity extends PipeBlockEntity {
         super(pos, state);
     }
 
+    private boolean isProducer(BlockEntity entity) {
+        return entity instanceof SolarPanelBlockEntity || entity instanceof CoalGeneratorBlockEntity;
+    }
+
     @Override
     public void addNode(@NotNull BlockEntity entity, PipeProperty pipeProperty, Direction direction, BlockPos pos) {
         if (pipeProperty.isNone()) return;
-        // direction is from the pipe toward the entity; the entity's face is the opposite
         var container = EnergyApi.BLOCK.find(entity.getLevel(), pos, direction.getOpposite());
         if (container == null) return;
 
-        if (!pipeProperty.isInsert() && (pipeProperty.isExtract() || container.extract(container.getStoredAmount(), true) > 0)) {
-            sources.put(pos, direction);
-        } else if (pipeProperty.isNormal() || pipeProperty.isInsert()) {
+        if (pipeProperty.isExtract()) {
+            // Wrench set to extract: only allow on producers
+            if (isProducer(entity)) {
+                sources.put(pos, direction);
+            }
+        } else if (pipeProperty.isInsert()) {
             consumers.put(pos, direction);
+        } else {
+            // Normal mode: only producers are sources, non-producers are consumers
+            if (isProducer(entity) && container.getStoredAmount() > 0) {
+                sources.put(pos, direction);
+            }
+            if (!isProducer(entity) && container.getCapacity() > 0) {
+                consumers.put(pos, direction);
+            }
         }
     }
 
     @Override
     public void moveContents(long transferRate, @NotNull BlockEntity source, @NotNull BlockEntity consumer, Direction sourceDirection, Direction consumerDirection) {
-        // sourceDirection/consumerDirection are from the pipe toward the entity; use opposite to get the entity's face
         var sourceContainer = EnergyApi.BLOCK.find(source.getLevel(), source.getBlockPos(), sourceDirection.getOpposite());
         if (sourceContainer == null) return;
         var consumerContainer = EnergyApi.BLOCK.find(consumer.getLevel(), consumer.getBlockPos(), consumerDirection.getOpposite());
@@ -47,7 +63,6 @@ public class CableBlockEntity extends PipeBlockEntity {
 
     @Override
     public boolean isValid(@NotNull BlockEntity entity, Direction direction) {
-        // direction is from the pipe toward the entity; the entity's face is the opposite
         return EnergyApi.BLOCK.find(entity.getLevel(), entity.getBlockPos(), direction.getOpposite()) != null;
     }
 }

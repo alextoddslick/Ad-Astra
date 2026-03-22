@@ -112,7 +112,7 @@ public abstract class BaseContainerMenu<T extends BlockEntity> extends AbstractC
 
     public static <T extends BlockEntity> T getBlockEntityFromBuf(Level level, BlockPos pos, Class<T> type) {
         if (pos == null) return null;
-        if (!level.isClientSide()) return null;
+        // Look up block entity on both client and server - the factory may be called on either side
         return WorldUtils.getTileEntity(type, level, pos);
     }
 }

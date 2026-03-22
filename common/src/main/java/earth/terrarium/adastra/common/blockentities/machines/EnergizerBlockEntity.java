@@ -92,12 +92,15 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
 
     @Override
     public void internalServerTick(ServerLevel level, long time, BlockState state, BlockPos pos) {
-        // Skip super.internalServerTick() to avoid periodic sync() calls that overwrite
-        // the POWER block state property set by onEnergyChange(). The Energizer uses
-        // block state (not block entity data) for client display, and its ChargeSlotType
-        // is NONE, so the battery slot handling in the parent is also unnecessary.
+        // ChargeSlotType is NONE, so skip battery slot handling from parent.
+        // But we still need to call sync() so the client receives inventory data
+        // for rendering the item above the energizer.
+        if (canFunction()) {
+            tickSideInteractions(pos, f -> true, getSideConfig());
+        }
         if (time % 2 == 0) {
             setChanged();
+            sync();
         }
     }
 

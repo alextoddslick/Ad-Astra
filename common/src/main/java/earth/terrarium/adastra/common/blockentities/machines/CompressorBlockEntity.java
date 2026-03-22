@@ -74,6 +74,13 @@ public class CompressorBlockEntity extends RecipeMachineBlockEntity<CompressingR
     }
 
     @Override
+    public boolean canCraft() {
+        if (!super.canCraft()) return false;
+        if (getEnergyStorage().extract(recipe.energy(), true) < recipe.energy()) return false;
+        return ItemUtils.canAddItem(getItem(2), recipe.result());
+    }
+
+    @Override
     public void craft() {
         if (recipe == null) return;
 

@@ -45,7 +45,7 @@ public class OxygenDistributorScreen extends MachineScreen<OxygenDistributorMenu
             Component.translatable("tooltip.ad_astra.energy_per_tick", entity.energyPerTick()),
             leftPos + 11,
             topPos + 9,
-            0x68d975
+            0xFF68d975
         );
 
         float fluidPerTick = entity.fluidPerTick() / (81000L / 1000f);
@@ -54,14 +54,14 @@ public class OxygenDistributorScreen extends MachineScreen<OxygenDistributorMenu
             Component.translatable("tooltip.ad_astra.fluid_per_tick", Math.round(fluidPerTick * 1000.0f) / 1000.0f),
             leftPos + 11,
             topPos + 20,
-            0x68d975
+            0xFF68d975
         );
         graphics.drawString(
             font,
             Component.translatable("tooltip.ad_astra.blocks_distributed", entity.distributedBlocksCount(), entity.distributedBlocksLimit()),
             leftPos + 11,
             topPos + 31,
-            0x68d975
+            0xFF68d975
         );
     }
 }

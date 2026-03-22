@@ -4,5 +4,5 @@
   "cookingtime": 100,
   "experience": 0.1,
   "ingredient": "ad_astra:venus_coal_ore",
-  "result": "minecraft:coal"
+  "result": {"id": "minecraft:coal"}
 }

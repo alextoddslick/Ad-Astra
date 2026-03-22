@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:green_wool"
-    },
-    "|": {
-      "item": "ad_astra:steel_rod"
-    }
+    "#": "minecraft:green_wool",
+    "|": "ad_astra:steel_rod"
   },
   "pattern": [
     "|##",

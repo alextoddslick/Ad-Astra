@@ -13,9 +13,14 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 // LEGACY ENTITY. WILL BE REPLACED IN THE FUTURE.
-public class SulfurCreeperRenderer extends MobRenderer<SulfurCreeper, LivingEntityRenderState, SulfurCreeperModel<LivingEntityRenderState>> {
+public class SulfurCreeperRenderer extends MobRenderer<SulfurCreeper, SulfurCreeperRenderer.SulfurCreeperRenderState, SulfurCreeperModel<SulfurCreeperRenderer.SulfurCreeperRenderState>> {
 
     public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/mob/sulfur_creeper.png");
+
+    public static class SulfurCreeperRenderState extends LivingEntityRenderState {
+        public float swelling;
+        public boolean isPowered;
+    }
 
     public SulfurCreeperRenderer(EntityRendererProvider.Context context) {
         super(context, new SulfurCreeperModel<>(context.bakeLayer(SulfurCreeperModel.LAYER_LOCATION)), 0.7f);
@@ -23,17 +28,37 @@ public class SulfurCreeperRenderer extends MobRenderer<SulfurCreeper, LivingEnti
     }
 
     @Override
-    public LivingEntityRenderState createRenderState() {
-        return new LivingEntityRenderState();
+    public SulfurCreeperRenderState createRenderState() {
+        return new SulfurCreeperRenderState();
     }
 
     @Override
-    protected void scale(LivingEntityRenderState state, PoseStack poseStack) {
-        // TODO: 1.21.11 - Restore creeper swelling animation using custom render state
+    public void extractRenderState(SulfurCreeper entity, SulfurCreeperRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.swelling = entity.getSwelling(partialTick);
+        state.isPowered = entity.isPowered();
     }
 
     @Override
-    public @NotNull Identifier getTextureLocation(LivingEntityRenderState state) {
+    protected void scale(SulfurCreeperRenderState state, PoseStack poseStack) {
+        float swelling = state.swelling;
+        float scale = 1.0f + Mth.sin(swelling * 100.0f) * swelling * 0.01f;
+        swelling = Mth.clamp(swelling, 0.0f, 1.0f);
+        swelling *= swelling;
+        swelling *= swelling;
+        float xzScale = (1.0f + swelling * 0.4f) * scale;
+        float yScale = (1.0f + swelling * 0.1f) / scale;
+        poseStack.scale(xzScale, yScale, xzScale);
+    }
+
+    @Override
+    protected float getWhiteOverlayProgress(SulfurCreeperRenderState state) {
+        float swelling = state.swelling;
+        return (int) (swelling * 10.0f) % 2 == 0 ? 0.0f : Mth.clamp(swelling, 0.5f, 1.0f);
+    }
+
+    @Override
+    public @NotNull Identifier getTextureLocation(SulfurCreeperRenderState state) {
         return TEXTURE;
     }
 }

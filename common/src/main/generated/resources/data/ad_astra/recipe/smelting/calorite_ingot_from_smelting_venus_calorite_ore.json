@@ -4,5 +4,5 @@
   "cookingtime": 200,
   "experience": 0.1,
   "ingredient": "ad_astra:venus_calorite_ore",
-  "result": "ad_astra:calorite_ingot"
+  "result": {"id": "ad_astra:calorite_ingot"}
 }

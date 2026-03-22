@@ -40,7 +40,7 @@ public class SolarPanelScreen extends MachineScreen<SolarPanelMenu, SolarPanelBl
             Component.translatable("tooltip.ad_astra.energy_per_tick", entity.isDay() && !full ? PlanetApi.API.getSolarPower(Minecraft.getInstance().level) : 0),
             leftPos + 27,
             topPos + 9,
-            0x68d975
+            0xFF68d975
         );
 
         graphics.drawString(
@@ -48,7 +48,7 @@ public class SolarPanelScreen extends MachineScreen<SolarPanelMenu, SolarPanelBl
             Component.translatable("tooltip.ad_astra.max_generation", PlanetApi.API.getSolarPower(Minecraft.getInstance().level)),
             leftPos + 27,
             topPos + 19,
-            0x68d975
+            0xFF68d975
         );
     }
 }

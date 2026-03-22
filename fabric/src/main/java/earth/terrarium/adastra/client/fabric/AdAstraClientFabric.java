@@ -2,6 +2,7 @@ package earth.terrarium.adastra.client.fabric;
 
 import earth.terrarium.adastra.client.AdAstraClient;
 import earth.terrarium.adastra.client.dimension.ModDimensionSpecialEffects;
+import earth.terrarium.adastra.client.renderers.special.ModSpecialRenderers;
 import earth.terrarium.adastra.client.models.entities.mobs.*;
 import earth.terrarium.adastra.client.models.entities.vehicles.LanderModel;
 import earth.terrarium.adastra.client.models.entities.vehicles.RocketModel;
@@ -14,12 +15,17 @@ import earth.terrarium.adastra.common.registry.ModBlocks;
 import earth.terrarium.adastra.common.registry.ModEntityTypes;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -30,13 +36,18 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class AdAstraClientFabric {
 
+    static final Map<Identifier, ExtraModelKey<BlockStateModel>> EXTRA_MODELS = new HashMap<>();
+
     public static void init() {
+        ModSpecialRenderers.register(SpecialModelRenderers.ID_MAPPER);
+        registerExtraModels();
         AdAstraClient.init();
         onAddReloadListener();
         ClientTickEvents.START_CLIENT_TICK.register(AdAstraClient::clientTick);
@@ -106,6 +117,16 @@ public class AdAstraClientFabric {
                 return listener.reload(sharedState, prepareExecutor, synchronizer, applyExecutor);
             }
         }));
+    }
+
+    private static void registerExtraModels() {
+        ModelLoadingPlugin.register(context -> {
+            AdAstraClient.onRegisterModels(id -> {
+                ExtraModelKey<BlockStateModel> key = ExtraModelKey.create(() -> id.toString());
+                context.addModel(key, SimpleUnbakedExtraModel.blockStateModel(id));
+                EXTRA_MODELS.put(id, key);
+            });
+        });
     }
 
     public static void registerDimensionEffects(Map<ResourceKey<Level>, ModDimensionSpecialEffects> renderers) {

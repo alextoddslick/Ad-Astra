@@ -2,9 +2,7 @@
   "type": "ad_astra:compressing",
   "cookingtime": 800,
   "energy": 20,
-  "ingredient": {
-    "tag": "ad_astra:ostrum_blocks"
-  },
+  "ingredient": "#ad_astra:ostrum_blocks",
   "result": {
     "count": 9,
     "id": "ad_astra:ostrum_plate"

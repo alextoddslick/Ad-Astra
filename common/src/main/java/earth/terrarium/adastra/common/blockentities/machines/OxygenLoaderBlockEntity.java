@@ -181,13 +181,8 @@ public class OxygenLoaderBlockEntity extends RecipeMachineBlockEntity<OxygenLoad
 
     @Override
     public void update() {
-        // Cannot use quickCheck here because OxygenLoadingRecipe.matches() always returns true
-        // (fluid-based recipes can't check fluids via RecipeInput). We must iterate all recipes
-        // and pick the one whose input actually matches the fluid in tank 0.
-        // NOTE: BaseFluidIngredient.test() always returns false in CSL 0.0.7,
-        // so we use FluidUtils.ingredientMatches() which checks getMatchingFluids() instead.
         FluidResource inputResource = getFluidContainer().get(0).getResource();
-        if (!inputResource.isBlank()) {
+        if (!inputResource.isBlank() && level().getServer() != null) {
             for (var holder : level().getServer().getRecipeManager().getRecipes()) {
                 if (holder.value().getType() != ModRecipeTypes.OXYGEN_LOADING.get()) continue;
                 OxygenLoadingRecipe r = (OxygenLoadingRecipe) holder.value();

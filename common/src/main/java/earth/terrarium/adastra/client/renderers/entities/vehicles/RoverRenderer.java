@@ -27,11 +27,13 @@ public class RoverRenderer extends EntityRenderer<Rover, EntityRenderState> {
     public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/rover/tier_1_rover.png");
 
     protected final EntityModel<EntityRenderState> model;
+    private final net.minecraft.client.renderer.rendertype.RenderType renderType;
 
     public RoverRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 1.0f;
         this.model = new RoverModel(context.bakeLayer(RoverModel.LAYER));
+        this.renderType = model.renderType(TEXTURE);
     }
 
     @Override
@@ -41,11 +43,15 @@ public class RoverRenderer extends EntityRenderer<Rover, EntityRenderState> {
 
     @Override
     public void submit(EntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+        poseStack.pushPose();
+        poseStack.translate(0.0f, 1.501f, 0.0f);
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+        poseStack.translate(0.0f, -1.501f, 0.0f);
+
+        collector.submitModelPart(model.root(), poseStack, renderType, state.lightCoords, OverlayTexture.NO_OVERLAY, null);
+
+        poseStack.popPose();
         super.submit(state, poseStack, collector, cameraState);
-        // TODO: 1.21.11 - Migrate rover rendering to the new SubmitNodeCollector pipeline.
-        // The old render method used MultiBufferSource which is no longer available here.
-        // Entity-specific data (entityYaw, xRot, etc.) should be extracted via
-        // extractRenderState and stored in a custom EntityRenderState subclass.
     }
 
     public static class ItemRenderer {

@@ -2,7 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "ad_astra:item/zip_gun"
+		"0": "ad_astra:item/zip_gun",
+		"particle": "ad_astra:item/zip_gun"
 	},
 	"elements": [
 		{

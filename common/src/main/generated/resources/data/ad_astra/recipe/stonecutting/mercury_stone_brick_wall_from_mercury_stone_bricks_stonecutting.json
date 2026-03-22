@@ -1,6 +1,5 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
   "ingredient": "ad_astra:mercury_stone_bricks",
-  "result": "ad_astra:mercury_stone_brick_wall"
+  "result": {"count": 1, "id": "ad_astra:mercury_stone_brick_wall"}
 }

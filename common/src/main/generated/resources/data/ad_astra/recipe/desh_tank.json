@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:desh_plates"
-    },
-    "T": {
-      "item": "ad_astra:steel_tank"
-    },
-    "|": {
-      "item": "ad_astra:steel_rod"
-    }
+    "#": "#ad_astra:desh_plates",
+    "T": "ad_astra:steel_tank",
+    "|": "ad_astra:steel_rod"
   },
   "pattern": [
     "## ",

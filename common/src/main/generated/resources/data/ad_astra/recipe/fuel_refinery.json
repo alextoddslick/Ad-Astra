@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:steel_plates"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    }
+    "#": "#ad_astra:steel_plates",
+    "B": "minecraft:bucket",
+    "F": "minecraft:furnace"
   },
   "pattern": [
     "###",

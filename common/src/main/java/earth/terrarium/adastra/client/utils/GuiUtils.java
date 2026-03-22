@@ -68,7 +68,9 @@ public class GuiUtils {
 
     public static void drawEnergyBar(GuiGraphics graphics, int mouseX, int mouseY, int x, int y, long energy, long capacity, Component... tooltips) {
         float ratio = energy / (float) capacity;
-        try (var ignored = new CloseableScissor(graphics, x + 6, y - 31 + ENERGY_BAR_HEIGHT - (int) (ENERGY_BAR_HEIGHT * ratio), ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT)) {
+        int scissorX = x + 6;
+        int scissorY = y - 31 + ENERGY_BAR_HEIGHT - (int) (ENERGY_BAR_HEIGHT * ratio);
+        try (var ignored = new CloseableScissor(graphics, scissorX, scissorY, scissorX + ENERGY_BAR_WIDTH, scissorY + ENERGY_BAR_HEIGHT)) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ENERGY_BAR, x + 6, y - 31, ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT);
         }
 
@@ -137,26 +139,13 @@ public class GuiUtils {
         Identifier stillTexture = getFluidStillTexture(fluid);
         int color = getFluidColor(fluid);
 
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS).getSprite(stillTexture);
-
-        // Use GuiGraphics to render the fluid sprite tiled
-        // TODO: 1.21.11 - The tiling approach needs to be updated for the new rendering pipeline.
-        // For now, render the sprite scaled to fill the area. Proper tiling may require
-        // using blitSprite with the appropriate RenderPipeline.
+        // Render the fluid as a solid color bar since atlas sprite lookup changed in 1.21.11.
+        // The tint color already represents the fluid visually.
         int drawY = y;
         int remaining = height;
         while (remaining > 0) {
             int drawHeight = Math.min(remaining, 16);
-            // Render using the sprite's atlas texture coordinates
-            float minU = sprite.getU0();
-            float maxU = sprite.getU(width / 16f);
-            float minV = sprite.getV0();
-            float maxV = sprite.getV(drawHeight / 16f);
-
-            // Use blit with atlas texture coordinates
-            graphics.blit(TextureAtlas.LOCATION_BLOCKS, x, drawY, x + width, drawY + drawHeight,
-                minU, minV, maxU, maxV);
-
+            graphics.fill(x, drawY, x + width, drawY + drawHeight, color | 0xFF000000);
             drawY += drawHeight;
             remaining -= drawHeight;
         }

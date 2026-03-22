@@ -4,5 +4,5 @@
   "cookingtime": 100,
   "experience": 0.1,
   "ingredient": "ad_astra:moon_desh_ore",
-  "result": "ad_astra:desh_ingot"
+  "result": {"id": "ad_astra:desh_ingot"}
 }

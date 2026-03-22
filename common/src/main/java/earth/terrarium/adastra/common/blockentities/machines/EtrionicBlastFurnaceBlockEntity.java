@@ -158,7 +158,10 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canCraftAlloying() {
-        return alloyingRecipe != null && alloyingRecipe.matches(toRecipeInput(), level());
+        if (alloyingRecipe == null) return false;
+        if (!alloyingRecipe.matches(toRecipeInput(), level())) return false;
+        if (getEnergyStorage().extract(alloyingRecipe.energy(), true) < alloyingRecipe.energy()) return false;
+        return ItemUtils.canAddItem(this, alloyingRecipe.result(), 5, 6, 7, 8);
     }
 
     public void craftAlloying() {
@@ -197,6 +200,7 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
 
     protected void createRecipe(int recipe, int slot) {
         if (getItem(slot).isEmpty()) return;
+        if (level().getServer() == null) return;
         level().getServer().getRecipeManager()
             .getRecipeFor(RecipeType.BLASTING, new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(slot)), level())
             .ifPresent(r -> {

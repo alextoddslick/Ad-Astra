@@ -12,12 +12,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -49,6 +50,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
 
     @Override
     public void extractRenderState(GravityNormalizerBlockEntity entity, GravityNormalizerRenderState state, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+        BlockEntityRenderState.extractBase(entity, state, crumblingOverlay);
         state.animation = Mth.lerp(partialTick, entity.lastAnimation(), entity.animation());
         state.face = entity.getBlockState().getValue(SidedMachineBlock.FACE);
         state.direction = entity.getBlockState().getValue(SidedMachineBlock.FACING);
@@ -56,9 +58,52 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
 
     @Override
     public void submit(GravityNormalizerRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
-        // TODO: 1.21.11 - Migrate to new SubmitNodeCollector rendering pipeline.
-        // The old MultiBufferSource-based rendering needs to be converted to the new
-        // deferred rendering system. For now, this is a stub.
+        var minecraft = Minecraft.getInstance();
+        BlockStateModel topModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOP);
+        BlockStateModel toeModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOE);
+        if (topModel == null || toeModel == null) return;
+
+        int light = state.lightCoords;
+        float yRot = state.animation / 1.2f;
+
+        // Render the spinning top part with captured world transform
+        {
+            PoseStack topPose = new PoseStack();
+            topPose.last().pose().set(poseStack.last().pose());
+            topPose.last().normal().set(poseStack.last().normal());
+            // Rotate around center of block at Y=0.7 (above base)
+            topPose.translate(0.5, 0.7, 0.5);
+            topPose.mulPose(Axis.XP.rotationDegrees(state.animation));
+            topPose.mulPose(Axis.YP.rotationDegrees(state.animation));
+            topPose.mulPose(Axis.ZP.rotationDegrees(state.animation));
+            topPose.mulPose(Axis.YP.rotationDegrees(yRot));
+            topPose.mulPose(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0, SIN_45));
+            topPose.mulPose(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0, SIN_45));
+            topPose.mulPose(Axis.YP.rotationDegrees(yRot));
+            topPose.mulPose(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0, SIN_45));
+            topPose.mulPose(Axis.YP.rotationDegrees(yRot));
+            // Translate back so model pixel origin aligns with block corner
+            topPose.translate(-0.5, -0.7, -0.5);
+
+            collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockSheet(), (pose, consumer) ->
+                ModelBlockRenderer.renderModel(topPose.last(), consumer, topModel, 1, 1, 1, light, OverlayTexture.NO_OVERLAY));
+        }
+
+        // Render 4 toe parts with captured world transforms
+        for (int i = 0; i < 4; i++) {
+            PoseStack toePose = new PoseStack();
+            toePose.last().pose().set(poseStack.last().pose());
+            toePose.last().normal().set(poseStack.last().normal());
+            toePose.translate(0.5, 0, 0.5);
+            toePose.mulPose(Axis.YP.rotationDegrees(90 * i));
+            toePose.translate(-0.5, 0, -0.5);
+            toePose.translate(0.27, 0.27, 0.27);
+            toePose.mulPose(Axis.XP.rotationDegrees(Mth.sin(state.animation / 50 + i) * 10));
+            toePose.translate(-0.27, -0.27, -0.27);
+
+            collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockSheet(), (p, consumer) ->
+                ModelBlockRenderer.renderModel(toePose.last(), consumer, toeModel, 1, 1, 1, light, OverlayTexture.NO_OVERLAY));
+        }
     }
 
     // Taken from geckolib
@@ -74,13 +119,17 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
     }
 
     static void renderStatic(BlockState state, float animation, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        BlockStateModel blockModel = ClientPlatformUtils.getModel(Minecraft.getInstance().getModelManager(), TOP);
-        BlockStateModel toeModel = ClientPlatformUtils.getModel(Minecraft.getInstance().getModelManager(), TOE);
+        var minecraft = Minecraft.getInstance();
+        BlockStateModel topModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOP);
+        BlockStateModel toeModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOE);
+        if (topModel == null || toeModel == null) return;
 
         poseStack.pushPose();
         try {
+            var consumer = buffer.getBuffer(Sheets.solidBlockSheet());
+
             poseStack.pushPose();
-            poseStack.translate(0.5, 0.7, 0.5);
+            poseStack.translate(0.5, 0, 0.5);
 
             poseStack.mulPose(Axis.XP.rotationDegrees(animation));
             poseStack.mulPose(Axis.YP.rotationDegrees(animation));
@@ -94,15 +143,9 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
             poseStack.mulPose(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0, SIN_45));
             poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
 
-            poseStack.translate(-0.5, -0.7, -0.5);
+            poseStack.translate(-0.5, 0, -0.5);
 
-            ModelBlockRenderer.renderModel(
-                poseStack.last(),
-                buffer.getBuffer(Sheets.cutoutBlockSheet()),
-                blockModel,
-                1, 1, 1,
-                packedLight, packedOverlay);
-
+            ModelBlockRenderer.renderModel(poseStack.last(), consumer, topModel, 1, 1, 1, packedLight, packedOverlay);
             poseStack.popPose();
 
             for (int i = 0; i < 4; i++) {
@@ -116,12 +159,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
                 poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(animation / 50 + i) * 10));
                 poseStack.translate(-0.27, -0.27, -0.27);
 
-                ModelBlockRenderer.renderModel(
-                    poseStack.last(),
-                    buffer.getBuffer(Sheets.cutoutBlockSheet()),
-                    toeModel,
-                    1, 1, 1,
-                    packedLight, packedOverlay);
+                ModelBlockRenderer.renderModel(poseStack.last(), consumer, toeModel, 1, 1, 1, packedLight, packedOverlay);
 
                 poseStack.popPose();
             }
@@ -145,7 +183,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
             try {
                 var model = minecraft.getBlockRenderer().getBlockModel(state);
                 ModelBlockRenderer.renderModel(poseStack.last(),
-                    buffer.getBuffer(Sheets.cutoutBlockSheet()),
+                    buffer.getBuffer(Sheets.solidBlockSheet()),
                     model,
                     1, 1, 1,
                     packedLight, packedOverlay);

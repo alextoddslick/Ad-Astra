@@ -3,9 +3,7 @@
   "cookingtime": 1,
   "energy": 30,
   "input": {
-    "ingredient": {
-      "tag": "ad_astra:oil"
-    },
+    "ingredient": {"tag": "ad_astra:oil"},
     "millibuckets": 5
   },
   "result": {

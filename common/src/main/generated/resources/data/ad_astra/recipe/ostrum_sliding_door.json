@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:ostrum_plates"
-    },
-    "B": {
-      "tag": "ad_astra:ostrum_blocks"
-    },
-    "P": {
-      "item": "minecraft:glass_pane"
-    }
+    "#": "#ad_astra:ostrum_plates",
+    "B": "#ad_astra:ostrum_blocks",
+    "P": "minecraft:glass_pane"
   },
   "pattern": [
     "###",

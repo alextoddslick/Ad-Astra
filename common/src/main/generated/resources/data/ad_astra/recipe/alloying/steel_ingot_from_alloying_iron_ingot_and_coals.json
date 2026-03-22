@@ -3,12 +3,8 @@
   "cookingtime": 100,
   "energy": 20,
   "ingredients": [
-    {
-      "item": "minecraft:iron_ingot"
-    },
-    {
-      "tag": "minecraft:coals"
-    }
+    "minecraft:iron_ingot",
+    "#minecraft:coals"
   ],
   "result": {
     "count": 1,

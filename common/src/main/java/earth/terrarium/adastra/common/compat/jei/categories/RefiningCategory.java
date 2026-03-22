@@ -17,6 +17,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -62,8 +63,8 @@ public record RefiningCategory(IGuiHelper guiHelper) implements IRecipeCategory<
 
     @Override
     public void draw(RefiningRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        graphics.blit(FuelRefineryScreen.TEXTURE, 2, -4, 0, 0, 177, 100, 177, 184);
-        graphics.blit(FuelRefineryScreen.TEXTURE, 2, 96, 0, 177, 177, 7, 177, 184);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, FuelRefineryScreen.TEXTURE, 2, -4, 0, 0, 177, 100, 177, 184);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, FuelRefineryScreen.TEXTURE, 2, 96, 0, 177, 177, 7, 177, 184);
 
         new EnergyBarDrawable(mouseX, mouseY, -recipe.energy(), MachineConfig.STEEL.energyCapacity, MachineConfig.STEEL.maxEnergyInOut, 0).draw(graphics, 146, 50);
 

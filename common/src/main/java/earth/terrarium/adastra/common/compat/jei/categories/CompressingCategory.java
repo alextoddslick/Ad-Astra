@@ -18,6 +18,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -61,8 +62,8 @@ public record CompressingCategory(IGuiHelper guiHelper) implements IRecipeCatego
 
     @Override
     public void draw(CompressingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        graphics.blit(CompressorScreen.TEXTURE, -1, -4, 0, 0, 184, 110, 184, 201);
-        graphics.blit(CompressorScreen.TEXTURE, -1, 100, 0, 194, 184, 7, 184, 201);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CompressorScreen.TEXTURE, -1, -4, 0, 0, 184, 110, 184, 201);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CompressorScreen.TEXTURE, -1, 100, 0, 194, 184, 7, 184, 201);
 
         new EtaDrawable(mouseX, mouseY, recipe.cookingTime(), GuiUtils.HAMMER, 15, 16).draw(graphics, 71, 55);
         new EnergyBarDrawable(mouseX, mouseY, -recipe.energy(), MachineConfig.IRON.energyCapacity, MachineConfig.IRON.maxEnergyInOut, 0).draw(graphics, 143, 70);

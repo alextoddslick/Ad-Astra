@@ -1,6 +1,5 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 2,
   "ingredient": "ad_astra:moon_stone",
-  "result": "ad_astra:moon_stone_slab"
+  "result": {"count": 2, "id": "ad_astra:moon_stone_slab"}
 }

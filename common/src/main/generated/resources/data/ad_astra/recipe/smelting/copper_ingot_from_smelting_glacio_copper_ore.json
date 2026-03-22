@@ -4,5 +4,5 @@
   "cookingtime": 200,
   "experience": 0.1,
   "ingredient": "ad_astra:glacio_copper_ore",
-  "result": "minecraft:copper_ingot"
+  "result": {"id": "minecraft:copper_ingot"}
 }

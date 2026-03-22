@@ -3,9 +3,7 @@
   "cookingtime": 1,
   "energy": 30,
   "input": {
-    "ingredient": {
-      "tag": "minecraft:water"
-    },
+    "ingredient": {"tag": "minecraft:water"},
     "millibuckets": 100
   },
   "result": {

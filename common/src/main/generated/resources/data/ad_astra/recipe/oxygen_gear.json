@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:steel_plates"
-    },
-    "|": {
-      "item": "ad_astra:steel_rod"
-    }
+    "#": "#ad_astra:steel_plates",
+    "|": "ad_astra:steel_rod"
   },
   "pattern": [
     " | ",

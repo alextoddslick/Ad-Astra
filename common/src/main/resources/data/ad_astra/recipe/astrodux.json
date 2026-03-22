@@ -20,15 +20,9 @@
     "#/#"
   ],
   "key": {
-    "#": {
-      "item": "minecraft:blue_dye"
-    },
-    "/": {
-      "item": "minecraft:iron_ingot"
-    },
-    "B": {
-      "item": "minecraft:book"
-    }
+    "#": "minecraft:blue_dye",
+    "/": "minecraft:iron_ingot",
+    "B": "minecraft:book"
   },
   "book": "ad_astra:astrodux"
 }

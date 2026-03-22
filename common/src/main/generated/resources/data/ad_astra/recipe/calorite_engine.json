@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:calorite_plates"
-    },
-    "E": {
-      "item": "ad_astra:ostrum_engine"
-    },
-    "F": {
-      "item": "ad_astra:fan"
-    }
+    "#": "#ad_astra:calorite_plates",
+    "E": "ad_astra:ostrum_engine",
+    "F": "ad_astra:fan"
   },
   "pattern": [
     "###",

@@ -10,27 +10,36 @@ import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 // LEGACY ENTITY. WILL BE REPLACED IN THE FUTURE.
-public class MoglerRenderer extends MobRenderer<Mogler, LivingEntityRenderState, MoglerModel<LivingEntityRenderState>> {
+public class MoglerRenderer extends MobRenderer<Mogler, MoglerRenderer.MoglerRenderState, MoglerModel<MoglerRenderer.MoglerRenderState>> {
 
     public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/mob/mogler.png");
+
+    public static class MoglerRenderState extends LivingEntityRenderState {
+        public boolean isConverting;
+    }
 
     public MoglerRenderer(EntityRendererProvider.Context context) {
         super(context, new MoglerModel<>(context.bakeLayer(MoglerModel.LAYER_LOCATION)), 0.7f);
     }
 
     @Override
-    public LivingEntityRenderState createRenderState() {
-        return new LivingEntityRenderState();
+    public MoglerRenderState createRenderState() {
+        return new MoglerRenderState();
     }
 
     @Override
-    public @NotNull Identifier getTextureLocation(LivingEntityRenderState state) {
+    public void extractRenderState(Mogler entity, MoglerRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.isConverting = entity.isConverting();
+    }
+
+    @Override
+    public @NotNull Identifier getTextureLocation(MoglerRenderState state) {
         return TEXTURE;
     }
 
     @Override
-    protected boolean isShaking(LivingEntityRenderState state) {
-        // TODO: 1.21.11 - Restore isConverting check using custom render state
-        return super.isShaking(state);
+    protected boolean isShaking(MoglerRenderState state) {
+        return super.isShaking(state) || state.isConverting;
     }
 }

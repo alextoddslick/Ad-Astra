@@ -46,6 +46,13 @@ public abstract class PipeBlockEntity extends BlockEntity implements TickableBlo
         }
     }
 
+    /**
+     * Get the transfer rate for this pipe (used by subclasses for direct transfers).
+     */
+    protected long getTransferRate() {
+        return transferRate;
+    }
+
     public void pipeChanged(Level level, BlockPos pos) {
         Direction[] directions = PipeBlock.getConnectedDirections(level.getBlockState(pos));
         connectedDirections = directions;

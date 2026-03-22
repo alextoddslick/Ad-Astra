@@ -4,5 +4,5 @@
   "cookingtime": 100,
   "experience": 0.1,
   "ingredient": "#ad_astra:raw_calorite",
-  "result": "ad_astra:calorite_ingot"
+  "result": {"id": "ad_astra:calorite_ingot"}
 }

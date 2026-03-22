@@ -2,7 +2,8 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"1": "ad_astra:item/ti-69/ti_69",
-		"2": "ad_astra:item/ti-69/ti_69_back"
+		"2": "ad_astra:item/ti-69/ti_69_back",
+		"particle": "ad_astra:item/ti-69/ti_69"
 	},
 	"elements": [
 		{

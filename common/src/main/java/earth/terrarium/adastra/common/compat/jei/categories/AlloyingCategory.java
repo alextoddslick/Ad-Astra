@@ -18,6 +18,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -76,9 +77,9 @@ public record AlloyingCategory(IGuiHelper guiHelper) implements IRecipeCategory<
 
     @Override
     public void draw(AlloyingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        graphics.blit(EtrionicBlastFurnaceScreen.TEXTURE, -2, -4, 0, 0, 184, 110, 184, 201);
-        graphics.blit(EtrionicBlastFurnaceScreen.TEXTURE, -2, 106, 0, 194, 184, 7, 184, 201);
-        graphics.blit(EtrionicBlastFurnaceScreen.FURNACE_OVERLAY_FULL_TEXTURE, 28, 47, 0, 0, 32, 43, 32, 43);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, EtrionicBlastFurnaceScreen.TEXTURE, -2, -4, 0, 0, 184, 110, 184, 201);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, EtrionicBlastFurnaceScreen.TEXTURE, -2, 106, 0, 194, 184, 7, 184, 201);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, EtrionicBlastFurnaceScreen.FURNACE_OVERLAY_FULL_TEXTURE, 28, 47, 0, 0, 32, 43, 32, 43);
 
         new EtaDrawable(mouseX, mouseY, recipe.cookingTime(), GuiUtils.ARROW, 20, 12).draw(graphics, 73, 46);
         new EnergyBarDrawable(mouseX, mouseY, -recipe.energy(), MachineConfig.STEEL.energyCapacity, MachineConfig.STEEL.maxEnergyInOut, 0).draw(graphics, 144, 63);

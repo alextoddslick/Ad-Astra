@@ -39,7 +39,11 @@ public class AdAstraFabric {
         EntityElytraEvents.CUSTOM.register((entity, tickElytra) -> {
             var chestStack = entity.getItemBySlot(EquipmentSlot.CHEST);
             if (chestStack.getItem() instanceof JetSuitItem jetSuit) {
-                return jetSuit.canElytraFly(chestStack, entity);
+                if (!jetSuit.canElytraFly(chestStack, entity)) return false;
+                if (tickElytra) {
+                    jetSuit.elytraFlightTick(chestStack, entity, entity.getFallFlyingTicks());
+                }
+                return true;
             }
             return false;
         });

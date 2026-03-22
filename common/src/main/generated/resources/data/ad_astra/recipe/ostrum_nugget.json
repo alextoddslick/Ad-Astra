@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "ad_astra:ostrum_ingot"
-    }
+    "ad_astra:ostrum_ingot"
   ],
   "result": {
     "count": 9,

@@ -4,5 +4,5 @@
   "cookingtime": 200,
   "experience": 0.1,
   "ingredient": "ad_astra:moon_stone_bricks",
-  "result": "ad_astra:cracked_moon_stone_bricks"
+  "result": {"id": "ad_astra:cracked_moon_stone_bricks"}
 }

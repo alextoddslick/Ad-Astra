@@ -29,7 +29,7 @@ public class PressableImageButton extends ImageButton {
 
     @Override
     public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        Identifier texture = sprites.get(!isFocused(), isHovered());
+        Identifier texture = sprites.get(isActive(), isHoveredOrFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), width, height);
     }
 }

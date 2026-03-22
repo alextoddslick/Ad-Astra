@@ -16,10 +16,10 @@ public class PlatformUtilsImpl {
         return entity.teleport(teleportTransition);
     }
 
-    // TODO: 1.21.11 - SpawnEggItem is now data-driven. Entity type and colors should be set
-    // via Item.Properties data components. The parameters are kept for API compatibility but
-    // colors are ignored - they need to be set via data packs or Item.Properties.
+    // 1.21.11: SpawnEggItem constructor takes only Item.Properties.
+    // Entity type is set via Item.Properties.spawnEgg() which adds the ENTITY_DATA component.
+    // Colors are now baked into the spawn egg texture (no longer data-driven tints).
     public static Supplier<Item> createSpawnEggItem(Supplier<? extends EntityType<? extends Mob>> type, int primaryColor, int secondaryColor, Item.Properties properties) {
-        return () -> new SpawnEggItem(properties);
+        return () -> new SpawnEggItem(properties.spawnEgg(type.get()));
     }
 }

@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "ad_astra:chiseled_permafrost_bricks"
-    }
+    "#": "ad_astra:chiseled_permafrost_bricks"
   },
   "pattern": [
     "###"

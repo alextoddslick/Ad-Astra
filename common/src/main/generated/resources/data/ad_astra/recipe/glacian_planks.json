@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "ad_astra:glacian_logs"
-    }
+    "#ad_astra:glacian_logs"
   ],
   "result": {
     "count": 4,

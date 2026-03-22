@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "ad_astra:steel_plating"
-    }
+    "#": "ad_astra:steel_plating"
   },
   "pattern": [
     "###"

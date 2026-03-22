@@ -67,8 +67,8 @@ public class GravityNormalizerScreen extends MachineScreen<GravityNormalizerMenu
             text,
             leftPos + 78,
             topPos + 32,
-            0x8cf5f5,
-            0x32506e
+            0xFF8cf5f5,
+            0xFF32506e
         );
 
         GuiUtils.drawColoredShadowString(
@@ -77,8 +77,8 @@ public class GravityNormalizerScreen extends MachineScreen<GravityNormalizerMenu
             Component.translatable("tooltip.ad_astra.energy_per_tick", entity.energyPerTick()),
             leftPos + 45,
             topPos + 82,
-            0x8cf5f5,
-            0x32506e
+            0xFF8cf5f5,
+            0xFF32506e
         );
 
         GuiUtils.drawColoredShadowString(
@@ -87,8 +87,8 @@ public class GravityNormalizerScreen extends MachineScreen<GravityNormalizerMenu
             Component.translatable("tooltip.ad_astra.blocks_distributed", entity.distributedBlocksCount(), entity.distributedBlocksLimit()),
             leftPos + 45,
             topPos + 93,
-            0x8cf5f5,
-            0x32506e
+            0xFF8cf5f5,
+            0xFF32506e
         );
     }
 

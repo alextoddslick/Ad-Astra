@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:ostrum_plates"
-    },
-    "D": {
-      "tag": "ad_astra:desh_plates"
-    },
-    "N": {
-      "item": "minecraft:netherite_leggings"
-    }
+    "#": "#ad_astra:ostrum_plates",
+    "D": "#ad_astra:desh_plates",
+    "N": "minecraft:netherite_leggings"
   },
   "pattern": [
     "#N#",

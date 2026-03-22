@@ -4,27 +4,19 @@
   "ingredients": [
     {
       "count": 32,
-      "ingredient": {
-        "tag": "ad_astra:steel_ingots"
-      }
+      "ingredient": "#ad_astra:steel_ingots"
     },
     {
       "count": 64,
-      "ingredient": {
-        "tag": "ad_astra:steel_plates"
-      }
+      "ingredient": "#ad_astra:steel_plates"
     },
     {
       "count": 32,
-      "ingredient": {
-        "tag": "ad_astra:ostrum_ingots"
-      }
+      "ingredient": "#ad_astra:ostrum_ingots"
     },
     {
       "count": 32,
-      "ingredient": {
-        "tag": "ad_astra:ostrum_plates"
-      }
+      "ingredient": "#ad_astra:ostrum_plates"
     }
   ],
   "structure": "ad_astra:space_station"

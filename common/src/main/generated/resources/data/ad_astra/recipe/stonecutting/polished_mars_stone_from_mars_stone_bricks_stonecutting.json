@@ -1,6 +1,5 @@
 {
   "type": "minecraft:stonecutting",
-  "count": 1,
   "ingredient": "ad_astra:mars_stone_bricks",
-  "result": "ad_astra:polished_mars_stone"
+  "result": {"count": 1, "id": "ad_astra:polished_mars_stone"}
 }

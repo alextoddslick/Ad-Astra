@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "ad_astra:block/oxygen_loader_on"
+    "model": "ad_astra:block/oxygen_loader"
   }
 }

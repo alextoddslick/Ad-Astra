@@ -23,11 +23,25 @@ public class FluidPipeBlockEntity extends PipeBlockEntity {
         CommonStorage<FluidResource> container = FluidApi.BLOCK.find(entity.getLevel(), pos, direction.getOpposite());
         if (container == null) return;
 
-        if (!pipeProperty.isInsert() && (pipeProperty.isExtract() || canExtractFluid(container))) {
+        if (pipeProperty.isExtract()) {
             sources.put(pos, direction);
-        } else if (pipeProperty.isNormal() || pipeProperty.isInsert()) {
+        } else if (pipeProperty.isInsert()) {
             consumers.put(pos, direction);
+        } else {
+            // Normal mode: blocks with fluid are sources, blocks with room are consumers
+            // A block can be both (e.g. oxygen distributor has input + output tanks)
+            boolean hasFluid = canExtractFluid(container);
+            boolean hasRoom = canInsertFluid(container);
+            if (hasFluid) sources.put(pos, direction);
+            if (hasRoom) consumers.put(pos, direction);
         }
+    }
+
+    private boolean canInsertFluid(CommonStorage<FluidResource> container) {
+        for (int i = 0; i < container.size(); i++) {
+            if (container.get(i).getAmount() < container.get(i).getLimit(container.get(i).getResource())) return true;
+        }
+        return false;
     }
 
     private boolean canExtractFluid(CommonStorage<FluidResource> container) {

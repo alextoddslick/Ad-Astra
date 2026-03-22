@@ -2,21 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:steel_plates"
-    },
-    "B": {
-      "tag": "ad_astra:steel_blocks"
-    },
-    "C": {
-      "item": "minecraft:crafting_table"
-    },
-    "T": {
-      "item": "minecraft:redstone_torch"
-    },
-    "|": {
-      "tag": "ad_astra:iron_rods"
-    }
+    "#": "#ad_astra:steel_plates",
+    "B": "#ad_astra:steel_blocks",
+    "C": "minecraft:crafting_table",
+    "T": "minecraft:redstone_torch",
+    "|": "#ad_astra:iron_rods"
   },
   "pattern": [
     "|#|",

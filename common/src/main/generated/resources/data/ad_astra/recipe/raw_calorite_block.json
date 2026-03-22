@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:raw_calorite"
-    }
+    "#": "#ad_astra:raw_calorite"
   },
   "pattern": [
     "###",

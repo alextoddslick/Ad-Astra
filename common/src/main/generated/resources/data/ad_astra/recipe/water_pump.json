@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "ad_astra:desh_plates"
-    },
-    "G": {
-      "item": "ad_astra:gas_tank"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "S": {
-      "tag": "ad_astra:steel_plates"
-    }
+    "#": "#ad_astra:desh_plates",
+    "G": "ad_astra:gas_tank",
+    "H": "minecraft:hopper",
+    "S": "#ad_astra:steel_plates"
   },
   "pattern": [
     "S#S",

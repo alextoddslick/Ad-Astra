@@ -48,7 +48,7 @@ public class OverlayScreen {
                 poseStack.pushMatrix();
                 poseStack.translate(width / 2f, height / 2f);
                 poseStack.scale(4, 4);
-                graphics.drawCenteredString(font, String.valueOf(countdown), 0, -10, 0xe53253);
+                graphics.drawCenteredString(font, String.valueOf(countdown), 0, -10, 0xFFe53253);
                 poseStack.popMatrix();
             }
 
@@ -81,10 +81,10 @@ public class OverlayScreen {
 
             var text = String.format("%.1f%%", ratio * 100);
             int textWidth = font.width(text);
-            int color = ratio <= 0 ? 0xDC143C : 0xFFFFFF;
+            int color = ratio <= 0 ? 0xFFDC143C : 0xFFFFFFFF;
             PlanetData localData = ClientData.getLocalData();
             if (localData != null && localData.oxygen()) {
-                color = 0x55ff55;
+                color = 0xFF55ff55;
             }
             graphics.drawString(font, text, (int) (x + (62 - textWidth) / 2f), y + 52 + 3, color);
             poseStack.popMatrix();
@@ -108,7 +108,7 @@ public class OverlayScreen {
 
             var text = String.format("%.1f%%", ratio * 100);
             int textWidth = font.width(text);
-            int color = ratio <= 0 ? 0xDC143C : 0x55ffff;
+            int color = ratio <= 0 ? 0xFFDC143C : 0xFF55ffff;
             graphics.drawString(font, text, (int) (x + (49 - textWidth) / 2f), y + 27 + 3, color);
             poseStack.popMatrix();
         }
@@ -122,19 +122,17 @@ public class OverlayScreen {
             poseStack.scale(1.4f, 1.4f);
 
             float alpha = Mth.clamp(0.1f - (float) (lander.getDeltaMovement().y() + 0.5), 0, 1);
-            // TODO: 1.21.11 - RenderSystem.enableBlend/setShaderColor removed. Alpha blending
-            // for text should be handled through GuiGraphics color parameter or a custom RenderType.
             int textAlpha = (int) (alpha * 255) << 24;
             int textColor = 0xe53253 | textAlpha;
             graphics.drawCenteredString(font,
                 Component.translatable("message.ad_astra.lander.onboard", minecraft.options.keyJump.getTranslatedKeyMessage().getString().toUpperCase(Locale.ROOT)),
                 0, 60, textColor);
 
-            int distanceColor = 0x55ff55;
+            int distanceColor = 0xFF55ff55;
             if (distance < 100) {
-                distanceColor = 0xff5555;
+                distanceColor = 0xFFff5555;
             } else if (distance < 300) {
-                distanceColor = 0xffff55;
+                distanceColor = 0xFFffff55;
             }
             graphics.drawCenteredString(font,
                 String.valueOf(distance),

@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:orange_dye"
-    },
-    "G": {
-      "item": "minecraft:glowstone_dust"
-    },
-    "I": {
-      "tag": "ad_astra:steel_ingots"
-    }
+    "#": "minecraft:orange_dye",
+    "G": "minecraft:glowstone_dust",
+    "I": "#ad_astra:steel_ingots"
   },
   "pattern": [
     "GGG",

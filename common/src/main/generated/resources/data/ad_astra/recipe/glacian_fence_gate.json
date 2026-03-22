@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "ad_astra:glacian_planks"
-    },
-    "|": {
-      "item": "minecraft:stick"
-    }
+    "#": "ad_astra:glacian_planks",
+    "|": "minecraft:stick"
   },
   "pattern": [
     "|#|",

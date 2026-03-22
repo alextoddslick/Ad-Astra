@@ -59,6 +59,9 @@ public class TransferUtils {
             Direction direction = ModUtils.relative(machine, entry.getKey());
             if (!filter.test(direction)) continue;
             BlockPos nearbyPos = pos.relative(direction);
+            // Don't pull energy from other machines - only from cables/generators
+            var nearbyEntity = machine.getLevel().getBlockEntity(nearbyPos);
+            if (nearbyEntity instanceof ContainerMachineBlockEntity) continue;
             ValueStorage nearbyContainer = EnergyApi.BLOCK.find(machine.getLevel(), nearbyPos, direction.getOpposite());
             if (nearbyContainer == null) continue;
             long extracted = nearbyContainer.extract(amount, true);

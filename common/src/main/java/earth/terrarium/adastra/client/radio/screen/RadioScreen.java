@@ -11,6 +11,7 @@ import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -60,14 +61,14 @@ public class RadioScreen extends BaseCursorScreen {
         int left = (this.width - WIDTH) / 2;
         int top = (this.height - HEIGHT) / 2;
 
-        graphics.blit(TEXTURE, left, top, 0, 0, WIDTH, HEIGHT, 512, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, left, top, 0, 0, WIDTH, HEIGHT, 512, 256);
         renderClock(graphics, left + 29, top + 92);
-        graphics.drawString(font, RadioConfig.volume + "%", left + 102 - font.width(RadioConfig.volume + "%"), top + 114, 0x189418);
-        graphics.drawString(font, "Day " + getDayTime() / 24000L, left + 16, top + 114, 0x189418);
+        graphics.drawString(font, RadioConfig.volume + "%", left + 102 - font.width(RadioConfig.volume + "%"), top + 114, 0xFF189418);
+        graphics.drawString(font, "Day " + getDayTime() / 24000L, left + 16, top + 114, 0xFF189418);
 
         String playing = RadioHandler.getPlaying();
         if (playing != null && stationNames.containsKey(playing.toLowerCase(Locale.ROOT))) {
-            renderScrollingString(graphics, font, Component.literal(stationNames.get(playing.toLowerCase(Locale.ROOT))), left + 65, top + 37, left + 188, top + 46, 0x189418);
+            renderScrollingString(graphics, font, Component.literal(stationNames.get(playing.toLowerCase(Locale.ROOT))), left + 65, top + 37, left + 188, top + 46, 0xFF189418);
         }
 
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -104,13 +105,13 @@ public class RadioScreen extends BaseCursorScreen {
         int firstMinute = minutes / 10;
         int secondMinute = minutes % 10;
 
-        graphics.blit(CLOCK, x, y, 0, (firstHour % 5) * 13, 8, 13, 64, 64);
-        graphics.blit(CLOCK, x + 8, y, (int) (secondHour / 5f) * 8, (secondHour % 5) * 13, 8, 13, 64, 64);
-        graphics.blit(CLOCK, x + 16, y, 39, 0, 5, 13, 64, 64);
-        graphics.blit(CLOCK, x + 21, y, (int) (firstMinute / 5f) * 8, (firstMinute % 5) * 13, 8, 13, 64, 64);
-        graphics.blit(CLOCK, x + 29, y, (int) (secondMinute / 5f) * 8, (secondMinute % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x, y, 0, (firstHour % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 8, y, (int) (secondHour / 5f) * 8, (secondHour % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 16, y, 39, 0, 5, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 21, y, (int) (firstMinute / 5f) * 8, (firstMinute % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 29, y, (int) (secondMinute / 5f) * 8, (secondMinute % 5) * 13, 8, 13, 64, 64);
 
-        graphics.blit(CLOCK, x + 37, y, 42, isPm ? 0 : 13, 22, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 37, y, 42, isPm ? 0 : 13, 22, 13, 64, 64);
     }
 
     private static long getDayTime() {
