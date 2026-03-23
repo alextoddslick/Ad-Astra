@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -39,9 +40,17 @@ public class RocketSpecialRenderer implements NoDataSpecialModelRenderer {
     @Override
     public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int light, int overlay, boolean foil, int color) {
         poseStack.pushPose();
-        poseStack.scale(1.0f, -1.0f, -1.0f);
 
-        collector.submitModelPart(model.root(), poseStack, renderType, light, OverlayTexture.NO_OVERLAY, null);
+        // Capture world transform and apply model flip
+        PoseStack worldPose = new PoseStack();
+        worldPose.last().pose().set(poseStack.last().pose());
+        worldPose.last().normal().set(poseStack.last().normal());
+        worldPose.scale(1.0f, -1.0f, -1.0f);
+
+        ModelPart root = model.root();
+        collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+            root.render(worldPose, consumer, 15728880, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+        });
 
         poseStack.popPose();
     }

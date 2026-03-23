@@ -44,9 +44,8 @@ public class RoverRenderer extends EntityRenderer<Rover, EntityRenderState> {
     @Override
     public void submit(EntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         poseStack.pushPose();
-        poseStack.translate(0.0f, 1.501f, 0.0f);
-        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
-        poseStack.translate(0.0f, -1.501f, 0.0f);
+        poseStack.translate(0.0f, 1.55f, 0.0f);
+        poseStack.scale(-1.0f, -1.0f, 1.0f);
 
         collector.submitModelPart(model.root(), poseStack, renderType, state.lightCoords, OverlayTexture.NO_OVERLAY, null);
 

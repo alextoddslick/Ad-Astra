@@ -30,9 +30,16 @@ public class RoverSpecialRenderer implements NoDataSpecialModelRenderer {
     @Override
     public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int light, int overlay, boolean foil, int color) {
         poseStack.pushPose();
-        poseStack.scale(1.0f, -1.0f, -1.0f);
 
-        collector.submitModelPart(model.root(), poseStack, renderType, light, OverlayTexture.NO_OVERLAY, null);
+        PoseStack worldPose = new PoseStack();
+        worldPose.last().pose().set(poseStack.last().pose());
+        worldPose.last().normal().set(poseStack.last().normal());
+        worldPose.scale(1.0f, -1.0f, -1.0f);
+
+        net.minecraft.client.model.geom.ModelPart root = model.root();
+        collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+            root.render(worldPose, consumer, 15728880, OverlayTexture.NO_OVERLAY);
+        });
 
         poseStack.popPose();
     }
