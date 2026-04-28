@@ -9,9 +9,10 @@ import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketT
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.adastra.AdAstra;
 import earth.terrarium.adastra.common.utils.ModUtils;
-// TODO: CSL migration - BotariumFluidBlock and FluidContainer replaced
-// import earth.terrarium.common_storage_lib.storage.base.CommonStorage;
-// import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
+import earth.terrarium.common_storage_lib.fluid.util.FluidProvider;
+import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
+import earth.terrarium.common_storage_lib.storage.base.CommonStorage;
+import earth.terrarium.common_storage_lib.storage.base.StorageSlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -47,8 +48,14 @@ public record ServerboundClearFluidTankPacket(
         public Consumer<Player> handle(ServerboundClearFluidTankPacket packet) {
             return player -> ModUtils.getMachineFromMenuPacket(packet.machine(), player, player.level()).ifPresent(
                 machine -> {
-                    // TODO: CSL migration - rework fluid tank clearing for CSL API
-                    // Previously checked instanceof BotariumFluidBlock, got FluidContainer, and cleared tank
+                    if (machine instanceof FluidProvider.BlockEntity fluidProvider) {
+                        CommonStorage<FluidResource> storage = fluidProvider.getFluids(null);
+                        if (storage != null && packet.tank() >= 0 && packet.tank() < storage.size()) {
+                            StorageSlot<FluidResource> slot = storage.get(packet.tank());
+                            slot.extract(slot.getResource(), slot.getAmount(), false);
+                            machine.setChanged();
+                        }
+                    }
                 }
             );
         }

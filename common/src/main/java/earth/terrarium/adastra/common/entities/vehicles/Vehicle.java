@@ -6,6 +6,7 @@ import earth.terrarium.adastra.common.entities.multipart.MultipartEntity;
 import earth.terrarium.adastra.common.entities.multipart.MultipartPartEntity;
 import earth.terrarium.adastra.common.network.NetworkHandler;
 import earth.terrarium.adastra.common.network.packets.ServerboundVehicleControlPacket;
+import earth.terrarium.adastra.common.utils.KeybindManager;
 import earth.terrarium.adastra.mixins.common.LivingEntityAccessor;
 import com.teamresourceful.resourcefullib.common.menu.ContentMenuProvider;
 import com.teamresourceful.resourcefullib.common.menu.MenuContentHelper;
@@ -257,8 +258,11 @@ public abstract class Vehicle extends Entity implements PlayerRideable, ContentM
 
     public boolean passengerHasSpaceDown() {
         var controllingPassenger = getControllingPassenger();
-        if (!(controllingPassenger instanceof LivingEntityAccessor entity)) return false;
-        return entity.isJumping();
+        if (!(controllingPassenger instanceof Player player)) return false;
+        if (level().isClientSide()) {
+            return ((LivingEntityAccessor) player).isJumping();
+        }
+        return KeybindManager.jumpDown(player);
     }
 
     public VehicleContainer inventory() {

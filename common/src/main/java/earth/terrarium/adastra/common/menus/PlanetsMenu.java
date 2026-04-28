@@ -102,12 +102,20 @@ public class PlanetsMenu extends AbstractContainerMenu {
         if (isClaimed(dimension)) return false;
         var recipe = SpaceStationRecipe.getSpaceStation(level, dimension).orElse(null);
         if (recipe == null) return false;
+        if (player.isCreative()) return true;
         return SpaceStationRecipe.hasIngredients(player, level, recipe.value());
     }
 
     @SuppressWarnings("unchecked")
     private Map<ResourceKey<Level>, List<Pair<ItemStack, Integer>>> getSpaceStationRecipes() {
         var server = level.getServer();
+        // On the client in 1.21.11, Level.getServer() returns null.
+        // Fall back to the integrated server for singleplayer.
+        if (server == null && level.isClientSide()) {
+            try {
+                server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
+            } catch (Exception ignored) {}
+        }
         if (server == null) return new HashMap<>();
         List<SpaceStationRecipe> spaceStationRecipes = server.getRecipeManager().getRecipes().stream()
             .filter(holder -> holder.value().getType() == ModRecipeTypes.SPACE_STATION_RECIPE.get())

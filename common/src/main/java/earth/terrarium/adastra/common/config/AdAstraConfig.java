@@ -51,6 +51,13 @@ public final class AdAstraConfig {
     public static int atmosphereLeave = 600;
 
     @ConfigEntry(
+        id = "jetSuitAtmosphereLeave",
+        translation = "config.ad_astra.jetSuitAtmosphereLeave"
+    )
+    @Comment("The y level where jet suits should leave the dimension and enter space. Set to -1 to disable.")
+    public static int jetSuitAtmosphereLeave = 1000;
+
+    @ConfigEntry(
         id = "disabledPlanets",
         translation = "config.ad_astra.disabledPlanets"
     )

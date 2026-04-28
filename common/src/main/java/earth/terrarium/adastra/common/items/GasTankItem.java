@@ -1,13 +1,11 @@
 package earth.terrarium.adastra.common.items;
 
 import earth.terrarium.adastra.common.constants.ConstantComponents;
+import earth.terrarium.adastra.common.items.armor.SpaceSuitItem;
 import earth.terrarium.adastra.common.utils.FluidUtils;
 import earth.terrarium.adastra.common.utils.TooltipUtils;
 import earth.terrarium.common_storage_lib.fluid.impl.SimpleFluidStorage;
-// TODO: Migrate to CSL
-// import earth.terrarium.botarium.common.fluid.FluidApi;
-// import earth.terrarium.botarium.common.fluid.base.FluidHolder;
-// import earth.terrarium.botarium.common.fluid.utils.ClientFluidHooks;
+import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -50,7 +48,6 @@ public class GasTankItem extends Item {
 
     @Override
     public void onUseTick(@NotNull Level level, @NotNull LivingEntity entity, @NotNull ItemStack stack, int remainingUseDuration) {
-        // TODO: Migrate to CSL - re-implement fluid distribution from gas tank to inventory items
         if (level.isClientSide()) return;
         if (!(entity instanceof Player player)) return;
         var container = getFluidContainer(stack);
@@ -58,11 +55,30 @@ public class GasTankItem extends Item {
         if (entity.tickCount % 4 == 0) {
             level.playSound(player, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
+        if (distributeSequential(stack, container, player.getInventory())) {
+            FluidUtils.saveItemFluidStorage(stack, container);
+        }
     }
 
-    // TODO: Migrate to CSL - re-implement fluid distribution
-    public boolean distributeSequential(ItemStack from, Object container, Inventory inventory) {
-        return false;
+    public boolean distributeSequential(ItemStack from, SimpleFluidStorage container, Inventory inventory) {
+        FluidResource resource = container.get(0).getResource();
+        if (resource.isBlank() || container.get(0).getAmount() == 0) return false;
+        long remaining = Math.min(container.get(0).getAmount(), distributionAmount * BUCKET / 1000L);
+        boolean transferred = false;
+        for (int i = 0; i < inventory.getContainerSize() && remaining > 0; i++) {
+            ItemStack target = inventory.getItem(i);
+            if (target.getItem() instanceof SpaceSuitItem suit) {
+                SimpleFluidStorage targetContainer = suit.getFluidContainer(target);
+                long inserted = FluidUtils.insertFluid(targetContainer.get(0), resource, remaining, false);
+                if (inserted > 0) {
+                    FluidUtils.saveItemFluidStorage(target, targetContainer);
+                    container.get(0).extract(resource, inserted, false);
+                    remaining -= inserted;
+                    transferred = true;
+                }
+            }
+        }
+        return transferred;
     }
 
     public SimpleFluidStorage getFluidContainer(ItemStack holder) {
@@ -71,7 +87,11 @@ public class GasTankItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag isAdvanced) {
-        consumer.accept(TooltipUtils.getFluidComponent(FluidUtils.getTank(stack), FluidUtils.getCapacity(stack)));
+        var container = getFluidContainer(stack);
+        FluidResource resource = container.get(0).getResource();
+        long amount = container.get(0).getAmount();
+        long capacity = container.get(0).getLimit(resource);
+        consumer.accept(TooltipUtils.getFluidComponent(resource, amount, capacity));
         consumer.accept(TooltipUtils.getMaxFluidOutComponent(distributionAmount * BUCKET / 1000L));
         TooltipUtils.addDescriptionComponent(consumer, ConstantComponents.GAS_TANK_INFO);
     }
@@ -93,7 +113,9 @@ public class GasTankItem extends Item {
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        // TODO: Migrate to CSL - replace ClientFluidHooks.getFluidColor
-        return 0xFFFFFF;
+        var container = getFluidContainer(stack);
+        FluidResource resource = container.get(0).getResource();
+        if (resource.isBlank()) return 0xFFFFFF;
+        return FluidUtils.getFluidBarColor(resource.getType());
     }
 }

@@ -48,6 +48,15 @@ subprojects {
         }
     }
 
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "net.fabricmc" && requested.name == "sponge-mixin" && requested.version == "0.17.0+mixin.0.8.7") {
+                useVersion("0.17.2+mixin.0.8.7")
+                because("0.17.0 is broken: MixinService references IAdviceProvider but the class is not bundled in the jar")
+            }
+        }
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()

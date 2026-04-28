@@ -129,7 +129,9 @@ public class SpaceSuitItem extends CustomDyeableArmorItem {
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        // TODO: Migrate to CSL - replace ClientFluidHooks.getFluidColor
-        return 0xFFFFFF;
+        var container = getFluidContainer(stack);
+        FluidResource resource = container.get(0).getResource();
+        if (resource.isBlank()) return 0xFFFFFF;
+        return FluidUtils.getFluidBarColor(resource.getType());
     }
 }

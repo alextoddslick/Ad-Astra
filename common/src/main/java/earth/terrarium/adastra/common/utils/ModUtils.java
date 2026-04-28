@@ -15,6 +15,7 @@ import earth.terrarium.adastra.common.blocks.base.MachineBlock;
 import earth.terrarium.adastra.common.config.AdAstraConfig;
 import earth.terrarium.adastra.common.entities.vehicles.Lander;
 import earth.terrarium.adastra.common.entities.vehicles.Rocket;
+import earth.terrarium.adastra.common.items.armor.SpaceSuitItem;
 import earth.terrarium.adastra.common.menus.PlanetsMenu;
 import earth.terrarium.adastra.common.menus.base.BaseContainerMenu;
 import earth.terrarium.adastra.common.registry.ModEntityTypes;
@@ -77,6 +78,11 @@ public final class ModUtils {
         String[] planets = AdAstraConfig.disabledPlanets.split(",");
         for (var planet : planets) {
             if (planet.equals(targetPlanet.dimension().identifier().toString())) return false;
+        }
+
+        // Allow jet suit flight to orbit (tier 1 only)
+        if (SpaceSuitItem.hasFullJetSuitSet(player) && player.getY() >= AdAstraConfig.jetSuitAtmosphereLeave && AdAstraConfig.jetSuitAtmosphereLeave >= 0) {
+            return targetPlanet.tier() <= 1;
         }
 
         if (!(player.getVehicle() instanceof Rocket rocket)) return false;

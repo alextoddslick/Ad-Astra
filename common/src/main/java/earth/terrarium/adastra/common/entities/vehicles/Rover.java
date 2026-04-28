@@ -112,8 +112,15 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
 
     @Override
     public ItemStack getDropStack() {
-        // TODO: Migrate to CSL - re-implement fluid transfer from entity to item
-        return ModItems.ROVER.get().getDefaultInstance();
+        ItemStack stack = ModItems.ROVER.get().getDefaultInstance();
+        FluidResource resource = fluidContainer.getResource(0);
+        long amount = fluidContainer.getAmount(0);
+        if (!resource.isBlank() && amount > 0) {
+            SimpleFluidStorage itemStorage = FluidUtils.getItemFluidStorage(stack, 1, fluidContainer.get(0).getLimit(FluidResource.BLANK));
+            FluidUtils.insertFluid(itemStorage.get(0), resource, amount, false);
+            FluidUtils.saveItemFluidStorage(stack, itemStorage);
+        }
+        return stack;
     }
 
     @Override

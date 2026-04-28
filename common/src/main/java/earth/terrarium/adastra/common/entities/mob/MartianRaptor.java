@@ -41,9 +41,6 @@ public class MartianRaptor extends Monster {
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
     }
 
-    // TODO: MobType was removed in 1.21. Use entity type tags for undead checks instead.
-    // To make this entity count as undead, add it to the minecraft:undead entity type tag.
-
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.STRIDER_HURT;

@@ -70,7 +70,8 @@
       "Bash(javap -p -cp $MCJAR net.minecraft.class_1534)",
       "Bash(javap -p -cp $MCJAR net.minecraft.class_1799)",
       "Bash(javap -cp $MCJAR net.minecraft.class_1799)",
-      "Bash(./gradlew :common:compileJava)"
+      "Bash(./gradlew :common:compileJava)",
+      "Bash(./gradlew :fabric:runClient)"
     ]
   }
 }

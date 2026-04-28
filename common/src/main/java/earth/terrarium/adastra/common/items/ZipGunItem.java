@@ -9,10 +9,7 @@ import earth.terrarium.adastra.common.tags.ModFluidTags;
 import earth.terrarium.adastra.common.utils.FluidUtils;
 import earth.terrarium.adastra.common.utils.TooltipUtils;
 import earth.terrarium.common_storage_lib.fluid.impl.SimpleFluidStorage;
-// TODO: Migrate to CSL
-// import earth.terrarium.botarium.common.fluid.base.FluidContainer;
-// import earth.terrarium.botarium.common.fluid.base.FluidHolder;
-// import earth.terrarium.botarium.common.fluid.utils.ClientFluidHooks;
+import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -107,12 +104,14 @@ public class ZipGunItem extends Item {
     }
 
     public boolean consumeFuel(Player player, ItemStack stack, long amount) {
-        // TODO: Migrate to CSL FluidResource - re-implement fuel consumption
         if (!(stack.getItem() instanceof ZipGunItem)) return false;
         if (player.isCreative()) return true;
         var container = getFluidContainer(stack);
         if (container == null) return false;
         long extracted = container.extract(container.get(0).getResource(), amount * BUCKET / 1000L, false);
+        if (extracted > 0) {
+            FluidUtils.saveItemFluidStorage(stack, container);
+        }
         return extracted > 0;
     }
 
@@ -155,8 +154,10 @@ public class ZipGunItem extends Item {
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        // TODO: Migrate to CSL - replace ClientFluidHooks.getFluidColor
-        return 0xFFFFFF;
+        var container = getFluidContainer(stack);
+        FluidResource resource = container.get(0).getResource();
+        if (resource.isBlank()) return 0xFFFFFF;
+        return FluidUtils.getFluidBarColor(resource.getType());
     }
 
     // Fabric disabling of nbt change animation

@@ -38,12 +38,14 @@ import earth.terrarium.adastra.common.network.packets.ServerboundSyncKeybindPack
 import earth.terrarium.adastra.common.registry.*;
 import earth.terrarium.adastra.common.tags.ModItemTags;
 import earth.terrarium.adastra.common.utils.KeybindManager;
+import earth.terrarium.adastra.common.entities.vehicles.Vehicle;
 import earth.terrarium.adastra.common.utils.radio.RadioHolder;
 // TODO: CSL migration - botarium ClientHooks provided registerBlockEntityRenderers, registerEntityRenderer,
 // registerItemProperty, setRenderLayer. These registration methods need platform-specific replacements.
 // import earth.terrarium.botarium.client.ClientHooks;
 import earth.terrarium.adastra.client.utils.ClientRegistrationHooks;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -73,6 +75,9 @@ public class AdAstraClient {
 
     public static final OverlayRenderer OXYGEN_OVERLAY_RENDERER = new OverlayRenderer(0x4099ccff, () -> AdAstraConfigClient.showOxygenDistributorArea, ModBlocks.OXYGEN_DISTRIBUTOR);
     public static final OverlayRenderer GRAVITY_OVERLAY_RENDERER = new OverlayRenderer(0x40DE2F14, () -> AdAstraConfigClient.showGravityNormalizerArea, ModBlocks.GRAVITY_NORMALIZER);
+
+    private static boolean forcedThirdPerson = false;
+    private static CameraType previousCameraType = null;
 
     public static final KeyMapping.Category AD_ASTRA_KEY_CATEGORY = KeyMapping.Category.register(
         Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "key_category"));
@@ -273,25 +278,49 @@ public class AdAstraClient {
             RadioHandler.open(null);
         }
 
-        if (player.getItemBySlot(EquipmentSlot.CHEST).is(ModItemTags.JET_SUITS)) {
-            Options options = minecraft.options;
+        // Auto third-person camera for vehicles that request it (lander, rocket)
+        if (player.getVehicle() instanceof Vehicle vehicle && vehicle.zoomOutCameraInThirdPerson()) {
+            if (!forcedThirdPerson && minecraft.options.getCameraType().isFirstPerson()) {
+                previousCameraType = minecraft.options.getCameraType();
+                minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+                forcedThirdPerson = true;
+            }
+        } else if (forcedThirdPerson) {
+            if (previousCameraType != null) {
+                minecraft.options.setCameraType(previousCameraType);
+            }
+            forcedThirdPerson = false;
+            previousCameraType = null;
+        }
 
+        boolean wearingJetSuit = player.getItemBySlot(EquipmentSlot.CHEST).is(ModItemTags.JET_SUITS);
+        boolean ridingVehicle = player.getVehicle() instanceof Vehicle;
+
+        if (wearingJetSuit) {
             if (KEY_TOGGLE_SUIT_FLIGHT.consumeClick()) {
                 AdAstraConfigClient.jetSuitEnabled = !AdAstraConfigClient.jetSuitEnabled;
                 Minecraft.getInstance().execute(() -> AdAstra.CONFIGURATOR.saveConfig(AdAstraConfigClient.class));
                 player.displayClientMessage(AdAstraConfigClient.jetSuitEnabled ? ConstantComponents.SUIT_FLIGHT_ENABLED : ConstantComponents.SUIT_FLIGHT_DISABLED, true);
             }
+        }
+
+        if (wearingJetSuit || ridingVehicle) {
+            Options options = minecraft.options;
 
             KeybindManager.set(player,
                 options.keyJump.isDown(),
                 options.keySprint.isDown(),
-                AdAstraConfigClient.jetSuitEnabled);
+                wearingJetSuit && AdAstraConfigClient.jetSuitEnabled);
 
             NetworkHandler.CHANNEL.sendToServer(new ServerboundSyncKeybindPacket(
                 options.keyJump.isDown(),
                 options.keySprint.isDown(),
-                AdAstraConfigClient.jetSuitEnabled
+                wearingJetSuit && AdAstraConfigClient.jetSuitEnabled
             ));
+        } else if (KeybindManager.hasAnyKeyDown(player)) {
+            // Clear stale keybind state on dismount to prevent jet suit launch
+            KeybindManager.set(player, false, false, false);
+            NetworkHandler.CHANNEL.sendToServer(new ServerboundSyncKeybindPacket(false, false, false));
         }
     }
 }

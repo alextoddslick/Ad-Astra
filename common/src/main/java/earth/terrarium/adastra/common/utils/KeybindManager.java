@@ -54,4 +54,9 @@ public final class KeybindManager {
     public static void set(UUID player, boolean jumpDown, boolean sprintDown, boolean suitFlightEnabled) {
         PLAYER_KEYS.put(player, new KeybindManager(jumpDown, sprintDown, suitFlightEnabled));
     }
+
+    public static boolean hasAnyKeyDown(Player player) {
+        KeybindManager keys = PLAYER_KEYS.get(player.getUUID());
+        return keys != null && (keys.jumpDown || keys.sprintDown || keys.suitFlightEnabled);
+    }
 }

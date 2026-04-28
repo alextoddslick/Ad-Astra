@@ -4,6 +4,8 @@ import com.teamresourceful.resourcefullib.common.registry.RegistryEntry;
 import earth.terrarium.adastra.common.items.GasTankItem;
 import earth.terrarium.adastra.common.items.ZipGunItem;
 import earth.terrarium.adastra.common.items.armor.SpaceSuitItem;
+import earth.terrarium.adastra.common.items.vehicles.VehicleItem;
+import earth.terrarium.adastra.common.registry.ModFluids;
 import earth.terrarium.common_storage_lib.fluid.impl.SimpleFluidSlot;
 import earth.terrarium.common_storage_lib.fluid.impl.SimpleFluidStorage;
 import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
@@ -26,10 +28,11 @@ import net.minecraft.world.level.material.Fluids;
 public class FluidUtils {
 
     /**
-     * Returns a placeholder fluid object for the given stack (TODO: CSL migration).
+     * @deprecated Use getItemFluidContainer(stack) instead.
      */
+    @Deprecated
     public static Object getTank(ItemStack stack) {
-        return null; // TODO: CSL migration - return actual fluid holder from item via FluidApi.ITEM
+        return null;
     }
 
     /**
@@ -131,6 +134,8 @@ public class FluidUtils {
             return tank.getFluidContainer(stack);
         } else if (item instanceof ZipGunItem zipGun) {
             return zipGun.getFluidContainer(stack);
+        } else if (item instanceof VehicleItem vehicle) {
+            return vehicle.getFluidContainer(stack);
         }
         return null;
     }
@@ -237,6 +242,20 @@ public class FluidUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Gets a display color for the given fluid, suitable for item bar rendering.
+     */
+    public static int getFluidBarColor(Fluid fluid) {
+        if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) return 0x3F76E4;
+        if (fluid == Fluids.LAVA || fluid == Fluids.FLOWING_LAVA) return 0xFFFFFF;
+        if (fluid == ModFluids.OXYGEN.get()) return 0xDAE6F0;
+        if (fluid == ModFluids.HYDROGEN.get()) return 0x89CFF0;
+        if (fluid == ModFluids.OIL.get()) return 0x373A36;
+        if (fluid == ModFluids.FUEL.get()) return 0xE5292B;
+        if (fluid == ModFluids.CRYO_FUEL.get()) return 0x6CFFFA;
+        return 0xFFFFFF;
     }
 
     /**

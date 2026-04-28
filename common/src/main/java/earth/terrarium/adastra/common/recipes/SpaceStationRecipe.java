@@ -80,6 +80,11 @@ public record SpaceStationRecipe(
     @SuppressWarnings("unchecked")
     public static Optional<RecipeHolder<SpaceStationRecipe>> getSpaceStation(Level level, ResourceKey<Level> dimension) {
         var server = level.getServer();
+        if (server == null && level.isClientSide()) {
+            try {
+                server = net.minecraft.client.Minecraft.getInstance().getSingleplayerServer();
+            } catch (Exception ignored) {}
+        }
         if (server == null) return Optional.empty();
         return server.getRecipeManager().getRecipes().stream()
             .filter(holder -> holder.value().getType() == ModRecipeTypes.SPACE_STATION_RECIPE.get())

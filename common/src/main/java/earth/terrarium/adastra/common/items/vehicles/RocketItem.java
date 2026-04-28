@@ -5,10 +5,10 @@ import earth.terrarium.adastra.common.blocks.properties.LaunchPadPartProperty;
 import earth.terrarium.adastra.common.constants.ConstantComponents;
 import earth.terrarium.adastra.common.entities.vehicles.Rocket;
 import earth.terrarium.adastra.common.tags.ModBlockTags;
+import earth.terrarium.adastra.common.utils.FluidUtils;
 import earth.terrarium.adastra.common.utils.TooltipUtils;
-// TODO: Migrate to CSL
-// import earth.terrarium.botarium.common.fluid.FluidApi;
-// import earth.terrarium.botarium.common.fluid.base.FluidContainer;
+import earth.terrarium.common_storage_lib.fluid.impl.SimpleFluidStorage;
+import earth.terrarium.common_storage_lib.resources.fluid.FluidResource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -56,7 +56,12 @@ public class RocketItem extends VehicleItem {
         level.addFreshEntity(vehicle);
 
         if (vehicle instanceof Rocket rocket) {
-            // TODO: Migrate to CSL - re-implement fluid transfer from item to entity
+            SimpleFluidStorage itemFluid = getFluidContainer(stack);
+            FluidResource resource = itemFluid.get(0).getResource();
+            long amount = itemFluid.get(0).getAmount();
+            if (!resource.isBlank() && amount > 0) {
+                FluidUtils.insertFluid(rocket.fluidContainer().get(0), resource, amount, false);
+            }
         }
 
         stack.shrink(1);

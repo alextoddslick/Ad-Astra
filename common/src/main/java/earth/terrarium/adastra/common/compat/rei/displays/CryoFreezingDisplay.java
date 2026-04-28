@@ -26,7 +26,6 @@ public record CryoFreezingDisplay(CryoFreezingRecipe recipe) implements Display 
 
     @Override
     public List<EntryIngredient> getOutputEntries() {
-        // TODO: CSL migration - fluid result was removed from recipe, re-add when CSL FluidResource is available
         return List.of();
     }
 

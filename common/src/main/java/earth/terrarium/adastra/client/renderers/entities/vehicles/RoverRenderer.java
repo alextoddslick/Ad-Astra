@@ -22,7 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public class RoverRenderer extends EntityRenderer<Rover, EntityRenderState> {
+public class RoverRenderer extends EntityRenderer<Rover, VehicleRenderState> {
 
     public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/rover/tier_1_rover.png");
 
@@ -37,13 +37,20 @@ public class RoverRenderer extends EntityRenderer<Rover, EntityRenderState> {
     }
 
     @Override
-    public EntityRenderState createRenderState() {
-        return new EntityRenderState();
+    public VehicleRenderState createRenderState() {
+        return new VehicleRenderState();
     }
 
     @Override
-    public void submit(EntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+    public void extractRenderState(Rover entity, VehicleRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.yRot = Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
+    }
+
+    @Override
+    public void submit(VehicleRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - state.yRot));
         poseStack.translate(0.0f, 1.55f, 0.0f);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
 

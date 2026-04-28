@@ -76,8 +76,10 @@ public record ServerboundConstructSpaceStationPacket(
                 RecipeHolder<SpaceStationRecipe> recipe = SpaceStationRecipe.getSpaceStation(targetLevel, targetLevel.dimension()).orElse(null);
                 if (recipe == null) return;
                 if (SpaceStationHandler.isInSpaceStation(serverPlayer, targetLevel)) return;
-                if (!SpaceStationRecipe.hasIngredients(serverPlayer, targetLevel, recipe.value())) return;
-                SpaceStationRecipe.consumeIngredients(serverPlayer, targetLevel);
+                if (!serverPlayer.isCreative()) {
+                    if (!SpaceStationRecipe.hasIngredients(serverPlayer, targetLevel, recipe.value())) return;
+                    SpaceStationRecipe.consumeIngredients(serverPlayer, targetLevel);
+                }
 
                 var pos = player.chunkPosition();
 

@@ -70,10 +70,12 @@ public record OxygenLoadingCategory(IGuiHelper guiHelper) implements IRecipeCate
 
         int cookTime = recipe.cookingTime();
         long capacity = MachineConfig.STEEL.fluidCapacity * 81L;
-        // TODO: CSL migration - FluidBarDrawable needs rework for CSL FluidResource
-        // new FluidBarDrawable(mouseX, mouseY, false, capacity, cookTime, recipe.input()
-        //     .getFluids().get(0).copyWithAmount(recipe.input().getFluidAmount()))
-        //     .draw(graphics, 39, 49);
-        // new FluidBarDrawable(mouseX, mouseY, true, capacity, cookTime, recipe.result()).draw(graphics, 96, 49);
+        var inputFluids = recipe.input().ingredient().getMatchingFluids();
+        if (!inputFluids.isEmpty()) {
+            new FluidBarDrawable(mouseX, mouseY, false, capacity, cookTime, inputFluids.get(0).getType(), recipe.input().getAmount())
+                .draw(graphics, 39, 49);
+        }
+        new FluidBarDrawable(mouseX, mouseY, true, capacity, cookTime, recipe.result().getType(), recipe.resultAmount())
+            .draw(graphics, 96, 49);
     }
 }

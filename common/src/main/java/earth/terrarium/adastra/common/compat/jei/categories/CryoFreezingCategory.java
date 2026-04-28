@@ -72,7 +72,7 @@ public record CryoFreezingCategory(IGuiHelper guiHelper) implements IRecipeCateg
         new EtaDrawable(mouseX, mouseY, recipe.cookingTime(), GuiUtils.SNOWFLAKE, 13, 13).draw(graphics, 55, 67);
         int cookTime = recipe.cookingTime();
         long capacity = MachineConfig.OSTRUM.fluidCapacity * 81L;
-        // TODO: CSL migration - FluidBarDrawable needs rework for CSL FluidResource
-        // new FluidBarDrawable(mouseX, mouseY, true, capacity, cookTime, recipe.result()).draw(graphics, 81, 65);
+        new FluidBarDrawable(mouseX, mouseY, true, capacity, cookTime, recipe.result().getType(), recipe.resultAmount())
+            .draw(graphics, 81, 65);
     }
 }

@@ -20,11 +20,13 @@ public abstract class FabricResourcefulRegistryMixin<T> {
 
     @Inject(method = "register", at = @At("HEAD"))
     private <I extends T> void adastra$setIdContext(String id, Supplier<I> supplier, CallbackInfoReturnable<RegistryEntry<I>> cir) {
-        RegistryIdContext.CURRENT_ID.set(Identifier.fromNamespaceAndPath(namespace(), id));
+        // Save any existing context so nested registrations (e.g. entity type class loading
+        // triggered from inside an item supplier) don't clobber the outer registration's ID.
+        RegistryIdContext.pushId(Identifier.fromNamespaceAndPath(namespace(), id));
     }
 
     @Inject(method = "register", at = @At("RETURN"))
     private <I extends T> void adastra$clearIdContext(String id, Supplier<I> supplier, CallbackInfoReturnable<RegistryEntry<I>> cir) {
-        RegistryIdContext.CURRENT_ID.remove();
+        RegistryIdContext.popId();
     }
 }

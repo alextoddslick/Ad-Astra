@@ -65,10 +65,11 @@ public class OxygenLoadingCategory implements DisplayCategory<OxygenLoadingDispl
 
         int cookTime = display.recipe().cookingTime();
         long capacity = MachineConfig.STEEL.fluidCapacity * 81L;
-        // TODO: CSL migration - ReiFluidBarWidget needs rework for CSL FluidResource
-        // widgets.add(new ReiFluidBarWidget(new Point(bounds.x + 37, bounds.y + 53), false, capacity, cookTime, display.recipe().input()
-        //     .getFluids().get(0).copyWithAmount(display.recipe().input().getFluidAmount())));
-        // widgets.add(new ReiFluidBarWidget(new Point(bounds.x + 94, bounds.y + 53), true, capacity, cookTime, display.recipe().result()));
+        var inputFluids = display.recipe().input().ingredient().getMatchingFluids();
+        if (!inputFluids.isEmpty()) {
+            widgets.add(new ReiFluidBarWidget(new Point(bounds.x + 37, bounds.y + 53), false, capacity, cookTime, inputFluids.get(0).getType(), display.recipe().input().getAmount()));
+        }
+        widgets.add(new ReiFluidBarWidget(new Point(bounds.x + 94, bounds.y + 53), true, capacity, cookTime, display.recipe().result().getType(), display.recipe().resultAmount()));
 
         return widgets;
     }

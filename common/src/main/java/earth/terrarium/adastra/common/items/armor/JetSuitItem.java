@@ -1,11 +1,17 @@
 package earth.terrarium.adastra.common.items.armor;
 
+import earth.terrarium.adastra.api.planets.Planet;
+import earth.terrarium.adastra.api.planets.PlanetApi;
+import earth.terrarium.adastra.common.config.AdAstraConfig;
 import earth.terrarium.adastra.common.constants.ConstantComponents;
+import earth.terrarium.adastra.common.planets.AdAstraData;
 import earth.terrarium.adastra.common.registry.ModFluids;
 import earth.terrarium.adastra.common.utils.EnergyUtils;
 import earth.terrarium.adastra.common.utils.FluidUtils;
 import earth.terrarium.adastra.common.utils.KeybindManager;
+import earth.terrarium.adastra.common.utils.ModUtils;
 import earth.terrarium.adastra.common.utils.TooltipUtils;
+import net.minecraft.resources.ResourceKey;
 import earth.terrarium.common_storage_lib.context.ItemContext;
 import earth.terrarium.common_storage_lib.energy.EnergyProvider;
 import earth.terrarium.common_storage_lib.energy.impl.SimpleValueStorage;
@@ -14,6 +20,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -67,10 +74,14 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         super.inventoryTick(stack, level, entity, slot);
         if (!(entity instanceof Player player)) return;
         if (player.getItemBySlot(EquipmentSlot.CHEST) != stack) return;
+        if (!hasFullJetSuitSet(player)) return;
+
+        // Check atmosphere leave regardless of flight state
+        checkAtmosphereLeave(player);
 
         if (player.getAbilities().flying) return;
+        if (player.isPassenger()) return;
         if (player.getCooldowns().isOnCooldown(stack)) return;
-        if (!hasFullJetSuitSet(player)) return;
 
         if (!KeybindManager.suitFlightEnabled(player)) return;
         if (!KeybindManager.jumpDown(player)) return;
@@ -82,6 +93,31 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         } else {
             upwardsFlight(player);
             consume(player, stack, 50);
+        }
+    }
+
+    private void checkAtmosphereLeave(Player player) {
+        if (AdAstraConfig.jetSuitAtmosphereLeave < 0) return;
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        if (!(player.level() instanceof ServerLevel serverLevel)) return;
+
+        ResourceKey<Level> currentDim = serverLevel.dimension();
+        Planet currentPlanet = AdAstraData.planets().get(currentDim);
+        if (currentPlanet == null) return;
+
+        // On a planet surface: fly to orbit at jetSuitAtmosphereLeave height
+        if (!currentPlanet.isSpace() && player.getY() >= AdAstraConfig.jetSuitAtmosphereLeave) {
+            ResourceKey<Level> orbitDim = currentPlanet.orbitIfPresent();
+            ServerLevel orbitLevel = serverLevel.getServer().getLevel(orbitDim);
+            if (orbitLevel == null) return;
+            ModUtils.land(serverPlayer, orbitLevel, new Vec3(player.getX(), AdAstraConfig.atmosphereLeave, player.getZ()));
+        }
+
+        // In Earth orbit: fly to moon at 10,000 blocks
+        if (currentDim.equals(Planet.EARTH_ORBIT) && player.getY() >= 10000) {
+            ServerLevel moonLevel = serverLevel.getServer().getLevel(Planet.MOON);
+            if (moonLevel == null) return;
+            ModUtils.land(serverPlayer, moonLevel, new Vec3(player.getX(), AdAstraConfig.atmosphereLeave, player.getZ()));
         }
     }
 
