@@ -69,7 +69,9 @@ public class WaterPumpBlockEntity extends EnergyContainerMachineBlockEntity impl
 
     public SimpleFluidStorage getFluidContainer() {
         if (fluidContainer != null) return fluidContainer;
-        return fluidContainer = new SimpleFluidStorage(1, MachineConfig.DESH.fluidCapacity * 81L);
+        // Tank 0 must only ever hold water — never oxygen or any other fluid.
+        return fluidContainer = new SimpleFluidStorage(1, MachineConfig.DESH.fluidCapacity * 81L)
+            .filter(0, resource -> resource.getType() == Fluids.WATER);
     }
 
     @Override

@@ -205,6 +205,14 @@ public class AdAstraClient {
         consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(ModBlocks.AIRLOCK.getId().getPath())));
         consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(ModBlocks.REINFORCED_DOOR.getId().getPath())));
 
+        // Per-variant flipped models for the simple sliding doors (iron / steel / desh / ostrum / calorite).
+        // These models live as JSONs but aren't reachable from any blockstate, so they must be registered
+        // as extra-baked models or `ClientPlatformUtils.getModel(...)` returns null and the renderer
+        // falls back to a rotated copy of the front-facing model — which is what was producing the
+        // washed-out / wrong-color second door panel reported by the user.
+        ModBlocks.SIMPLE_SLIDING_DOORS.stream().forEach(block ->
+            consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(block.getId().getPath()))));
+
         // Globe cube models (per-planet, with correct textures baked in)
         ModBlocks.GLOBES.stream().forEach(block ->
             consumer.accept(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_cube".formatted(block.getId().getPath()))));

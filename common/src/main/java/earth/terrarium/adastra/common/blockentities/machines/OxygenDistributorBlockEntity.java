@@ -1,5 +1,6 @@
 package earth.terrarium.adastra.common.blockentities.machines;
 
+import net.minecraft.world.level.material.Fluids;
 import earth.terrarium.adastra.api.systems.OxygenApi;
 import earth.terrarium.adastra.api.systems.TemperatureApi;
 import earth.terrarium.adastra.client.AdAstraClient;
@@ -77,9 +78,10 @@ public class OxygenDistributorBlockEntity extends OxygenLoaderBlockEntity {
     @Override
     public SimpleFluidStorage getFluidContainer() {
         if (distributorFluidContainer != null) return distributorFluidContainer;
-        // Use DESH-tier fluid capacity (5000 mB = ~6 buckets) instead of STEEL (3000 mB = ~3 buckets)
-        // Filter tank 1 (output) to only accept oxygen
+        // Tank 0 (input/left bar) must only accept water — never oxygen.
+        // Tank 1 (output) must only ever hold oxygen.
         return distributorFluidContainer = new SimpleFluidStorage(2, MachineConfig.DESH.fluidCapacity * 81L)
+            .filter(0, resource -> resource.getType() == Fluids.WATER)
             .filter(1, resource -> resource.getType() == ModFluids.OXYGEN.get());
     }
 

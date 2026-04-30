@@ -15,18 +15,7 @@
     },
     "sky_color": 13732690,
     "water_color": 4159204,
-    "water_fog_color": 329011,
-    "music": [
-      {
-        "data": {
-          "max_delay": 24000,
-          "min_delay": 12000,
-          "replace_current_music": false,
-          "sound": "minecraft:music.creative"
-        },
-        "weight": 1
-      }
-    ]
+    "water_fog_color": 329011
   },
   "features": [
     [],
@@ -89,5 +78,14 @@
     "water_ambient": [],
     "water_creature": []
   },
-  "temperature": 1.6
+  "temperature": 1.6,
+  "attributes": {
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 12000,
+        "min_delay": 0,
+        "sound": "minecraft:music.creative"
+      }
+    }
+  }
 }
