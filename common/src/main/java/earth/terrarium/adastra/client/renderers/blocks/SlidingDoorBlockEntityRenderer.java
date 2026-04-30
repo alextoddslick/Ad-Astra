@@ -69,7 +69,17 @@ public class SlidingDoorBlockEntityRenderer implements BlockEntityRenderer<Slidi
 
         poseStack.translate(-state.slide - state.slide, 0, 0);
 
-        if (!state.flipSecondDoor) {
+        // Always prefer a baked `<id>_flipped` model when one exists. Falls back to the
+        // simple-rotation path so blocks that haven't shipped a flipped variant still render.
+        String blockId = BuiltInRegistries.BLOCK.getKey(state.blockState.getBlock()).getPath();
+        BlockStateModel flippedModel = ClientPlatformUtils.getModel(
+            Minecraft.getInstance().getModelManager(),
+            Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(blockId)));
+
+        if (flippedModel != null) {
+            poseStack.translate(-1.25f, 0, 0);
+            collector.submitBlockModel(poseStack, Sheets.cutoutBlockSheet(), flippedModel, 1, 1, 1, light, 0, -1);
+        } else if (!state.flipSecondDoor) {
             poseStack.translate(0.5f, 0, 0.5f);
             poseStack.mulPose(Axis.YP.rotationDegrees(180));
             poseStack.translate(-0.5f, 0, -0.5f);
@@ -77,15 +87,6 @@ public class SlidingDoorBlockEntityRenderer implements BlockEntityRenderer<Slidi
 
             collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockSheet(), (pose, consumer) ->
                 ModelBlockRenderer.renderModel(pose, consumer, model, 1, 1, 1, light, 0));
-        } else {
-            poseStack.translate(-1.25f, 0, 0);
-            String blockId = BuiltInRegistries.BLOCK.getKey(state.blockState.getBlock()).getPath();
-            BlockStateModel flippedModel = ClientPlatformUtils.getModel(
-                Minecraft.getInstance().getModelManager(),
-                Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "block/%s_flipped".formatted(blockId)));
-            if (flippedModel != null) {
-                collector.submitBlockModel(poseStack, Sheets.cutoutBlockSheet(), flippedModel, 1, 1, 1, light, 0, -1);
-            }
         }
 
         poseStack.popPose();
