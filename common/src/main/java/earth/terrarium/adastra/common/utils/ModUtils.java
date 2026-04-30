@@ -10,6 +10,7 @@ import com.teamresourceful.yabn.elements.YabnElement;
 import com.teamresourceful.yabn.reader.ArrayByteReader;
 import earth.terrarium.adastra.AdAstra;
 import earth.terrarium.adastra.api.planets.Planet;
+import earth.terrarium.adastra.api.planets.PlanetApi;
 import earth.terrarium.adastra.common.blockentities.base.ContainerMachineBlockEntity;
 import earth.terrarium.adastra.common.blocks.base.MachineBlock;
 import earth.terrarium.adastra.common.config.AdAstraConfig;
@@ -116,13 +117,20 @@ public final class ModUtils {
     public static void land(ServerPlayer player, ServerLevel targetLevel, Vec3 pos) {
         Entity vehicle = player.getVehicle();
         player.stopRiding();
-        player.setPos(pos.x, pos.y, pos.z);
+        // When arriving in a space dimension (planet/orbit), always enter from the top of the build height
+        // minus a small safety margin so the player/lander falls toward the surface — regardless of the
+        // source Y coordinate. Without this override, launching from very high (e.g. y >= 1000) on the
+        // overworld could leave the player at that source Y in the destination.
+        Vec3 arrivalPos = PlanetApi.API.isSpace(targetLevel)
+            ? new Vec3(pos.x, targetLevel.getMaxY() - 10, pos.z)
+            : pos;
+        player.setPos(arrivalPos.x, arrivalPos.y, arrivalPos.z);
         var teleportedPlayer = teleportToDimension(player, targetLevel);
 
         if (!(vehicle instanceof Rocket rocket)) return;
         Lander lander = ModEntityTypes.LANDER.get().create(targetLevel, EntitySpawnReason.TRIGGERED);
         if (lander == null) return;
-        lander.setPos(pos);
+        lander.setPos(arrivalPos);
         targetLevel.addFreshEntity(lander);
         teleportedPlayer.startRiding(lander);
 
