@@ -13,7 +13,7 @@
       "translate": "advancements.ad_astra.moon.description"
     },
     "icon": {
-      "item": "ad_astra:moon_globe"
+      "id": "ad_astra:moon_globe"
     },
     "title": {
       "translate": "advancements.ad_astra.moon.title"

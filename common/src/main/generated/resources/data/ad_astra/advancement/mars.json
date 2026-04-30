@@ -13,7 +13,7 @@
       "translate": "advancements.ad_astra.mars.description"
     },
     "icon": {
-      "item": "ad_astra:mars_globe"
+      "id": "ad_astra:mars_globe"
     },
     "title": {
       "translate": "advancements.ad_astra.mars.title"

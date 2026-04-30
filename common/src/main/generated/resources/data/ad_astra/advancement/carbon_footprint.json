@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.carbon_footprint.description"
     },
     "icon": {
-      "item": "ad_astra:coal_generator"
+      "id": "ad_astra:coal_generator"
     },
     "title": {
       "translate": "advancements.ad_astra.carbon_footprint.title"

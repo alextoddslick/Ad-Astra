@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.cryo_freezer.description"
     },
     "icon": {
-      "item": "ad_astra:cryo_freezer"
+      "id": "ad_astra:cryo_freezer"
     },
     "title": {
       "translate": "advancements.ad_astra.cryo_freezer.title"

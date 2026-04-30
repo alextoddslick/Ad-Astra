@@ -1,6 +1,11 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "ad_astra:item/tier_4_rocket"
+    "type": "minecraft:special",
+    "base": "ad_astra:item/tier_4_rocket",
+    "model": {
+      "type": "ad_astra:rocket",
+      "texture": "ad_astra:textures/entity/rocket/tier_4_rocket.png",
+      "layer": "ad_astra:tier_4_rocket/main"
+    }
   }
 }

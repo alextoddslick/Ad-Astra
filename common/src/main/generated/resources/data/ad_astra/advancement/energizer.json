@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.energizer.description"
     },
     "icon": {
-      "item": "ad_astra:energizer"
+      "id": "ad_astra:energizer"
     },
     "title": {
       "translate": "advancements.ad_astra.energizer.title"

@@ -84,6 +84,20 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         if (player.getCooldowns().isOnCooldown(stack)) return;
 
         if (!KeybindManager.suitFlightEnabled(player)) return;
+
+        // Space brake: in space, hold sneak while *touching a block* (ground / wall / ceiling)
+        // to instantly kill velocity. Mid-air sneak does nothing — that matches user expectation
+        // ("hold shift while pressed against a block to stop").
+        if (PlanetApi.API.isSpace(player.level()) && player.isShiftKeyDown() && canFly(player, stack)) {
+            boolean touchingBlock = player.onGround()
+                || player.horizontalCollision
+                || player.verticalCollision;
+            if (touchingBlock) {
+                applySpaceBrake(player);
+                consume(player, stack, 30);
+            }
+        }
+
         if (!KeybindManager.jumpDown(player)) return;
         if (!canFly(player, stack)) return;
 
@@ -94,6 +108,16 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
             upwardsFlight(player);
             consume(player, stack, 50);
         }
+    }
+
+    private void applySpaceBrake(Player player) {
+        Vec3 v = player.getDeltaMovement();
+        if (v.lengthSqr() < 1.0e-4) return;
+        // Instant zero when touching a block. The caller already gates on
+        // touchingBlock, so reaching here means the player is grounded or
+        // pressed against a surface — no reason to drift.
+        player.setDeltaMovement(Vec3.ZERO);
+        player.hurtMarked = true;
     }
 
     private void checkAtmosphereLeave(Player player) {
@@ -124,21 +148,49 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
     protected void upwardsFlight(Player player) {
         double acceleration = sigmoidAcceleration(player.tickCount, 5.0, 1.0, 2.0);
         acceleration /= 35.0f;
-        player.push(new Vec3(0, Math.max(0.002, acceleration), 0));
+        double yBoost = Math.max(0.002, acceleration);
+
+        if (PlanetApi.API.isSpace(player.level())) {
+            // In space, while jump is held, gradually bleed off lateral momentum
+            // (~20% per tick) instead of zeroing it instantly — feels like real
+            // attitude thrusters rather than an emergency stop. Y gets the boost
+            // additively. After ~10 ticks (0.5s) the player is going essentially
+            // straight up.
+            Vec3 v = player.getDeltaMovement();
+            final double lateralDamp = 0.80;
+            player.setDeltaMovement(v.x * lateralDamp, v.y + yBoost, v.z * lateralDamp);
+        } else {
+            // Atmospheric: gravity + drag handle horizontal naturally; just push Y.
+            player.push(new Vec3(0, yBoost, 0));
+        }
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
-        // push() sets needsSync which only sends velocity to OTHER tracking players,
-        // not to the player themselves. For players, movement is client-authoritative,
-        // so we must set hurtMarked to force the server velocity to be sent to
-        // the player's own client via ClientboundSetEntityMotionPacket (sendToTrackingPlayersAndSelf).
         player.hurtMarked = true;
     }
 
     protected void fullFlight(Player player) {
-        Vec3 movement = player.getLookAngle().normalize().scale(0.055);
-        if (player.getDeltaMovement().length() > 1.5) return;
-        player.push(movement);
+        Vec3 look = player.getLookAngle().normalize();
+        Vec3 current = player.getDeltaMovement();
+
+        if (PlanetApi.API.isSpace(player.level())) {
+            // Space mode: redirect existing momentum toward look direction (turn assist),
+            // plus apply forward thrust. Without this the player just adds vectors and
+            // can't actually steer — looking somewhere else doesn't change where you go.
+            double speed = current.length();
+            double turnRate = 0.18;       // 18% of momentum redirected per tick
+            double thrust = 0.085;        // higher than the atmospheric 0.055
+            double maxSpeed = 1.8;
+
+            Vec3 redirected = current.scale(1.0 - turnRate).add(look.scale(speed * turnRate));
+            Vec3 newVel = redirected.add(look.scale(thrust));
+            if (newVel.length() > maxSpeed) newVel = newVel.normalize().scale(maxSpeed);
+            player.setDeltaMovement(newVel);
+        } else {
+            // Atmospheric: original behaviour. Drag/gravity provide the natural deceleration.
+            if (current.length() > 1.5) return;
+            player.push(look.scale(0.055));
+        }
+
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
-        // Same as upwardsFlight: force velocity sync to the player's own client.
         player.hurtMarked = true;
         if (!player.isFallFlying()) {
             player.startFallFlying();

@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.rover.description"
     },
     "icon": {
-      "item": "ad_astra:tier_1_rover"
+      "id": "ad_astra:tier_1_rover"
     },
     "title": {
       "translate": "advancements.ad_astra.rover.title"

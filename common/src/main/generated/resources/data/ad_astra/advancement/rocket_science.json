@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.rocket_science.description"
     },
     "icon": {
-      "item": "ad_astra:nasa_workbench"
+      "id": "ad_astra:nasa_workbench"
     },
     "title": {
       "translate": "advancements.ad_astra.rocket_science.title"

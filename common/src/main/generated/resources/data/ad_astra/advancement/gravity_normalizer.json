@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.gravity_normalizer.description"
     },
     "icon": {
-      "item": "ad_astra:gravity_normalizer"
+      "id": "ad_astra:gravity_normalizer"
     },
     "title": {
       "translate": "advancements.ad_astra.gravity_normalizer.title"

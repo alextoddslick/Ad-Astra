@@ -1,6 +1,25 @@
 {
+  "_comment": "TIER 2 — Approach B: select-on-display_context, special only in GUI, static model elsewhere",
   "model": {
-    "type": "minecraft:model",
-    "model": "ad_astra:item/tier_2_rocket"
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": ["gui"],
+        "model": {
+          "type": "minecraft:special",
+          "base": "ad_astra:item/tier_2_rocket",
+          "model": {
+            "type": "ad_astra:rocket",
+            "texture": "ad_astra:textures/entity/rocket/tier_2_rocket.png",
+            "layer": "ad_astra:tier_2_rocket/main"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ad_astra:item/tier_2_rocket"
+    }
   }
 }

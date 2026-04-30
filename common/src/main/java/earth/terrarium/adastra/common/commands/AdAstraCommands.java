@@ -8,5 +8,6 @@ public class AdAstraCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         RadioCommand.register(dispatcher);
         PlanetsCommand.register(dispatcher);
+        VelocityDebugCommand.register(dispatcher);
     }
 }

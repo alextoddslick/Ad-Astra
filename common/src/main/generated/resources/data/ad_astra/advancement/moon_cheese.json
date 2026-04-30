@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.moon_cheese.description"
     },
     "icon": {
-      "item": "ad_astra:cheese"
+      "id": "ad_astra:cheese"
     },
     "title": {
       "translate": "advancements.ad_astra.moon_cheese.title"

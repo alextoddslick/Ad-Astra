@@ -129,7 +129,7 @@ public class AdAstraClient {
     }
 
     private static void registerBlockEntityRenderers() {
-        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.ENERGIZER.get(), c -> new EnergizerBlockEntityRenderer());
+        ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.ENERGIZER.get(), c -> new EnergizerBlockEntityRenderer(c));
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.GLOBE.get(), c -> new GlobeBlockEntityRenderer(c));
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.OXYGEN_DISTRIBUTOR.get(), c -> new OxygenDistributorBlockEntityRenderer(c));
         ClientRegistrationHooks.registerBlockEntityRenderers(ModBlockEntityTypes.GRAVITY_NORMALIZER.get(), c -> new GravityNormalizerBlockEntityRenderer());

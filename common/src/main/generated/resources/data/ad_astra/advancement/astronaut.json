@@ -34,8 +34,7 @@
       "translate": "advancements.ad_astra.astronaut.description"
     },
     "icon": {
-      "item": "ad_astra:space_helmet",
-      "nbt": "{Damage:0}"
+      "id": "ad_astra:space_helmet"
     },
     "title": {
       "translate": "advancements.ad_astra.astronaut.title"

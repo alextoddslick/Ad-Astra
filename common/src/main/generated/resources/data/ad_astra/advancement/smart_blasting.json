@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.smart_blasting.description"
     },
     "icon": {
-      "item": "ad_astra:etrionic_blast_furnace"
+      "id": "ad_astra:etrionic_blast_furnace"
     },
     "title": {
       "translate": "advancements.ad_astra.smart_blasting.title"

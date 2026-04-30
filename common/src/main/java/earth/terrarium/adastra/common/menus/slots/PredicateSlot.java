@@ -22,25 +22,17 @@ public class PredicateSlot extends Slot {
     }
 
     public static <T extends Recipe<RecipeInput>> PredicateSlot ofRecipeInput(Container container, int slot, int x, int y, Level level, RecipeType<T> type) {
-        final var server = level.getServer();
-        final RecipeManager recipeManager = server != null ? server.getRecipeManager() : null;
-        final SingleSlotContainer inventory = new SingleSlotContainer(slot);
-        final RecipeInput recipeInput = new RecipeInput() {
-            @Override
-            public ItemStack getItem(int s) {
-                return inventory.getItem(s);
-            }
-
-            @Override
-            public int size() {
-                return inventory.getContainerSize();
-            }
-        };
-        return new PredicateSlot(container, slot, x, y, item -> {
-            if (recipeManager == null) return false;
-            inventory.setItem(item);
-            return recipeManager.getRecipeFor(type, recipeInput, level).isPresent();
-        });
+        // Accept any item. The previous implementation looked up the recipe
+        // manager via level.getServer().getRecipeManager() — which is null on
+        // the client, so the predictive mayPlace check rejected every click
+        // before it ever reached the server. (Affected cryo freezer etc.)
+        //
+        // In 1.21+, RecipeManager is server-only; clients only have a synced
+        // RecipePropertySet subset which doesn't support generic getRecipeFor.
+        // Rather than register a custom property set per recipe type, allow
+        // placement; the server's recipeTick will simply not fire for items
+        // that have no matching recipe — same UX as most tech mods.
+        return new PredicateSlot(container, slot, x, y, item -> true);
     }
 
     @Override

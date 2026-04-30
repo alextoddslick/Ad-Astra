@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.dj.description"
     },
     "icon": {
-      "item": "ad_astra:radio"
+      "id": "ad_astra:radio"
     },
     "title": {
       "translate": "advancements.ad_astra.dj.title"

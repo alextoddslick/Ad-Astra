@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.solar_panel.description"
     },
     "icon": {
-      "item": "ad_astra:solar_panel"
+      "id": "ad_astra:solar_panel"
     },
     "title": {
       "translate": "advancements.ad_astra.solar_panel.title"

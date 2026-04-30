@@ -35,8 +35,7 @@
     },
     "frame": "goal",
     "icon": {
-      "item": "ad_astra:netherite_space_helmet",
-      "nbt": "{Damage:0}"
+      "id": "ad_astra:netherite_space_helmet"
     },
     "title": {
       "translate": "advancements.ad_astra.doom_slayer.title"

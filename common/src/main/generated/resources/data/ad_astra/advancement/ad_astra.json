@@ -20,7 +20,7 @@
       "translate": "advancements.ad_astra.ad_astra.description"
     },
     "icon": {
-      "item": "ad_astra:earth_globe"
+      "id": "ad_astra:earth_globe"
     },
     "show_toast": false,
     "title": {

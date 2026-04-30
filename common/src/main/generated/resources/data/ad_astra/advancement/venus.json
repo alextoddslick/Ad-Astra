@@ -13,7 +13,7 @@
       "translate": "advancements.ad_astra.venus.description"
     },
     "icon": {
-      "item": "ad_astra:venus_globe"
+      "id": "ad_astra:venus_globe"
     },
     "title": {
       "translate": "advancements.ad_astra.venus.title"

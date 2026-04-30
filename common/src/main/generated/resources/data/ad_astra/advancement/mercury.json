@@ -13,7 +13,7 @@
       "translate": "advancements.ad_astra.mercury.description"
     },
     "icon": {
-      "item": "ad_astra:mercury_globe"
+      "id": "ad_astra:mercury_globe"
     },
     "title": {
       "translate": "advancements.ad_astra.mercury.title"

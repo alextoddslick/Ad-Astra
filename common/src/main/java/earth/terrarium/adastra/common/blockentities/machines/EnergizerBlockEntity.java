@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,10 +99,10 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
         if (canFunction()) {
             tickSideInteractions(pos, f -> true, getSideConfig());
         }
-        if (time % 2 == 0) {
-            setChanged();
-            sync();
-        }
+        // Sync every tick to ensure the client renderer gets immediate inventory updates
+        // (avoids ghost items lingering above the energizer after take-out).
+        setChanged();
+        sync();
     }
 
     @Override
@@ -136,6 +137,27 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
         int charge = Math.round(getEnergyStorage().getStoredAmount() / (float) getEnergyStorage().getCapacity() * 5);
         level().setBlock(getBlockPos(), getBlockState().setValue(EnergizerBlock.POWER, charge), Block.UPDATE_CLIENTS);
     }
+
+    // Ghost-item fix — when slot 0 changes (especially clear), force an immediate
+    // setChanged + sync so the client renderer re-extracts and stops drawing the cached item.
+    // Default sync runs every 2 ticks via internalServerTick; this fires the moment the slot changes.
+    // APPROACH A (active): override setItem and sync immediately
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        super.setItem(slot, stack);
+        if (slot == 0 && level instanceof ServerLevel) {
+            setChanged();
+            sync();
+        }
+    }
+
+    // APPROACH B (alternative — uncomment if A doesn't fix it; remove A's @Override above first):
+    // Run sync() every tick instead of every 2 ticks. Heavier on the network but guarantees the client
+    // sees inventory state ASAP. Edit `internalServerTick` to remove the `if (time % 2 == 0)` gate.
+
+    // APPROACH C (alternative): override the BE's network-update tag to explicitly include
+    // slot-0 contents. Requires reading EnergyContainerMachineBlockEntity.getUpdateTag/saveAdditional
+    // to confirm what it sends today; if items aren't in there, add them.
 
     public void distributeToChargeSlot(ServerLevel level, BlockPos pos) {
         var stack = getItem(0);

@@ -1,6 +1,7 @@
 package earth.terrarium.adastra.client.renderers.special;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import earth.terrarium.adastra.client.models.entities.vehicles.RocketModel;
@@ -40,8 +41,8 @@ public class RocketSpecialRenderer implements NoDataSpecialModelRenderer {
     @Override
     public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int light, int overlay, boolean foil, int color) {
         poseStack.pushPose();
+        applyContextTransform(displayContext, poseStack);
 
-        // Capture world transform and apply model flip
         PoseStack worldPose = new PoseStack();
         worldPose.last().pose().set(poseStack.last().pose());
         worldPose.last().normal().set(poseStack.last().normal());
@@ -49,10 +50,48 @@ public class RocketSpecialRenderer implements NoDataSpecialModelRenderer {
 
         ModelPart root = model.root();
         collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
-            root.render(worldPose, consumer, 15728880, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            root.render(worldPose, consumer, 15728880, OverlayTexture.NO_OVERLAY);
         });
 
         poseStack.popPose();
+    }
+
+    private static void applyContextTransform(ItemDisplayContext ctx, PoseStack pose) {
+        switch (ctx) {
+            case GUI -> {
+                pose.translate(0.5f, 0.45f, 0.5f);
+                pose.mulPose(Axis.XP.rotationDegrees(-30));
+                pose.mulPose(Axis.YP.rotationDegrees(225));
+                pose.scale(0.22f, 0.22f, 0.22f);
+            }
+            case GROUND -> {
+                pose.translate(0.5f, 0.3f, 0.5f);
+                pose.scale(0.15f, 0.15f, 0.15f);
+            }
+            case FIXED -> {
+                pose.translate(0.5f, 0.5f, 0.5f);
+                pose.mulPose(Axis.YP.rotationDegrees(180));
+                pose.scale(0.2f, 0.2f, 0.2f);
+            }
+            case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> {
+                pose.translate(0.5f, 0.3f, 0.5f);
+                pose.mulPose(Axis.XP.rotationDegrees(-90));
+                pose.scale(0.18f, 0.18f, 0.18f);
+            }
+            case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> {
+                pose.translate(0.5f, 0.3f, 0.5f);
+                pose.mulPose(Axis.XP.rotationDegrees(-90));
+                pose.scale(0.18f, 0.18f, 0.18f);
+            }
+            case HEAD -> {
+                pose.translate(0.5f, 0.5f, 0.5f);
+                pose.scale(0.4f, 0.4f, 0.4f);
+            }
+            default -> {
+                pose.translate(0.5f, 0.5f, 0.5f);
+                pose.scale(0.2f, 0.2f, 0.2f);
+            }
+        }
     }
 
     @Override

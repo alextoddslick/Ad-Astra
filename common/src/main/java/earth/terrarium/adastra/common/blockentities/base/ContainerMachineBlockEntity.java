@@ -61,6 +61,10 @@ public abstract class ContainerMachineBlockEntity extends MachineBlockEntity imp
     @Override
     public void loadAdditional(@NotNull ValueInput input) {
         super.loadAdditional(input);
+        // Clear items first: ContainerHelper.saveAllItems skips empty slots, and loadAllItems
+        // does not reset the list. Without clearing, slots emptied on the server stay populated
+        // on the client (ghost items above renderers like the energizer).
+        for (int i = 0; i < this.items.size(); i++) this.items.set(i, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(input, this.items);
         ConfigurationEntry.load(input, this.sideConfig, getDefaultConfig());
         this.redstoneControl = RedstoneControl.values()[input.getByteOr("RedstoneControl", (byte) 0)];

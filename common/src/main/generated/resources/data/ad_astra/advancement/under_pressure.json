@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.under_pressure.description"
     },
     "icon": {
-      "item": "ad_astra:compressor"
+      "id": "ad_astra:compressor"
     },
     "title": {
       "translate": "advancements.ad_astra.under_pressure.title"

@@ -1,6 +1,7 @@
 package earth.terrarium.adastra.common.blockentities.pipes;
 
 import earth.terrarium.adastra.common.blockentities.machines.CoalGeneratorBlockEntity;
+import earth.terrarium.adastra.common.blockentities.machines.EnergizerBlockEntity;
 import earth.terrarium.adastra.common.blockentities.machines.SolarPanelBlockEntity;
 import earth.terrarium.adastra.common.blocks.properties.PipeProperty;
 import earth.terrarium.common_storage_lib.energy.EnergyApi;
@@ -18,7 +19,9 @@ public class CableBlockEntity extends PipeBlockEntity {
     }
 
     private boolean isProducer(BlockEntity entity) {
-        return entity instanceof SolarPanelBlockEntity || entity instanceof CoalGeneratorBlockEntity;
+        return entity instanceof SolarPanelBlockEntity
+            || entity instanceof CoalGeneratorBlockEntity
+            || entity instanceof EnergizerBlockEntity;
     }
 
     @Override

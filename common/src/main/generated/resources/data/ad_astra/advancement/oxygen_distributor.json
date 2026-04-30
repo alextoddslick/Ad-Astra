@@ -19,7 +19,7 @@
       "translate": "advancements.ad_astra.oxygen_distributor.description"
     },
     "icon": {
-      "item": "ad_astra:oxygen_distributor"
+      "id": "ad_astra:oxygen_distributor"
     },
     "title": {
       "translate": "advancements.ad_astra.oxygen_distributor.title"

@@ -14,7 +14,7 @@
     },
     "frame": "goal",
     "icon": {
-      "item": "ad_astra:glacio_globe"
+      "id": "ad_astra:glacio_globe"
     },
     "title": {
       "translate": "advancements.ad_astra.interstellar.title"
