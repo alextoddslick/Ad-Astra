@@ -120,6 +120,15 @@ Verdict: migration is complete and clean. No further fixes needed.
 **Folder:** Done
 **Notes:** `CableBlockEntity.isProducer` only listed `SolarPanelBlockEntity` and `CoalGeneratorBlockEntity`. The energizer was being treated as a consumer, so cables never extracted from it. Added `EnergizerBlockEntity` to the producer set.
 
+### #21 [P2] [done] Earth y≥1000 auto-teleport to space station
+**Folder:** Gameplay
+**Notes:** New "left the atmosphere" feature — when a player on the overworld (Earth) ascends through y=1000, they're auto-teleported to `ad_astra:earth_orbit` at `(x, -100, z)`. No rocket required; existing rocket / jet-suit launch flows are unchanged.
+- New `common/.../events/AtmosphereLeaveTicker.java`. Server-tick handler keyed off `MinecraftServer`. Tracks per-UUID previous-tick Y in a static `HashMap`; fires only on the upward crossing (`prev < 1000 && current >= 1000`) so players who somehow start above 1000 don't get auto-teleported on login. Bails when the player's level is not `Level.OVERWORLD` and as a belt-and-braces also bails when `PlanetApi.API.isSpace(level)` — so once they arrive in `earth_orbit` the next tick naturally skips. Lightweight GC prunes the map when offline-player entries exceed 4× online count.
+- Wired in `AdAstra.onServerTick` next to the existing `VelocityDebugTicker.onServerTick(server)` line.
+- Y-clamp opt-out: `ModUtils.land()` was hardened in #20 to override arrival Y to `targetLevel.getMaxY() - 10` whenever the destination is space — that would have stomped the user's explicit y=-100. Added a sibling `ModUtils.landAt(player, level, pos)` that delegates to a private `landInternal(..., clampToTopOfSpace=false)`. The original `land(...)` keeps its top-of-space clamp; `landAt(...)` honours the caller-supplied Y verbatim. Lander-vehicle handoff still works for both paths.
+- Dim used: `Planet.EARTH_ORBIT` (`ad_astra:earth_orbit`) — the user said "spacestation"; `earth_orbit` is the matching orbit dimension where space stations are constructed.
+- `./gradlew build` SUCCESSFUL (fabric + neoforge).
+
 ### #20 [P2] [done] Earth → space teleport sometimes drops player at y≈1000 instead of top
 **Folder:** Gameplay
 **Notes:** Fixed in `common/src/main/java/earth/terrarium/adastra/common/utils/ModUtils.java#land`. Previously the arrival `Vec3.y` was set by callers (`atmosphereLeave=600` for rockets, but a few space-station callers passed source-Y verbatim). When the player launched from very high (y≈1000) the source-Y in some paths leaked through to the destination set-pos. Hardened the central `land()` choke-point: when `PlanetApi.API.isSpace(targetLevel)` is true, override the arrival Y to `targetLevel.getMaxY() - 10` regardless of what the caller passed. Lander entity is also spawned at the same overridden Y. Non-space destinations (back to overworld) are unaffected. Build: `./gradlew build` SUCCESSFUL.

@@ -115,13 +115,27 @@ public final class ModUtils {
     }
 
     public static void land(ServerPlayer player, ServerLevel targetLevel, Vec3 pos) {
+        landInternal(player, targetLevel, pos, true);
+    }
+
+    /**
+     * Like {@link #land(ServerPlayer, ServerLevel, Vec3)} but respects the caller-supplied Y even
+     * when arriving at a space dimension. Used for the "fly past y=1000 on Earth" auto-teleport
+     * which intentionally drops the player at a specific low Y (-100) inside the space station.
+     */
+    public static void landAt(ServerPlayer player, ServerLevel targetLevel, Vec3 pos) {
+        landInternal(player, targetLevel, pos, false);
+    }
+
+    private static void landInternal(ServerPlayer player, ServerLevel targetLevel, Vec3 pos, boolean clampToTopOfSpace) {
         Entity vehicle = player.getVehicle();
         player.stopRiding();
-        // When arriving in a space dimension (planet/orbit), always enter from the top of the build height
+        // When arriving in a space dimension (planet/orbit), normally enter from the top of the build height
         // minus a small safety margin so the player/lander falls toward the surface — regardless of the
         // source Y coordinate. Without this override, launching from very high (e.g. y >= 1000) on the
         // overworld could leave the player at that source Y in the destination.
-        Vec3 arrivalPos = PlanetApi.API.isSpace(targetLevel)
+        // Caller can opt out via landAt(...) when an explicit arrival Y is required.
+        Vec3 arrivalPos = (clampToTopOfSpace && PlanetApi.API.isSpace(targetLevel))
             ? new Vec3(pos.x, targetLevel.getMaxY() - 10, pos.z)
             : pos;
         player.setPos(arrivalPos.x, arrivalPos.y, arrivalPos.z);

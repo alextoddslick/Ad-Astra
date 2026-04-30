@@ -14,7 +14,7 @@
 - **0 in-progress**
 - **1 blocked + backlog** (#15)
 - **2 backlog** (#15, #16)
-- **13 done** (see `tasks.md`)
+- **14 done** (see `tasks.md`)
 
 ## ◐ Currently in progress (sub-agents working)
 
@@ -46,6 +46,7 @@ _(none)_
 > When the user drops a dated bullet in `comments.md`, the AI surfaces it here.
 > Format: `- <date> #NN — short summary` · `✓` after AI replies in `comments.md`.
 
+- 2026-04-30 #21 — auto-teleport from Earth y≥1000 to space station at y=-100 ✓ done
 - 2026-04-30 #20 — earth→space teleport sometimes places player at y≈1000 instead of top of space ✓ done
 - 2026-04-30 #11 — sky / planet rendering missing in orbit dimensions ✓ done (build only — needs in-game check)
 

@@ -82,6 +82,8 @@ public class AdAstra {
                 NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncLocalPlanetDataPacket(new PlanetData(oxygen, temperature, gravity)), player);
             }
         });
+        earth.terrarium.adastra.common.events.VelocityDebugTicker.onServerTick(server);
+        earth.terrarium.adastra.common.events.AtmosphereLeaveTicker.onServerTick(server);
     }
 
     public static void onServerStarted(MinecraftServer server) {

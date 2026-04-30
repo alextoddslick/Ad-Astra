@@ -54,6 +54,10 @@
 - 2026-04-30 12:59: add this to backlog as well
   > AI 2026-04-30: ✓ tagged as **backlog**. No functional impact (cosmetic startup warnings only). Will batch with other low-priority cleanups when the active work calms down.
 
+## #21 — Earth y≥1000 auto-teleport to space station
+- 2026-04-30: when the player gets to y 1000 on earth it should teleport them to the spacestation at y -100.
+  > AI 2026-04-30: ✓ shipped. New `AtmosphereLeaveTicker` (server-tick) tracks per-player previous-tick Y; on the upward crossing of y=1000 in the overworld it teleports the player to `ad_astra:earth_orbit` at `(x, -100, z)`. Added `ModUtils.landAt(...)` so the explicit y=-100 isn't stomped by the top-of-space clamp introduced in #20 — `ModUtils.land(...)` (rocket / jet-suit path) keeps the clamp, the new path opts out. Crossing-only check (not `>= 1000`) prevents repeat fires and login-at-altitude misfires. Both fabric + neoforge `./gradlew build` SUCCESSFUL.
+
 ## #20 — Earth → space y-height issue
 - 2026-04-30: when going to space after y 1000, it sometimes sends the user to space at y 1000, it should send user to the very bottom of the space +10.
   > AI 2026-04-30: 📥 captured from webui screenshot earlier. Dispatching sub-agent now to inspect dimension-transfer arrival-Y in `ModUtils` / planet-teleport flow.
