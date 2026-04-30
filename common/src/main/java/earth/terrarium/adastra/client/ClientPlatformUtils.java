@@ -64,4 +64,9 @@ public class ClientPlatformUtils {
     public static void registerPlanetRenderers(Map<ResourceKey<Level>, ModDimensionSpecialEffects> renderers) {
         throw new NotImplementedException();
     }
+
+    @ExpectPlatform
+    public static Map<ResourceKey<Level>, ModDimensionSpecialEffects> getPlanetRenderers() {
+        throw new NotImplementedException();
+    }
 }

@@ -129,7 +129,12 @@ public class AdAstraClientFabric {
         });
     }
 
+    public static final Map<ResourceKey<Level>, ModDimensionSpecialEffects> DIMENSION_RENDERERS = new HashMap<>();
+
     public static void registerDimensionEffects(Map<ResourceKey<Level>, ModDimensionSpecialEffects> renderers) {
-        // TODO: 1.21.11 - DimensionRenderingRegistry was removed from Fabric API.
+        // 1.21.11 - DimensionRenderingRegistry was removed from Fabric API. We hold the data here
+        // and the SkyRendererMixin consumes it to draw planet sky renderables on top of vanilla sun/moon/stars.
+        DIMENSION_RENDERERS.clear();
+        DIMENSION_RENDERERS.putAll(renderers);
     }
 }

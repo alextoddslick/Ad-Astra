@@ -61,4 +61,8 @@ public class ClientPlatformUtilsImpl {
     public static void registerPlanetRenderers(Map<ResourceKey<Level>, ModDimensionSpecialEffects> renderers) {
         AdAstraClientFabric.registerDimensionEffects(renderers);
     }
+
+    public static Map<ResourceKey<Level>, ModDimensionSpecialEffects> getPlanetRenderers() {
+        return AdAstraClientFabric.DIMENSION_RENDERERS;
+    }
 }

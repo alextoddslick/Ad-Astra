@@ -10,22 +10,20 @@
 
 ## Counts
 
-- **5 open** — 1 P1 · 1 P2 · 3 P3
-- **1 in-progress** (sub-agent dispatched: #11)
+- **4 open** — 0 P1 · 1 P2 · 3 P3
+- **0 in-progress**
 - **1 blocked + backlog** (#15)
 - **2 backlog** (#15, #16)
-- **12 done** (see `tasks.md`)
+- **13 done** (see `tasks.md`)
 
 ## ◐ Currently in progress (sub-agents working)
 
-- **#11** — Sky / dimension rendering: research legacy skybox + port to `DimensionSpecialEffects`
+- _(none — #11 closed pending in-game user verification)_
 
 ## Open by priority
 
 ### P1
-| #  | Status      | Title                                              |
-|----|-------------|----------------------------------------------------|
-| 11 | in-progress | Sky / dimension rendering on space dimensions      |
+_(none)_
 
 ### P2
 | #  | Status      | Title                                              |
@@ -49,10 +47,11 @@
 > Format: `- <date> #NN — short summary` · `✓` after AI replies in `comments.md`.
 
 - 2026-04-30 #20 — earth→space teleport sometimes places player at y≈1000 instead of top of space ✓ done
+- 2026-04-30 #11 — sky / planet rendering missing in orbit dimensions ✓ done (build only — needs in-game check)
 
 ## Suggested next focus (priority-based, used when no fresh comments)
 
-1. **#11** (P1) — biggest visible win; only P1 left.
+1. **#11** (P1) — _(closed pending user in-game verification of planet discs)_
 2. **#12** (P2) — verify cryo freezer take-out / bucket flow now that the slot fix landed.
 3. **#16** (P3) — re-dispatch sub-agent for tag-conventions migration (previous attempt stalled).
 

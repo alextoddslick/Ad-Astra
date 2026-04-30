@@ -35,6 +35,10 @@ public class ClientPlatformUtilsImpl {
         DIMENSION_RENDERERS.putAll(renderers);
     }
 
+    public static Map<ResourceKey<Level>, ModDimensionSpecialEffects> getPlanetRenderers() {
+        return DIMENSION_RENDERERS;
+    }
+
     public record ArmorRenderer(Identifier texture, ModelLayerLocation layer,
                                 ClientPlatformUtils.ArmorFactory factory) {}
 }

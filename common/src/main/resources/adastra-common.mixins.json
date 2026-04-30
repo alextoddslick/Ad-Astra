@@ -44,6 +44,7 @@
         "client.LevelRendererAccessor",
         "client.LevelRendererMixin",
         "client.PlayerRendererMixin",
+        "client.SkyRendererMixin",
         "client.SoundEngineAccessor",
         "client.SoundManagerAccessor",
         "client.SoundManagerMixin",

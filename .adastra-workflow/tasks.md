@@ -15,14 +15,6 @@ Priority values: `P1` (urgent) · `P2` (important) · `P3` (nice-to-have)
 **Folder:** Rendering / Models
 **Notes:** Currently `poseStack.translate(0.5, 1.7 + yOffset, 0.5)` in `EnergizerBlockEntityRenderer`. Last visual check looked OK. Re-verify if any other renderer change happens around the energizer.
 
-### #11 [P1] [todo] Sky / dimension rendering on space dimensions
-**Folder:** Rendering / Models
-**Notes:** Largest outstanding visual item in the 1.21.11 port. Affects moon / mars / mercury / venus / glacio dimensions and the **earth space station** (user reports skybox doesn't show earth, stars, etc.).
-
-User 2026-04-30: *"For example when I am in space station above earth it doesnt show the skybox properly to show earth and the other things like stars and such — there should be some legacy docs and stuff to add here."*
-
-Likely needs porting around the new `DimensionSpecialEffects` API in 1.21. Inspect `ModDimensionSpecialEffects`, `ad_astra/planet_renderers/*.json`, and `ad_astra/sky_renderers/*` legacy assets if they were dropped during the port. The user's mention of "legacy docs" suggests upstream Ad Astra wiki / older mod versions have a documented skybox config we can mine.
-
 ### #12 [P2] [todo] Cryo freezer — take-out and bucket flow not working
 **Folder:** Gameplay
 **Notes:** Slot layout: `slot 1`=recipe input, `slot 2`=empty bucket in, `slot 3`=filled bucket out (`CustomSlot.noPlace`).
@@ -48,6 +40,19 @@ User reported "still an issue" 2026-04-30. Code review:
 ---
 
 ## Done
+
+### #11 [P1] [done] Sky / dimension rendering on space dimensions
+**Folder:** Done
+**Notes:** Closed 2026-04-30 (build verified, in-game still pending user check).
+- Previous sub-agent fix: dimension_type JSONs ported to 1.21.11 schema → vanilla End skybox + black sky/fog now show in orbit dimensions (stars + dark sky covered).
+- This agent: planet-disc rendering ported. New `common/.../client/dimension/PlanetSkyRenderer.java` builds a single 4-vertex `POSITION_TEX` `GpuBuffer` and renders each `SkyRenderable` from the loaded `ModDimensionSpecialEffects` via `RenderPipelines.CELESTIAL` (BlendFunction.OVERLAY). Geometry mirrors legacy: globalRotation rotates camera-aligned axes, `translate(0, 100, 0)` puts the disc at sky-radius, then localRotation spins in place; quad scaled by `SkyRenderable.scale()` on X/Z. Backlight glow drawn first under the planet at `backLightScale` using `DimensionRenderingUtils.BACKLIGHT` and the renderable's `backLightColor`. Earth has scale=80 in `earth_orbit.json` → ~80-unit-radius disc 100 units away, fills a big chunk of sky.
+- Mixin `common/.../mixins/client/SkyRendererMixin.java` injects at `TAIL` of `SkyRenderer.renderSunMoonAndStars` (signature `(PoseStack, sunAngle, moonAngle, starAngle, MoonPhase, rainBrightness, starBrightness)`), passes converted `sunAngle/(2π)` as the `timeOfDay` fraction. TAIL injection runs after vanilla popPose, so the PoseStack is back in the caller's sky frame (no time-of-day rotation accumulated) — clean absolute frame for renderable globalRotation. Stars render before our discs so planets sit over the star field.
+- Platform glue: added `getPlanetRenderers()` to `ClientPlatformUtils` (architectury `@ExpectPlatform`); fabric impl now stores them in a `DIMENSION_RENDERERS` map (was a no-op), neoforge already had its own map. Mixin reads via `ClientPlatformUtils.getPlanetRenderers()` and early-returns when no entry for `level.dimension()`, so overworld/nether/end/modded skies are untouched.
+- Texture loading: `Minecraft.getTextureManager().getTexture(id)` lazy-creates a `SimpleTexture` if the texture isn't pre-registered, so the Ad Astra environment PNGs load on first frame.
+- Mixin registered in `common/src/main/resources/adastra-common.mixins.json` under `client`.
+- Both fabric and neoforge `./gradlew build` pass. Vanilla End-skybox path for the actual stars/dark sky is unchanged.
+- **Pending user verification:** Need an in-game check that (a) Earth disc actually shows below player in earth orbit, (b) sun + moon discs show in moon/mars/etc orbits, (c) overworld/nether/end skies look unchanged. If geometry is upside-down or rotated wrong, suspect the `XP/YP/ZP` order or the quad vertex winding. The legacy code worked in a per-call `pushPose` over the *unrotated* sky frame, which is what we now have at TAIL.
+- Open follow-up #18 (custom 13000-star Ad Astra constellations + per-color weighted stars) is unaddressed; vanilla end-skybox 1500 stars are used. Low priority.
 
 ### #1 [P1] [done] Mixin classpath crash on runClient
 **Folder:** Done
