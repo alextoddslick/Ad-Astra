@@ -2,6 +2,9 @@ package earth.terrarium.adastra.client.dimension;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -41,6 +44,32 @@ import java.util.OptionalInt;
  * along Y; {@code localRotation} then spins the disc in place.
  */
 public final class PlanetSkyRenderer {
+
+    /**
+     * Opaque depth-writing pipeline for the planet/sun/moon body discs.
+     *
+     * Mirrors vanilla {@link RenderPipelines#CELESTIAL} (POSITION_TEX + core/position_tex
+     * shader) but enables depth write and uses TRANSLUCENT blend so the texture's alpha
+     * channel still gives soft edges. With {@code withDepthWrite(true)} the disc occludes
+     * any later-drawn celestial geometry at greater depth, which fixes the bug where stars
+     * (drawn first by vanilla, no depth write) and other discs were visible through Earth.
+     *
+     * Stays inside the existing custom sky pass — that pass attaches the main render
+     * target's depth view directly via createRenderPass, so depth write works without
+     * touching the FrameGraph wiring.
+     */
+    private static final RenderPipeline PLANET_DISC_PIPELINE = RenderPipeline.builder()
+        .withLocation(Identifier.fromNamespaceAndPath("adastra", "pipeline/planet_disc"))
+        .withVertexShader("core/position_tex")
+        .withFragmentShader("core/position_tex")
+        .withSampler("Sampler0")
+        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+        .withBlend(com.mojang.blaze3d.pipeline.BlendFunction.TRANSLUCENT)
+        .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+        .withDepthWrite(true)
+        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+        .build();
 
     @Nullable
     private static GpuBuffer quadBuffer;
@@ -101,16 +130,22 @@ public final class PlanetSkyRenderer {
                     (float) renderable.globalRotation().z - timeOfDay * 360.0F);
             };
 
-            // Optional back-light glow first (drawn larger/below so the planet sits on top).
+            // Optional back-light glow first (drawn larger/below on the additive CELESTIAL
+            // pipeline so it leaks softly around the disc edges).
             if (renderable.backLightScale() > 0) {
                 renderQuad(poseStack, globalRot, renderable.localRotation(),
                     renderable.backLightScale(),
                     earth.terrarium.adastra.client.utils.DimensionRenderingUtils.BACKLIGHT,
-                    renderable.backLightColor());
+                    renderable.backLightColor(),
+                    RenderPipelines.CELESTIAL);
             }
 
+            // Body disc on the opaque, depth-writing pipeline so it occludes stars (drawn
+            // before with no depth write) and any later-drawn celestial body that would
+            // otherwise overpaint it (sun/moon/etc.).
             renderQuad(poseStack, globalRot, renderable.localRotation(),
-                renderable.scale(), renderable.texture(), 0xFFFFFFFF);
+                renderable.scale(), renderable.texture(), 0xFFFFFFFF,
+                PLANET_DISC_PIPELINE);
         }
 
         poseStack.popPose();
@@ -118,7 +153,8 @@ public final class PlanetSkyRenderer {
 
     private static void renderQuad(PoseStack poseStack, Vector3f globalRotation,
                                    net.minecraft.world.phys.Vec3 localRotation,
-                                   float scale, Identifier texture, int colorArgb) {
+                                   float scale, Identifier texture, int colorArgb,
+                                   RenderPipeline pipeline) {
         Minecraft mc = Minecraft.getInstance();
         AbstractTexture tex = mc.getTextureManager().getTexture(texture);
         if (tex == null) return;
@@ -153,7 +189,7 @@ public final class PlanetSkyRenderer {
 
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder()
             .createRenderPass(() -> "Ad Astra planet disc", color, OptionalInt.empty(), depth, OptionalDouble.empty())) {
-            pass.setPipeline(RenderPipelines.CELESTIAL);
+            pass.setPipeline(pipeline);
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("DynamicTransforms", transform);
             pass.bindTexture("Sampler0", tex.getTextureView(), tex.getSampler());
