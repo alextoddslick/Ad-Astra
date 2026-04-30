@@ -129,12 +129,18 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         Planet currentPlanet = AdAstraData.planets().get(currentDim);
         if (currentPlanet == null) return;
 
-        // On a planet surface: fly to orbit at jetSuitAtmosphereLeave height
+        // On a planet surface: fly to orbit at jetSuitAtmosphereLeave height.
+        // For Earth → earth_orbit specifically, arrive at y=-100 (the space-station Y);
+        // other planets keep the legacy "top of build height" clamp via land(...).
         if (!currentPlanet.isSpace() && player.getY() >= AdAstraConfig.jetSuitAtmosphereLeave) {
             ResourceKey<Level> orbitDim = currentPlanet.orbitIfPresent();
             ServerLevel orbitLevel = serverLevel.getServer().getLevel(orbitDim);
             if (orbitLevel == null) return;
-            ModUtils.land(serverPlayer, orbitLevel, new Vec3(player.getX(), AdAstraConfig.atmosphereLeave, player.getZ()));
+            if (orbitDim.equals(Planet.EARTH_ORBIT)) {
+                ModUtils.landAt(serverPlayer, orbitLevel, new Vec3(player.getX(), -100, player.getZ()));
+            } else {
+                ModUtils.land(serverPlayer, orbitLevel, new Vec3(player.getX(), AdAstraConfig.atmosphereLeave, player.getZ()));
+            }
         }
 
         // In Earth orbit: fly to moon at 10,000 blocks
