@@ -190,9 +190,9 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
 
         float zOffset = getControllingPassenger() == passenger ? -0.6f : 0.4f;
         // 1.21+ passenger anchor is computed differently — the previous 0.95f
-        // value put the player ~1 block above the seat. Lower so the rider
-        // sits on the seat rather than floating above it.
-        float yOffset = this.isRemoved() ? 0.01f : -0.05f;
+        // value put the player ~1 block above the seat; -0.05f put them too
+        // low (sunken into the seat). 0.45f sits the rider on the seat surface.
+        float yOffset = this.isRemoved() ? 0.01f : 0.45f;
         Vec3 position = new Vec3(-0.5, 0, zOffset).yRot(-getYRot() * (float) (Math.PI / 180) - (float) (Math.PI / 2));
 
         clampRotation(passenger);
