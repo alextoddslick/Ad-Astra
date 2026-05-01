@@ -30,7 +30,10 @@ public abstract class SoundManagerMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void adastra$play(SoundInstance sound, CallbackInfoReturnable<SoundEngine.PlayResult> cir) {
         if (adastra$play(sound, 0)) {
-            cir.setReturnValue(null);
+            // Re-routed through soundEngine.play() with muffled volume; from the caller's POV
+            // the sound did start. Returning null here crashes vanilla's MusicManager.startPlaying
+            // in 1.21.11 because it calls .ordinal() on this without a null check.
+            cir.setReturnValue(SoundEngine.PlayResult.STARTED);
         }
     }
 
