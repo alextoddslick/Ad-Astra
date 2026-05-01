@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:glacio",
+  "width": 2,
+  "height": 2,
+  "title": { "translate": "painting.ad_astra.glacio.title" },
+  "author": { "translate": "painting.ad_astra.glacio.author" }
+}

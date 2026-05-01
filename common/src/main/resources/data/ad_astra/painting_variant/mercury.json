@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:mercury",
+  "width": 1,
+  "height": 1,
+  "title": { "translate": "painting.ad_astra.mercury.title" },
+  "author": { "translate": "painting.ad_astra.mercury.author" }
+}

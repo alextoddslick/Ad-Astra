@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:neptune",
+  "width": 3,
+  "height": 3,
+  "title": { "translate": "painting.ad_astra.neptune.title" },
+  "author": { "translate": "painting.ad_astra.neptune.author" }
+}

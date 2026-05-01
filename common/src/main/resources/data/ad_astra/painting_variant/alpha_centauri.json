@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:alpha_centauri",
+  "width": 4,
+  "height": 4,
+  "title": { "translate": "painting.ad_astra.alpha_centauri.title" },
+  "author": { "translate": "painting.ad_astra.alpha_centauri.author" }
+}

@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:venus",
+  "width": 2,
+  "height": 2,
+  "title": { "translate": "painting.ad_astra.venus.title" },
+  "author": { "translate": "painting.ad_astra.venus.author" }
+}

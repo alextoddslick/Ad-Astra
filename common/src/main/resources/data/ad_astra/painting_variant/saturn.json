@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:saturn",
+  "width": 4,
+  "height": 3,
+  "title": { "translate": "painting.ad_astra.saturn.title" },
+  "author": { "translate": "painting.ad_astra.saturn.author" }
+}

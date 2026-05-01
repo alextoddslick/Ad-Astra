@@ -1,0 +1,7 @@
+{
+  "asset_id": "ad_astra:sun",
+  "width": 5,
+  "height": 5,
+  "title": { "translate": "painting.ad_astra.sun.title" },
+  "author": { "translate": "painting.ad_astra.sun.author" }
+}
