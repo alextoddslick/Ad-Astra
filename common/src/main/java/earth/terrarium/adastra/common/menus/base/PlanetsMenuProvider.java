@@ -20,7 +20,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -54,13 +53,20 @@ public class PlanetsMenuProvider implements ContentMenuProvider<PlanetsMenuConte
 
         Map<ResourceKey<Level>, Map<UUID, Set<SpaceStation>>> spaceStationsMap = new HashMap<>();
         AdAstraData.planets().values().forEach(planet -> {
-            // Space stations are stored in the orbit dimension, not the planet dimension
+            // Space stations are stored in the orbit dimension, not the planet dimension.
+            // The data itself lives on the overworld now (see SpaceStationHandler), so we
+            // only need the orbit dim's ResourceKey, not its ServerLevel — but we still
+            // ask for the ServerLevel because the existing migration path inside
+            // SpaceStationHandler.read() consumes any legacy per-orbit-dim file when the
+            // orbit dim is present.
             ResourceKey<Level> orbitDimension = planet.orbitIfPresent();
-            ServerLevel orbitLevel = player.level().getServer().getLevel(orbitDimension);
-            if (orbitLevel != null) {
-                var stations = SpaceStationHandler.getAllSpaceStations(orbitLevel);
-                spaceStationsMap.put(orbitDimension, stations);
-            }
+            var stations = SpaceStationHandler.getAllSpaceStations(player.level().getServer(), orbitDimension);
+            // Snapshot the per-dimension data so a later mutation of the live SavedData map
+            // (e.g. another construct on the server before the buffer is written) cannot
+            // race with serialization.
+            Map<UUID, Set<SpaceStation>> snapshot = new HashMap<>();
+            stations.forEach((uuid, set) -> snapshot.put(uuid, new HashSet<>(set)));
+            spaceStationsMap.put(orbitDimension, snapshot);
         });
 
         List<GlobalPos> locations = new ArrayList<>();

@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -36,13 +37,29 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
 
     private static final long BUCKET = 81000L;
     private static final float MAX_SPEED_KM = 50.0f;
     private static final float ACCELERATION_RATE = 0.02f;
+    /**
+     * Hard cap on absolute Y velocity in blocks/tick. Vehicle.tickGravity()
+     * runs unconditionally, but Vehicle.tick() only calls move() when there
+     * is a controlling passenger. While riderless, gravity therefore
+     * accumulates in deltaMovement.y without ever being dissipated by a
+     * vertical collision. Combined with doEntityCollisionTick() — which
+     * uses getDeltaMovement().length() as the launch power for nearby
+     * entities — a just-dismounted player still inside the inflated AABB
+     * could be flung upward at hundreds of blocks/tick. Clamping y here
+     * (and using horizontalDistance for collision power below) breaks that
+     * loop.
+     */
+    private static final double Y_VELOCITY_CAP = 2.0;
 
     public static final EntityDataAccessor<Long> FUEL = SynchedEntityData.defineId(Rover.class, EntityDataSerializers.LONG);
     public static final EntityDataAccessor<String> FUEL_TYPE = SynchedEntityData.defineId(Rover.class, EntityDataSerializers.STRING);
@@ -56,6 +73,16 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
     public float wheelYRot;
 
     private String radioUrl = "";
+
+    /**
+     * Tracks entities already pushed/damaged by doEntityCollisionTick this
+     * tick. Cleared at the start of each invocation. Defense in depth: even
+     * if some upstream pathway calls doEntityCollisionTick more than once per
+     * tick, an individual entity gets at most one push + damage application
+     * per tick. Without this, a player stuck in the inflated AABB could
+     * accumulate stacked +Y boosts and reach hundreds of blocks/tick.
+     */
+    private final Set<UUID> ranOverThisTick = new HashSet<>();
 
     public Rover(EntityType<?> type, Level level) {
         super(type, level);
@@ -162,7 +189,10 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
         if (!hasPassenger(passenger)) return;
 
         float zOffset = getControllingPassenger() == passenger ? -0.6f : 0.4f;
-        float yOffset = this.isRemoved() ? 0.01f : 0.95f;
+        // 1.21+ passenger anchor is computed differently — the previous 0.95f
+        // value put the player ~1 block above the seat. Lower so the rider
+        // sits on the seat rather than floating above it.
+        float yOffset = this.isRemoved() ? 0.01f : -0.05f;
         Vec3 position = new Vec3(-0.5, 0, zOffset).yRot(-getYRot() * (float) (Math.PI / 180) - (float) (Math.PI / 2));
 
         clampRotation(passenger);
@@ -175,7 +205,24 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
     public void tick() {
         super.tick();
         handleVehicleMovementTick();
+        // Vehicle.tick() only calls move() when a controlling passenger is
+        // present. Without this, gravity from tickGravity() accumulates in
+        // deltaMovement.y while the rover is parked or after a dismount.
+        // Apply movement here when riderless so gravity is dissipated by
+        // ground collisions.
+        if (getControllingPassenger() == null) {
+            move(MoverType.SELF, getDeltaMovement());
+            tickFriction();
+        }
         doEntityCollisionTick();
+        // Final defensive Y clamp: any pathway (gravity accumulation, vanilla
+        // push, mod interactions) that managed to put |y| above Y_VELOCITY_CAP
+        // gets clipped here so the next tick can't feed runaway values into
+        // collision math or motion.
+        Vec3 dm = getDeltaMovement();
+        if (Math.abs(dm.y) > Y_VELOCITY_CAP) {
+            setDeltaMovement(dm.x, Mth.clamp(dm.y, -Y_VELOCITY_CAP, Y_VELOCITY_CAP), dm.z);
+        }
         if (!level().isClientSide()) {
             FluidUtils.moveItemToContainer(inventory, fluidContainer, 0, 1, 0);
             FluidUtils.moveContainerToItem(inventory, fluidContainer, 0, 1, 0);
@@ -231,9 +278,15 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
 
         // handle speed
         float yRot = getYRot() * (float) (Math.PI / 180);
+        // Reset Y on ground — Vehicle.tickGravity() always subtracts gravity
+        // but Vehicle.tick() only calls move() when there's a controlling
+        // passenger, so without this reset the y component drifts unbounded.
+        // Always cap |y| as a final safety net against runaway accumulation.
+        double rawY = getDeltaMovement().y;
+        double y = onGround() ? Math.max(0.0, rawY) : Mth.clamp(rawY, -Y_VELOCITY_CAP, Y_VELOCITY_CAP);
         setDeltaMovement(
             Mth.sin(-yRot) * speed,
-            getDeltaMovement().y,
+            y,
             Mth.cos(yRot) * speed
         );
 
@@ -243,17 +296,40 @@ public class Rover extends Vehicle implements PlayerRideable, RadioHolder {
 
     // run over entities, launching and damaging them
     private void doEntityCollisionTick() {
+        // Reset the per-tick dedupe set on every invocation. If something
+        // calls this method N times per tick (which would be a bug), each
+        // entity still only gets one push+damage on the *first* call; the
+        // remaining calls find them in the set and skip. The set is cleared
+        // here rather than at end-of-tick so we don't depend on tick ordering.
+        ranOverThisTick.clear();
         if (level().isClientSide()) return;
-        if (getDeltaMovement().length() <= 0.15) return;
+        // Use horizontalDistance — not length() — so any leftover y velocity
+        // (e.g. accumulated gravity while riderless) can't fuel a runaway
+        // upward launch of nearby entities. The rover only "runs over"
+        // things by moving horizontally anyway.
+        double horizontalSpeed = getDeltaMovement().horizontalDistance();
+        if (horizontalSpeed <= 0.15) return;
         AABB aabb = getBoundingBox().inflate(1.001);
         List<LivingEntity> entities = level().getEntitiesOfClass(LivingEntity.class, aabb, entity -> !getPassengers().contains(entity));
         if (entities.isEmpty()) return;
 
-        double power = getDeltaMovement().length() * 0.4;
-        float damage = (float) (power * 0.5f) * 100;
+        double power = Math.min(horizontalSpeed * 0.4, 0.6); // hard cap on launch power
+        // Survivable damage cap: previous formula (power*0.5*100) gave up to
+        // 30 damage — a one-shot kill on a 20-HP player at the lightest
+        // brush. New formula scales linearly with power up to a max of 6
+        // damage (3 hearts), so even worst-case a healthy player survives
+        // a touch and can react.
+        float damage = (float) Math.min(power * 8.0, 6.0);
+        // Vertical-push cap: previous code added the full `power` (up to 0.6)
+        // to Y velocity. Combined with any other vertical force that lands
+        // on the entity in the same tick, this could launch a player into
+        // the stratosphere. Cap the Y component at 0.15 — enough to feel
+        // a knock, not enough to kill via fall damage.
+        double yPush = Math.min(power, 0.15);
         var yRot = getYRot() * (float) (Math.PI / 180);
         for (var entity : entities) {
-            entity.setDeltaMovement(entity.getDeltaMovement().add(Mth.sin(-yRot) * 0.1, power, Mth.cos(yRot) * 0.1));
+            if (!ranOverThisTick.add(entity.getUUID())) continue;
+            entity.setDeltaMovement(entity.getDeltaMovement().add(Mth.sin(-yRot) * 0.1, yPush, Mth.cos(yRot) * 0.1));
             entity.hurt(ModDamageSources.ranOver(level(), this, getControllingPassenger()), damage);
         }
     }

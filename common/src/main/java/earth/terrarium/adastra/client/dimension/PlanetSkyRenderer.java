@@ -130,6 +130,12 @@ public final class PlanetSkyRenderer {
                     (float) renderable.globalRotation().z - timeOfDay * 360.0F);
             };
 
+            // Horizon cull: skip any renderable whose disc center (origin translated +100 Y, then
+            // rotated by globalRot) sits at or below the local horizon plane. Otherwise small moons
+            // (Phobos, Deimos, etc.) clip into surface terrain — the player sees them rendered
+            // "through" the ground.
+            if (skyY(globalRot) <= 0.05F) continue;
+
             // Optional back-light glow first (drawn larger/below on the additive CELESTIAL
             // pipeline so it leaks softly around the disc edges).
             if (renderable.backLightScale() > 0) {
@@ -149,6 +155,26 @@ public final class PlanetSkyRenderer {
         }
 
         poseStack.popPose();
+    }
+
+    /**
+     * Returns the disc-center Y coordinate after applying the global rotation to the up vector
+     * (0,1,0) — i.e. the unit-sphere Y of where the disc would sit before the +100 translate
+     * and per-disc local rotation. Range [-1, +1]; <= 0 means at or below horizon.
+     */
+    private static float skyY(Vector3f globalRot) {
+        // Match the X→Y→Z multiplication order applied by mulPose calls in renderQuad.
+        // Rotate (0,1,0) by R_x then R_y then R_z, return the resulting Y.
+        float rx = (float) Math.toRadians(globalRot.x);
+        float ry = (float) Math.toRadians(globalRot.y);
+        float rz = (float) Math.toRadians(globalRot.z);
+        // Start (0,1,0). After R_x: (0, cos(rx), sin(rx)).
+        float y1 = (float) Math.cos(rx);
+        float z1 = (float) Math.sin(rx);
+        // After R_y on (0, y1, z1): (sin(ry)*z1, y1, cos(ry)*z1). Y unchanged.
+        // After R_z on (x2, y1, z2): y' = x2*sin(rz) + y1*cos(rz). x2 = sin(ry)*z1.
+        float x2 = (float) Math.sin(ry) * z1;
+        return x2 * (float) Math.sin(rz) + y1 * (float) Math.cos(rz);
     }
 
     private static void renderQuad(PoseStack poseStack, Vector3f globalRotation,

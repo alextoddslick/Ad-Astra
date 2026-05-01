@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -88,10 +89,49 @@ public class Lander extends Vehicle {
 
     @Override
     public void tick() {
+        // Capture pre-tick vertical velocity so we can detect a hard impact
+        // that occurs during this tick (touchdown after a fall).
+        double prevDeltaY = getDeltaMovement().y;
+        boolean wasInAir = !onGround();
+
         super.tick();
-        if (!onGround()) flightTick();
-        else angle = 0;
+
+        if (!onGround()) {
+            if (getControllingPassenger() != null) {
+                // Player is steering — original flight behaviour.
+                flightTick();
+            } else {
+                // Riderless mid-air (e.g. player dismounted) — make sure the
+                // lander actually falls instead of hovering. Vehicle.tick()
+                // only calls move() when there's a controlling passenger,
+                // so we need to apply movement ourselves here. Gravity has
+                // already been applied by Vehicle.tickGravity().
+                speed = (float) getDeltaMovement().y;
+                move(MoverType.SELF, getDeltaMovement());
+                tickFriction();
+            }
+        } else {
+            angle = 0;
+        }
+
+        // Detect ground impact (was airborne last tick, now on ground).
+        // If the lander hit hard, blow up the ground; otherwise let it sit.
+        if (wasInAir && onGround() && !level().isClientSide()) {
+            double impactSpeed = Math.abs(prevDeltaY);
+            if (impactSpeed >= HARD_IMPACT_THRESHOLD) {
+                explode(IMPACT_EXPLOSION_RADIUS);
+            }
+        }
     }
+
+    /**
+     * Vertical speed (blocks/tick) at or above which a touchdown causes a ground-shattering explosion.
+     * Piloted descent is clamped to ~1.1 blocks/tick by {@link #flightTick()}, so anything above 1.5
+     * indicates an unpiloted free-fall (e.g. the player dismounted mid-air).
+     */
+    private static final double HARD_IMPACT_THRESHOLD = 1.5;
+    /** Explosion radius used for hard impacts (smaller than {@link #explode()}'s 10-block fall-distance blast). */
+    private static final float IMPACT_EXPLOSION_RADIUS = 3.0f;
 
     private void flightTick() {
         var delta = getDeltaMovement();
@@ -134,11 +174,15 @@ public class Lander extends Vehicle {
     }
 
     public void explode() {
+        explode(10);
+    }
+
+    public void explode(float radius) {
         if (level().isClientSide()) return;
         level().explode(
             this,
             getX(), getY(), getZ(),
-            10,
+            radius,
             OxygenApi.API.hasOxygen(this.level()),
             Level.ExplosionInteraction.TNT);
         discard();
