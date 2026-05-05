@@ -65,6 +65,13 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
         return null;
     }
 
+    @Override
+    protected ValueStorage createExternalEnergyView() {
+        // Energizer is a battery: external readers (cables, adjacent blocks) need
+        // both insert and extract, so expose the raw container.
+        return energyContainer;
+    }
+
     public ValueStorage getEnergyStorage(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity entity, @Nullable Direction direction) {
         if (energyContainer != null) return energyContainer;
         return energyContainer = new SimpleValueStorage(MachineConfig.energizerEnergyCapacity) {
@@ -92,10 +99,16 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
 
     @Override
     public void internalServerTick(ServerLevel level, long time, BlockState state, BlockPos pos) {
-        // Skip super.internalServerTick() to avoid periodic sync() calls that overwrite
-        // the POWER block state property set by onEnergyChange(). The Energizer uses
-        // block state (not block entity data) for client display, and its ChargeSlotType
-        // is NONE, so the battery slot handling in the parent is also unnecessary.
+        // Reimplements the grandparent (ContainerMachineBlockEntity) tick instead of
+        // calling super: EnergyContainerMachineBlockEntity.internalServerTick calls sync()
+        // periodically, which overwrites the POWER block state set by onEnergyChange().
+        // Battery-slot handling is also skipped because ChargeSlotType is NONE.
+        if (time % 50 == 0 && shouldUpdate()) {
+            update();
+        }
+        if (canFunction()) {
+            tickSideInteractions(pos, f -> true, getSideConfig());
+        }
         if (time % 2 == 0) {
             setChanged();
         }
@@ -110,9 +123,14 @@ public class EnergizerBlockEntity extends EnergyContainerMachineBlockEntity {
 
     @Override
     public void tickSideInteractions(BlockPos pos, Predicate<Direction> filter, List<ConfigurationEntry> sideConfig) {
-        TransferUtils.pushEnergyNearby(this, pos, getEnergyStorage().getCapacity(), sideConfig.get(0), filter);
-        TransferUtils.pullEnergyNearby(this, pos, getEnergyStorage().getCapacity(), sideConfig.get(0), filter);
+        // Per-tick rate limit so the Energizer doesn't dump its entire stored amount
+        // into a neighbor in a single tick.
+        long rate = ENERGIZER_TRANSFER_RATE;
+        TransferUtils.pushEnergyNearby(this, pos, rate, sideConfig.get(0), filter);
+        TransferUtils.pullEnergyNearby(this, pos, rate, sideConfig.get(0), filter);
     }
+
+    private static final long ENERGIZER_TRANSFER_RATE = 1000L;
 
     @Override
     public List<ConfigurationEntry> getDefaultConfig() {

@@ -116,3 +116,11 @@ run/
 
 # Architectury Garbage
 *.architectury-transformer
+
+# Claude Code
+.claude/
+.adastra-workflow/
+.ai-tasks
+.tasks
+.backups/
+.adastra-workflow/ai-notes.md

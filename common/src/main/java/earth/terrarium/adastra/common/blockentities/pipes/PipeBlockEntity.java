@@ -3,7 +3,11 @@ package earth.terrarium.adastra.common.blockentities.pipes;
 import earth.terrarium.adastra.common.blockentities.base.TickableBlockEntity;
 import earth.terrarium.adastra.common.blocks.base.BasicEntityBlock;
 import earth.terrarium.adastra.common.blocks.pipes.PipeBlock;
+import earth.terrarium.adastra.common.blocks.pipes.TransferablePipe;
 import earth.terrarium.adastra.common.config.MachineConfig;
+import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -25,6 +29,7 @@ public abstract class PipeBlockEntity extends BlockEntity implements TickableBlo
     private Direction[] connectedDirections;
     private boolean initialized;
     private boolean isController;
+    private boolean isCanonicalController;
 
     public PipeBlockEntity(BlockPos pos, BlockState state) {
         super(((BasicEntityBlock) state.getBlock()).entity(state), pos, state);
@@ -39,11 +44,45 @@ public abstract class PipeBlockEntity extends BlockEntity implements TickableBlo
                 sources.clear();
                 consumers.clear();
                 findNodes(level, pos);
+                isCanonicalController = computeIsCanonicalController(level, pos);
             }
-            if (!consumers.isEmpty() && !sources.isEmpty()) {
+            if (isCanonicalController && !consumers.isEmpty() && !sources.isEmpty()) {
                 transfer(level, transferRate, sources, consumers);
             }
         }
+    }
+
+    /**
+     * Returns true if this pipe is the lowest-positioned controller in its connected
+     * network. Without this, every controller (every pipe touching a non-pipe block)
+     * runs its own transfer cycle each tick, so a 2-cable run between a generator and
+     * a consumer would transfer 2× the cable's rated throughput. Designating one
+     * canonical controller per network keeps total throughput equal to the rated rate.
+     */
+    private boolean computeIsCanonicalController(ServerLevel level, BlockPos myPos) {
+        long myLong = myPos.asLong();
+        long min = myLong;
+        LongSet visited = new LongOpenHashSet();
+        LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
+        queue.enqueue(myLong);
+        visited.add(myLong);
+        while (!queue.isEmpty()) {
+            long curLong = queue.dequeueLong();
+            BlockPos cur = BlockPos.of(curLong);
+            if (!(level.getBlockEntity(cur) instanceof PipeBlockEntity pipeEntity)) continue;
+            if (pipeEntity.isController && curLong < min) min = curLong;
+            Direction[] dirs = pipeEntity.connectedDirections();
+            if (dirs == null) continue;
+            for (var d : dirs) {
+                BlockPos next = cur.relative(d);
+                long nextLong = next.asLong();
+                if (!visited.add(nextLong)) continue;
+                if (level.getBlockState(next).getBlock() instanceof TransferablePipe) {
+                    queue.enqueue(nextLong);
+                }
+            }
+        }
+        return myLong == min;
     }
 
     public void pipeChanged(Level level, BlockPos pos) {

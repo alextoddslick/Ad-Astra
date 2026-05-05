@@ -40,6 +40,7 @@ public class AdAstraClientFabric {
 
     public static void init() {
         AdAstraClient.init();
+        ModClientFluidProperties.init();
         onAddReloadListener();
         ClientTickEvents.START_CLIENT_TICK.register(AdAstraClient::clientTick);
         KeyBindingHelper.registerKeyBinding(AdAstraClient.KEY_TOGGLE_SUIT_FLIGHT);

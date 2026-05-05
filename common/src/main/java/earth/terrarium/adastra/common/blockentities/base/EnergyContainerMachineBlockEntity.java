@@ -1,6 +1,7 @@
 package earth.terrarium.adastra.common.blockentities.base;
 
 import earth.terrarium.adastra.common.utils.EnergyUtils;
+import earth.terrarium.adastra.common.utils.FilteredEnergyView;
 import earth.terrarium.common_storage_lib.energy.EnergyProvider;
 import earth.terrarium.common_storage_lib.energy.impl.SimpleValueStorage;
 import earth.terrarium.common_storage_lib.storage.base.ValueStorage;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class EnergyContainerMachineBlockEntity extends ContainerMachineBlockEntity implements EnergyProvider.BlockEntity {
     protected SimpleValueStorage energyContainer;
+    private ValueStorage externalEnergyView;
 
     public EnergyContainerMachineBlockEntity(BlockPos pos, BlockState state, int containerSize) {
         super(pos, state, containerSize);
@@ -64,7 +66,19 @@ public abstract class EnergyContainerMachineBlockEntity extends ContainerMachine
 
     @Override
     public ValueStorage getEnergy(@Nullable Direction direction) {
-        return energyContainer;
+        if (direction == null) return energyContainer;
+        if (externalEnergyView == null) externalEnergyView = createExternalEnergyView();
+        return externalEnergyView;
+    }
+
+    /**
+     * Builds the energy view that external readers (cables, adjacent machines) see.
+     * Defaults to insert-only because most machines are pure consumers. Generators
+     * should override to return an extract-only view; batteries (Energizer) should
+     * override to return the raw container.
+     */
+    protected ValueStorage createExternalEnergyView() {
+        return FilteredEnergyView.insertOnly(() -> energyContainer);
     }
 
     public void extractBatterySlot() {

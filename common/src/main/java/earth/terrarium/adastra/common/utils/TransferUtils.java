@@ -39,6 +39,9 @@ public class TransferUtils {
             if (nearbyEntity != null && !entityFilter.test(nearbyEntity)) continue;
             ValueStorage nearbyContainer = EnergyApi.BLOCK.find(machine.getLevel(), nearbyPos, direction.getOpposite());
             if (nearbyContainer == null) continue;
+            // If the neighbor is also a two-way battery, only push from higher to
+            // lower to avoid oscillation and propagate energy through chains.
+            if (nearbyContainer.allowsExtraction() && container.getStoredAmount() <= nearbyContainer.getStoredAmount()) continue;
             long extracted = container.extract(amount, true);
             if (extracted > 0) {
                 long inserted = nearbyContainer.insert(extracted, false);
@@ -61,6 +64,10 @@ public class TransferUtils {
             BlockPos nearbyPos = pos.relative(direction);
             ValueStorage nearbyContainer = EnergyApi.BLOCK.find(machine.getLevel(), nearbyPos, direction.getOpposite());
             if (nearbyContainer == null) continue;
+            // If the neighbor also accepts insertion, only pull when we have less
+            // stored than them. Pairs with the symmetric guard in pushEnergyNearby
+            // so two adjacent batteries transfer in one direction per tick.
+            if (nearbyContainer.allowsInsertion() && container.getStoredAmount() >= nearbyContainer.getStoredAmount()) continue;
             long extracted = nearbyContainer.extract(amount, true);
             if (extracted > 0) {
                 long inserted = container.insert(extracted, false);

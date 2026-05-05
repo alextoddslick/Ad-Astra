@@ -9,6 +9,7 @@ import earth.terrarium.adastra.common.config.MachineConfig;
 import earth.terrarium.adastra.common.constants.ConstantComponents;
 import earth.terrarium.adastra.common.menus.machines.SolarPanelMenu;
 import earth.terrarium.adastra.common.utils.EnergyUtils;
+import earth.terrarium.adastra.common.utils.FilteredEnergyView;
 import earth.terrarium.adastra.common.utils.TransferUtils;
 import earth.terrarium.common_storage_lib.storage.base.ValueStorage;
 import net.minecraft.core.BlockPos;
@@ -42,6 +43,11 @@ public class SolarPanelBlockEntity extends EnergyContainerMachineBlockEntity {
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
         return new SolarPanelMenu(id, inventory, this);
+    }
+
+    @Override
+    protected ValueStorage createExternalEnergyView() {
+        return FilteredEnergyView.extractOnly(() -> energyContainer);
     }
 
     public ValueStorage getEnergyStorage(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity entity, @Nullable Direction direction) {
