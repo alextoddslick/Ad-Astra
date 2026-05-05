@@ -6,7 +6,7 @@
       "weight": 100,
       "element": {
         "location": "ad_astra:venus_bullet",
-        "processors": "minecraft:empty",
+        "processors": "ad_astra:venus_loot",
         "projection": "rigid",
         "element_type": "minecraft:single_pool_element"
       }

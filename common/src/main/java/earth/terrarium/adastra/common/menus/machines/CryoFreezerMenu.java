@@ -43,8 +43,8 @@ public class CryoFreezerMenu extends MachineMenu<CryoFreezerBlockEntity> {
         super.addMenuSlots();
         addSlot(PredicateSlot.ofRecipeInput(entity, 1, 26, 70, this.level, ModRecipeTypes.CRYO_FREEZING.get()));
 
-        addSlot(new Slot(entity, 2, 113, 42));
-        addSlot(CustomSlot.noPlace(entity, 3, 113, 70));
+        addSlot(earth.terrarium.adastra.common.menus.slots.ExtractableSlot.input(entity, 2, 113, 42));
+        addSlot(earth.terrarium.adastra.common.menus.slots.ExtractableSlot.output(entity, 3, 113, 70));
     }
 
     @Override

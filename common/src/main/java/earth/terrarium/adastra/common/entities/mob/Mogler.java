@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.Nullable;
 
 // LEGACY ENTITY. WILL BE REPLACED IN THE FUTURE.
@@ -20,6 +21,7 @@ public class Mogler extends Hoglin {
 
     public Mogler(EntityType<? extends Hoglin> entityType, Level level) {
         super(entityType, level);
+        this.setImmuneToZombification(true);
     }
 
     public static AttributeSupplier.Builder createMobAttributes() {
@@ -33,6 +35,22 @@ public class Mogler extends Hoglin {
     @Override
     public boolean removeWhenFarAway(double distanceSquared) {
         return false;
+    }
+
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        // Vanilla Hoglin.readAdditionalSaveData reads "IsImmuneToZombification" with default false,
+        // which clobbers the constructor-set true on entity load. Re-assert immunity here.
+        this.setImmuneToZombification(true);
+    }
+
+    @Override
+    protected void customServerAiStep(ServerLevel level) {
+        // Belt-and-braces: ensure the synced flag stays true so vanilla
+        // Hoglin.customServerAiStep never increments TimeInOverworld for Moglers.
+        this.setImmuneToZombification(true);
+        super.customServerAiStep(level);
     }
 
     @Override

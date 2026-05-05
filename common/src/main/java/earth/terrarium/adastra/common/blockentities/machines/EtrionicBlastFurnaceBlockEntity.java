@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -64,6 +65,7 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
         return new EtrionicBlastFurnaceMenu(id, inventory, this);
     }
+
 
     public ValueStorage getEnergyStorage(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity entity, @Nullable Direction direction) {
         if (energyContainer != null) return energyContainer;
@@ -110,14 +112,32 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
             }
             energyStorage.extract(MachineConfig.etrionicBlastFurnaceBlastingEnergyPerItem, false);
             isCooking = true;
-            if (cookTime < cookTimeTotal) continue;
+        }
+
+        if (isCooking && cookTime >= cookTimeTotal) {
+            // 2x throughput when ALL FOUR input slots have a valid recipe and >=2 items.
+            // Decided once at craft time so it can't flip mid-cycle.
+            int multiplier = 1;
+            boolean allReady = true;
             for (int j = 0; j < 4; j++) {
-                craft(recipes[j], j + 1);
+                if (recipes[j] == null || getItem(j + 1).getCount() < 2) {
+                    allReady = false;
+                    break;
+                }
+            }
+            if (allReady) {
+                long extraEnergy = (long) MachineConfig.etrionicBlastFurnaceBlastingEnergyPerItem * 4L;
+                if (energyStorage.extract(extraEnergy, true) >= extraEnergy) {
+                    energyStorage.extract(extraEnergy, false);
+                    multiplier = 2;
+                }
+            }
+            for (int j = 0; j < 4; j++) {
+                craft(recipes[j], j + 1, multiplier);
             }
         }
-        if (isCooking) {
-            cookTime++;
-        }
+
+        if (isCooking) cookTime++;
         if (shouldClear) {
             for (int i = 0; i < 4; i++) {
                 clearRecipe(i);
@@ -133,11 +153,21 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
         return ItemUtils.canAddItem(this, recipe.assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(slot)), level().registryAccess()), 5, 6, 7, 8);
     }
 
-    protected void craft(BlastingRecipe recipe, int slot) {
+    protected void craft(BlastingRecipe recipe, int slot, int multiplier) {
         if (recipe == null) return;
+        int actual = Math.min(multiplier, getItem(slot).getCount());
+        if (actual <= 0) return;
 
-        getItem(slot).shrink(1);
-        ItemUtils.addItem(this, recipe.assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(slot)), level().registryAccess()), 5, 6, 7, 8);
+        var result = recipe.assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(slot)), level().registryAccess()).copy();
+        result.setCount(result.getCount() * actual);
+
+        if (actual > 1 && !ItemUtils.canAddItem(this, result, 5, 6, 7, 8)) {
+            actual = 1;
+            result = recipe.assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(getItem(slot)), level().registryAccess()).copy();
+        }
+
+        getItem(slot).shrink(actual);
+        ItemUtils.addItem(this, result, 5, 6, 7, 8);
 
         cookTime = 0;
     }
@@ -167,19 +197,48 @@ public class EtrionicBlastFurnaceBlockEntity extends EnergyContainerMachineBlock
     public void craftAlloying() {
         if (alloyingRecipe == null) return;
 
-        for (var recipe : alloyingRecipe.ingredients()) {
-            for (int i = 0; i < 4; i++) {
-                if (recipe.test(getItem(i + 1))) {
-                    getItem(i + 1).shrink(1);
-                    break;
+        // Multiplier = how many full ingredient sets are present across the 4 input slots.
+        // For "1 coal + 1 iron" with 2 coal and 2 iron loaded (any slot configuration),
+        // multiplier = 2 → produce 2 steel and consume 2+2 inputs in one craft cycle.
+        // Capped at 2 for now (user-requested behavior); higher tiers could extend.
+        int multiplier = computeAlloyingMultiplier();
+
+        for (var ingredient : alloyingRecipe.ingredients()) {
+            int remaining = multiplier;
+            for (int i = 0; i < 4 && remaining > 0; i++) {
+                ItemStack slotItem = getItem(i + 1);
+                if (ingredient.test(slotItem)) {
+                    int take = Math.min(remaining, slotItem.getCount());
+                    slotItem.shrink(take);
+                    remaining -= take;
                 }
             }
         }
 
-        ItemUtils.addItem(this, alloyingRecipe.result(), 5, 6, 7, 8);
+        ItemStack result = alloyingRecipe.result().copy();
+        result.setCount(result.getCount() * multiplier);
+        ItemUtils.addItem(this, result, 5, 6, 7, 8);
 
         cookTime = 0;
         if (!canCraftAlloying()) clearAlloyingRecipe();
+    }
+
+    private int computeAlloyingMultiplier() {
+        if (alloyingRecipe == null) return 1;
+        // Each ingredient needs >= 2 items available across all 4 slots combined.
+        for (var ingredient : alloyingRecipe.ingredients()) {
+            int total = 0;
+            for (int i = 0; i < 4; i++) {
+                ItemStack slotItem = getItem(i + 1);
+                if (ingredient.test(slotItem)) total += slotItem.getCount();
+            }
+            if (total < 2) return 1;
+        }
+        // Output must accommodate 2× result.
+        ItemStack result2x = alloyingRecipe.result().copy();
+        result2x.setCount(result2x.getCount() * 2);
+        if (!ItemUtils.canAddItem(this, result2x, 5, 6, 7, 8)) return 1;
+        return 2;
     }
 
     @Override

@@ -67,10 +67,26 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
 
         int light = state.lightCoords;
 
-        // Capture world transform and add rotation
+        float faceXRot = switch (state.face) {
+            case WALL -> 90f;
+            case CEILING -> 180f;
+            default -> 0f;
+        };
+        float facingYRot = switch (state.direction) {
+            case EAST -> 90f;
+            case SOUTH -> 180f;
+            case WEST -> 270f;
+            default -> 0f;
+        };
+        if (state.face == AttachFace.CEILING) facingYRot = (facingYRot + 180f) % 360f;
+
         PoseStack worldPose = new PoseStack();
         worldPose.last().pose().set(poseStack.last().pose());
         worldPose.last().normal().set(poseStack.last().normal());
+        worldPose.translate(0.5, 0.5, 0.5);
+        worldPose.mulPose(Axis.YP.rotationDegrees(facingYRot));
+        worldPose.mulPose(Axis.XP.rotationDegrees(faceXRot));
+        worldPose.translate(-0.5, -0.5, -0.5);
         worldPose.translate(0.5, 0, 0.5);
         worldPose.mulPose(Axis.YP.rotationDegrees(-state.yRot));
         worldPose.translate(-0.5, 0, -0.5);

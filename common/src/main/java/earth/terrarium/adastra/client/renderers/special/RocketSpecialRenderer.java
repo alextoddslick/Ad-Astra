@@ -74,14 +74,15 @@ public class RocketSpecialRenderer implements NoDataSpecialModelRenderer {
                 pose.scale(0.2f, 0.2f, 0.2f);
             }
             case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> {
-                pose.translate(0.5f, 0.3f, 0.5f);
-                pose.mulPose(Axis.XP.rotationDegrees(-90));
-                pose.scale(0.18f, 0.18f, 0.18f);
+                // Rocket model has its origin at the bottom; push high so it appears
+                // above the camera, no rotation (the Y-flip in submit() already orients
+                // the entity model upright relative to world).
+                pose.translate(0.5f, 3.0f, 0.5f);
+                pose.scale(1.0f, 1.0f, 1.0f);
             }
             case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> {
-                pose.translate(0.5f, 0.3f, 0.5f);
-                pose.mulPose(Axis.XP.rotationDegrees(-90));
-                pose.scale(0.18f, 0.18f, 0.18f);
+                pose.translate(0.5f, 3.5f, 0.5f);
+                pose.scale(1.0f, 1.0f, 1.0f);
             }
             case HEAD -> {
                 pose.translate(0.5f, 0.5f, 0.5f);

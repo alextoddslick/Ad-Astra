@@ -29,5 +29,6 @@ public final class NetworkHandler {
         CHANNEL.register(ServerboundLandOnSpaceStationPacket.TYPE);
         CHANNEL.register(ServerboundConstructSpaceStationPacket.TYPE);
         CHANNEL.register(ServerboundSyncKeybindPacket.TYPE);
+        CHANNEL.register(ServerboundExtractFromMachineSlotPacket.TYPE);
     }
 }

@@ -1,15 +1,22 @@
 package earth.terrarium.adastra.common.menus.machines;
 
 import earth.terrarium.adastra.common.blockentities.machines.CompressorBlockEntity;
-import earth.terrarium.adastra.common.menus.base.MachineMenu;
-import earth.terrarium.adastra.common.menus.configuration.EnergyConfiguration;
-import earth.terrarium.adastra.common.menus.configuration.SlotConfiguration;
-import earth.terrarium.adastra.common.menus.slots.CustomSlot;
+import earth.terrarium.adastra.common.menus.base.BaseContainerMenu;
 import earth.terrarium.adastra.common.registry.ModMenus;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
-public class CompressorMenu extends MachineMenu<CompressorBlockEntity> {
+/**
+ * NOTE: Refactored to extend {@link BaseContainerMenu} directly (mirroring
+ * {@code NasaWorkbenchMenu}'s class hierarchy) instead of {@code MachineMenu} ->
+ * {@code BaseConfigurableContainerMenu} -> {@code BaseContainerMenu}. This isolates
+ * whether the item-extraction bug originates in those parent classes.
+ *
+ * Battery slot is added as a vanilla {@link Slot} (not {@code BatterySlot}). All
+ * machine slots are vanilla {@link Slot} (no {@code ExtractableSlot}, no
+ * {@code CustomSlot}). No side-config UI hooks remain.
+ */
+public class CompressorMenu extends BaseContainerMenu<CompressorBlockEntity> {
 
     public CompressorMenu(int id, Inventory inventory, CompressorBlockEntity entity) {
         super(ModMenus.COMPRESSOR.get(), id, inventory, entity);
@@ -42,16 +49,11 @@ public class CompressorMenu extends MachineMenu<CompressorBlockEntity> {
 
     @Override
     protected void addMenuSlots() {
-        super.addMenuSlots();
+        // Battery slot at slot 0 (static coords; the MachineScreen battery widget no
+        // longer repositions it because the menu isn't a MachineMenu instance).
+        addSlot(new Slot(entity, 0, 152, 8));
+        // Input slot 1 / output slot 2 -- vanilla Slot, not ExtractableSlot.
         addSlot(new Slot(entity, 1, 47, 58));
-        addSlot(CustomSlot.noPlace(entity, 2, 95, 58));
-    }
-
-    @Override
-    protected void addConfigSlots() {
-        addConfigSlot(new SlotConfiguration(0, 47, 58));
-        addConfigSlot(new SlotConfiguration(1, 95, 58));
-
-        addConfigSlot(new EnergyConfiguration(2, 150, 42, entity.getEnergyStorage()));
+        addSlot(new Slot(entity, 2, 95, 58));
     }
 }
