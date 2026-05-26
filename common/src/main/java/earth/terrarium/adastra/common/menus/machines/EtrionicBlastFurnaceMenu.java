@@ -4,10 +4,8 @@ import earth.terrarium.adastra.common.blockentities.machines.EtrionicBlastFurnac
 import earth.terrarium.adastra.common.menus.base.MachineMenu;
 import earth.terrarium.adastra.common.menus.configuration.EnergyConfiguration;
 import earth.terrarium.adastra.common.menus.configuration.SlotConfiguration;
-import earth.terrarium.adastra.common.menus.slots.CustomSlot;
 import earth.terrarium.adastra.common.registry.ModMenus;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 
 public class EtrionicBlastFurnaceMenu extends MachineMenu<EtrionicBlastFurnaceBlockEntity> {
 
@@ -43,15 +41,15 @@ public class EtrionicBlastFurnaceMenu extends MachineMenu<EtrionicBlastFurnaceBl
     @Override
     protected void addMenuSlots() {
         super.addMenuSlots();
-        addSlot(new Slot(entity, 1, 29, 38));
-        addSlot(new Slot(entity, 2, 47, 38));
-        addSlot(new Slot(entity, 3, 29, 58));
-        addSlot(new Slot(entity, 4, 47, 58));
+        addSlot(new net.minecraft.world.inventory.Slot(entity, 1, 29, 38));
+        addSlot(new net.minecraft.world.inventory.Slot(entity, 2, 47, 38));
+        addSlot(new net.minecraft.world.inventory.Slot(entity, 3, 29, 58));
+        addSlot(new net.minecraft.world.inventory.Slot(entity, 4, 47, 58));
 
-        addSlot(CustomSlot.noPlace(entity, 5, 101, 38));
-        addSlot(CustomSlot.noPlace(entity, 6, 119, 38));
-        addSlot(CustomSlot.noPlace(entity, 7, 101, 58));
-        addSlot(CustomSlot.noPlace(entity, 8, 119, 58));
+        addSlot(earth.terrarium.adastra.common.menus.slots.CustomSlot.noPlace(entity, 5, 101, 38));
+        addSlot(earth.terrarium.adastra.common.menus.slots.CustomSlot.noPlace(entity, 6, 119, 38));
+        addSlot(earth.terrarium.adastra.common.menus.slots.CustomSlot.noPlace(entity, 7, 101, 58));
+        addSlot(earth.terrarium.adastra.common.menus.slots.CustomSlot.noPlace(entity, 8, 119, 58));
     }
 
     @Override

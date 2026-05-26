@@ -199,4 +199,17 @@ public class TooltipUtils {
         return Component.translatable("tooltip.ad_astra.eta",
             eta).withStyle(ChatFormatting.GOLD);
     }
+
+    /**
+     * ETA to finish {@code totalItems} items (not just the current craft). Counts the
+     * remainder of the current cycle plus full cycles for the rest of the items.
+     */
+    public static Component getTotalEtaComponent(int cookTime, int cookTimeTotal, int totalItems) {
+        if (totalItems <= 0 || cookTimeTotal <= 0) {
+            return Component.translatable("tooltip.ad_astra.eta", 0).withStyle(ChatFormatting.GOLD);
+        }
+        int remainingTicks = totalItems * cookTimeTotal - cookTime;
+        if (remainingTicks < 0) remainingTicks = 0;
+        return Component.translatable("tooltip.ad_astra.eta", remainingTicks / 20).withStyle(ChatFormatting.GOLD);
+    }
 }

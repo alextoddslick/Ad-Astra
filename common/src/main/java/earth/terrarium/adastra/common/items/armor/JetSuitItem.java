@@ -157,13 +157,8 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         double yBoost = Math.max(0.002, acceleration);
 
         if (PlanetApi.API.isSpace(player.level())) {
-            // In space, while jump is held, gradually bleed off lateral momentum
-            // (~20% per tick) instead of zeroing it instantly — feels like real
-            // attitude thrusters rather than an emergency stop. Y gets the boost
-            // additively. After ~10 ticks (0.5s) the player is going essentially
-            // straight up.
             Vec3 v = player.getDeltaMovement();
-            final double lateralDamp = 0.80;
+            final double lateralDamp = 0.99;
             player.setDeltaMovement(v.x * lateralDamp, v.y + yBoost, v.z * lateralDamp);
         } else {
             // Atmospheric: gravity + drag handle horizontal naturally; just push Y.

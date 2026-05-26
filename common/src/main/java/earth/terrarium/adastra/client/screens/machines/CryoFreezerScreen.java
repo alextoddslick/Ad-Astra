@@ -26,6 +26,12 @@ public class CryoFreezerScreen extends MachineScreen<CryoFreezerMenu, CryoFreeze
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         super.renderBg(graphics, partialTick, mouseX, mouseY);
-        this.drawHorizontalProgressBar(graphics, GuiUtils.SNOWFLAKE, mouseX, mouseY, 54, 71, 13, 13, entity.cookTime(), entity.cookTimeTotal(), false);
+        int totalItems = entity.getItem(1).getCount();
+        GuiUtils.drawHorizontalProgressBar(
+            graphics, GuiUtils.SNOWFLAKE, mouseX, mouseY,
+            leftPos + 54, topPos + 71, 13, 13,
+            entity.cookTime(), entity.cookTimeTotal(), false,
+            earth.terrarium.adastra.common.utils.TooltipUtils.getProgressComponent(entity.cookTime(), entity.cookTimeTotal()),
+            earth.terrarium.adastra.common.utils.TooltipUtils.getTotalEtaComponent(entity.cookTime(), entity.cookTimeTotal(), totalItems));
     }
 }

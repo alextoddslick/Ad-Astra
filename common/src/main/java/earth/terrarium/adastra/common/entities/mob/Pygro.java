@@ -12,12 +12,14 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
 
 // LEGACY ENTITY. WILL BE REPLACED IN THE FUTURE.
 public class Pygro extends Piglin {
 
     public Pygro(EntityType<? extends AbstractPiglin> entityType, Level level) {
         super(entityType, level);
+        this.setImmuneToZombification(true);
     }
 
     public static AttributeSupplier.Builder createMobAttributes() {
@@ -29,6 +31,22 @@ public class Pygro extends Piglin {
     @Override
     public boolean removeWhenFarAway(double distanceSquared) {
         return false;
+    }
+
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        // Vanilla AbstractPiglin.readAdditionalSaveData reads "IsImmuneToZombification" with default false,
+        // which clobbers the constructor-set true on entity load. Re-assert immunity here.
+        this.setImmuneToZombification(true);
+    }
+
+    @Override
+    protected void customServerAiStep(ServerLevel level) {
+        // Belt-and-braces: ensure the synced flag stays true so vanilla
+        // AbstractPiglin.customServerAiStep never increments TimeInOverworld for Pygros.
+        this.setImmuneToZombification(true);
+        super.customServerAiStep(level);
     }
 
     @Override

@@ -21,7 +21,11 @@ public abstract class ConfigurationWidget extends AbstractWidget {
 
     @Override
     protected boolean isValidClickButton(net.minecraft.client.input.MouseButtonInfo button) {
-        return ConfigurationScreen.isConfigurable();
+        // Never intercept clicks — the configuration overlay should be render-only.
+        // Otherwise it eats empty-cursor clicks on machine slots while the side-config
+        // widget is open, breaking item extraction. Side-config selection is still
+        // reachable via the gear-button cycle (OptionsBarWidget).
+        return false;
     }
 
     @Override

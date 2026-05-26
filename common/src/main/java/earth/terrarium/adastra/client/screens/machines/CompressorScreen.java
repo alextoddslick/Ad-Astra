@@ -25,6 +25,12 @@ public class CompressorScreen extends MachineScreen<CompressorMenu, CompressorBl
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         super.renderBg(graphics, partialTick, mouseX, mouseY);
-        this.drawHorizontalProgressBar(graphics, GuiUtils.HAMMER, mouseX, mouseY, 72, 59, 15, 16, entity.cookTime(), entity.cookTimeTotal(), false);
+        int totalItems = entity.getItem(1).getCount();
+        GuiUtils.drawHorizontalProgressBar(
+            graphics, GuiUtils.HAMMER, mouseX, mouseY,
+            leftPos + 72, topPos + 59, 15, 16,
+            entity.cookTime(), entity.cookTimeTotal(), false,
+            earth.terrarium.adastra.common.utils.TooltipUtils.getProgressComponent(entity.cookTime(), entity.cookTimeTotal()),
+            earth.terrarium.adastra.common.utils.TooltipUtils.getTotalEtaComponent(entity.cookTime(), entity.cookTimeTotal(), totalItems));
     }
 }

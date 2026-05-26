@@ -81,7 +81,6 @@ public class SidedConfigWidget extends ContainerWidget {
     @Override
     public void setActive(boolean active) {
         super.setActive(active);
-        this.menu.slots.stream().filter(slot -> slot instanceof InventorySlot).forEach(slot -> ((InventorySlot) slot).setActive(!active));
     }
 
     public void toggle() {

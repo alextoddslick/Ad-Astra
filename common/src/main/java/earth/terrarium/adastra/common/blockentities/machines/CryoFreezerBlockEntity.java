@@ -54,6 +54,7 @@ public class CryoFreezerBlockEntity extends RecipeMachineBlockEntity<CryoFreezin
         this.energyContainer = EnergyUtils.machineInsertOnlyEnergy(MachineConfig.OSTRUM);
     }
 
+
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
         return new CryoFreezerMenu(id, inventory, this);

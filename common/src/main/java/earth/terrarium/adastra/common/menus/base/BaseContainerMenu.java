@@ -104,12 +104,6 @@ public abstract class BaseContainerMenu<T extends BlockEntity> extends AbstractC
         }
     }
 
-    @Override
-    public void clicked(int slotIndex, int button, @NotNull ClickType actionType, @NotNull Player player) {
-        super.clicked(slotIndex, button, actionType, player);
-        broadcastFullState();
-    }
-
     public static <T extends BlockEntity> T getBlockEntityFromBuf(Level level, BlockPos pos, Class<T> type) {
         if (pos == null) return null;
         // Look up block entity on both client and server - the factory may be called on either side

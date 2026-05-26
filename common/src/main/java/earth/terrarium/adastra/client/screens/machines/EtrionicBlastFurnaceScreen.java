@@ -30,7 +30,20 @@ public class EtrionicBlastFurnaceScreen extends MachineScreen<EtrionicBlastFurna
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         super.renderBg(graphics, partialTick, mouseX, mouseY);
-        this.drawHorizontalProgressBar(graphics, GuiUtils.ARROW, mouseX, mouseY, 75, 50, 20, 12, entity.cookTime(), entity.cookTimeTotal(), false);
+        // BLASTING crafts each input slot in parallel, so the queue length is the
+        // largest stack across the four input slots — that's how many cycles before
+        // everything is processed.
+        int totalItems = 0;
+        for (int i = 1; i <= 4; i++) {
+            int c = entity.getItem(i).getCount();
+            if (c > totalItems) totalItems = c;
+        }
+        GuiUtils.drawHorizontalProgressBar(
+            graphics, GuiUtils.ARROW, mouseX, mouseY,
+            leftPos + 75, topPos + 50, 20, 12,
+            entity.cookTime(), entity.cookTimeTotal(), false,
+            earth.terrarium.adastra.common.utils.TooltipUtils.getProgressComponent(entity.cookTime(), entity.cookTimeTotal()),
+            earth.terrarium.adastra.common.utils.TooltipUtils.getTotalEtaComponent(entity.cookTime(), entity.cookTimeTotal(), totalItems));
         if (entity.cookTimeTotal() > 0) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FURNACE_OVERLAY, leftPos + 30, topPos + 51, 32, 43);
         }

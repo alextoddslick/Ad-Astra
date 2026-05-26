@@ -193,8 +193,9 @@ public abstract class MachineScreen<M extends BaseContainerMenu<E>, E extends Co
 
     @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        boolean handled = super.mouseReleased(event);
         setFocused(null);
-        return super.mouseReleased(event);
+        return handled;
     }
 
     public int leftPos() {
