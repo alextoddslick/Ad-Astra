@@ -1,7 +1,7 @@
 package earth.terrarium.adastra.mixins.fabric.common;
 
 import com.teamresourceful.resourcefullib.common.registry.RegistryEntry;
-import com.teamresourceful.resourcefullib.common.registry.fabric.FabricResourcefulRegistry;
+import com.teamresourceful.resourcefullib.common.registry.FabricResourcefulRegistry;
 import earth.terrarium.adastra.common.registry.RegistryIdContext;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;

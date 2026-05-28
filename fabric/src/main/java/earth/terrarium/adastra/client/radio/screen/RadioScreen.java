@@ -1,0 +1,138 @@
+package earth.terrarium.adastra.client.radio.screen;
+
+import earth.terrarium.adastra.client._compat.BaseCursorScreen;
+import earth.terrarium.adastra.AdAstra;
+import earth.terrarium.adastra.client.config.RadioConfig;
+import earth.terrarium.adastra.client.radio.audio.RadioHandler;
+import earth.terrarium.adastra.common.network.NetworkHandler;
+import earth.terrarium.adastra.common.network.packets.ServerboundRequestStationsPacket;
+import earth.terrarium.adastra.common.utils.radio.StationInfo;
+import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+
+public class RadioScreen extends BaseCursorScreen {
+
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/radio/ui.png");
+    private static final Identifier CLOCK = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/radio/clock.png");
+    private static final int WIDTH = 253;
+    private static final int HEIGHT = 138;
+
+    private final List<StationInfo> stations = new ArrayList<>();
+    private final Map<String, String> stationNames = new HashMap<>();
+
+    @Nullable
+    private final BlockPos pos;
+
+    private RadioList list;
+
+    public RadioScreen(@Nullable BlockPos pos) {
+        super(CommonComponents.EMPTY);
+        this.pos = pos;
+        NetworkHandler.CHANNEL.sendToServer(new ServerboundRequestStationsPacket());
+    }
+
+    @Override
+    protected void init() {
+        int left = (this.width - WIDTH) / 2;
+        int top = (this.height - HEIGHT) / 2;
+        addRenderableWidget(new VolumeButton(left + 116, top + 83, 21, 21, 1));
+        addRenderableWidget(new VolumeButton(left + 116, top + 105, 21, 21, -1));
+        this.list = addRenderableWidget(new RadioList(left + 149, top + 84, this.pos));
+        if (!this.stations.isEmpty()) {
+            this.list.update(this.stations, RadioHandler.getPlaying());
+        }
+    }
+
+    @Override
+    public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        int left = (this.width - WIDTH) / 2;
+        int top = (this.height - HEIGHT) / 2;
+
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, left, top, 0, 0, WIDTH, HEIGHT, 512, 256);
+        renderClock(graphics, left + 29, top + 92);
+        graphics.text(font, RadioConfig.volume + "%", left + 102 - font.width(RadioConfig.volume + "%"), top + 114, 0xFF189418);
+        graphics.text(font, "Day " + getDayTime() / 24000L, left + 16, top + 114, 0xFF189418);
+
+        String playing = RadioHandler.getPlaying();
+        if (playing != null && stationNames.containsKey(playing.toLowerCase(Locale.ROOT))) {
+            renderScrollingString(graphics, font, Component.literal(stationNames.get(playing.toLowerCase(Locale.ROOT))), left + 65, top + 37, left + 188, top + 46, 0xFF189418);
+        }
+
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    }
+
+    protected static void renderScrollingString(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int minY, int maxX, int maxY, int color) {
+        int i = font.width(text);
+        int k = maxX - minX;
+        if (i > k) {
+            int l = i - k;
+            double d = (double) Util.getMillis() / 1000.0;
+            double e = Math.max((double) l * 0.5, 3.0);
+            double f = Math.sin(1.5707963267948966 * Math.cos(6.283185307179586 * d / e)) / 2.0 + 0.5;
+            double g = Mth.lerp(f, 0.0, l);
+            graphics.enableScissor(minX, minY, maxX, maxY);
+            graphics.text(font, text, minX - (int) g, (minY + maxY - 9) / 2 + 1, color);
+            graphics.disableScissor();
+        } else {
+            graphics.centeredText(font, text, (minX + maxX) / 2, (minY + maxY - 9) / 2 + 1, color);
+        }
+    }
+
+    public void renderClock(GuiGraphicsExtractor graphics, int x, int y) {
+        double ratio = 1000.0 / 60.0;
+
+        int dayTime = (int) ((getDayTime() + 6000L) % 12000L);
+        boolean isPm = (int) ((getDayTime() + 6000L) % 24000L) >= 12000;
+        int hours = dayTime / 1000 == 0 ? 12 : dayTime / 1000;
+        int minutes = (int) ((dayTime % 1000) / ratio);
+
+        int firstHour = hours / 10;
+        int secondHour = hours % 10;
+
+        int firstMinute = minutes / 10;
+        int secondMinute = minutes % 10;
+
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x, y, 0, (firstHour % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 8, y, (int) (secondHour / 5f) * 8, (secondHour % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 16, y, 39, 0, 5, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 21, y, (int) (firstMinute / 5f) * 8, (firstMinute % 5) * 13, 8, 13, 64, 64);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 29, y, (int) (secondMinute / 5f) * 8, (secondMinute % 5) * 13, 8, 13, 64, 64);
+
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CLOCK, x + 37, y, 42, isPm ? 0 : 13, 22, 13, 64, 64);
+    }
+
+    private static long getDayTime() {
+        if (Minecraft.getInstance().level == null) return 0;
+        return Minecraft.getInstance().level.getOverworldClockTime();
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    public static void handleStationUpdates(List<StationInfo> stations) {
+        if (Minecraft.getInstance().screen instanceof RadioScreen screen) {
+            screen.list.update(stations, RadioHandler.getPlaying());
+            screen.stations.clear();
+            screen.stationNames.clear();
+            for (StationInfo station : stations) {
+                screen.stationNames.put(station.url().toLowerCase(Locale.ROOT), station.name());
+                screen.stations.add(station);
+            }
+        }
+    }
+}

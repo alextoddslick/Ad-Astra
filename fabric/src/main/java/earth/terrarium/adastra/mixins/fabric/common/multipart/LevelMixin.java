@@ -30,44 +30,9 @@ public class LevelMixin implements MultipartPartsHolder {
         return adastra$multipartEntityParts;
     }
 
-    // Verified: method_31593 is an unmapped lambda in Level.getEntities, confirmed present in 1.21.11
-    // both intermediary and named jars. Signature: (Entity, Predicate, List, Entity)V
-    @Inject(
-        method = {"method_31593"},
-        at = @At("TAIL")
-    )
-    private static void adastra$getEntities(Entity entity, Predicate<? super Entity> predicate, List<Entity> list, Entity entity2, CallbackInfo ci) {
-        if (entity2 instanceof MultipartEntity multipartEntity) {
-            for (MultipartPartEntity<?> part : multipartEntity.getParts()) {
-                Entity asEntity = (Entity) part;
-                if (entity != entity2 && predicate.test(asEntity)) {
-                    list.add(asEntity);
-                }
-            }
-        }
-    }
-
-    // Verified: method_47576 is an unmapped lambda in Level.getEntities, confirmed present in 1.21.11
-    // both intermediary and named jars. Signature: (Predicate, List, int, EntityTypeTest, Entity)Continuation
-    @Inject(
-        method = {"method_47576"},
-        at = @At(value = "RETURN", ordinal = 2),
-        cancellable = true
-    )
-    private static <T extends Entity> void adastra$getEntities(
-        Predicate<? super T> predicate, List<? super T> output, int maxResults, EntityTypeTest<Entity, T> entityTypeTest, Entity entity, CallbackInfoReturnable<AbortableIterationConsumer.Continuation> cir
-    ) {
-
-        if (entity instanceof MultipartEntity multipartEntity) {
-            for (MultipartPartEntity<?> part : multipartEntity.getParts()) {
-                T entity2 = entityTypeTest.tryCast((Entity) part);
-                if (entity2 != null && predicate.test(entity2)) {
-                    output.add(entity2);
-                    if (output.size() >= maxResults) {
-                        cir.setReturnValue(AbortableIterationConsumer.Continuation.ABORT);
-                    }
-                }
-            }
-        }
-    }
+    // TODO 26.1.2: multipart entity hit detection injects stubbed — the original
+    // mixin targeted intermediary lambda names (method_31593, method_47576) which
+    // don't resolve under 26.1's no-remap toolchain. Vehicle multipart hitboxes
+    // will not be returned by Level.getEntities until this is reworked against
+    // the new method signatures.
 }

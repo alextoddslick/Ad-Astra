@@ -43,10 +43,10 @@
     ],
     "depends": {
         "fabric-api": "*",
-        "minecraft": ">=1.21.11",
-        "java": ">=21",
-        "resourcefullib": ">=3.0.0",
-        "resourcefulconfig": ">=3.0.0",
-        "common_storage_lib": ">=0.0.7"
+        "minecraft": ">=26.1.2",
+        "java": ">=25",
+        "resourcefullib": ">=4.0.0",
+        "resourcefulconfig": ">=4.0.0",
+        "common_storage_lib": ">=0.0.9"
     }
 }
