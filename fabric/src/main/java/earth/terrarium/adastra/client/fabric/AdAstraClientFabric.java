@@ -1,8 +1,12 @@
 package earth.terrarium.adastra.client.fabric;
 
+import earth.terrarium.adastra.AdAstra;
 import earth.terrarium.adastra.client.AdAstraClient;
 import earth.terrarium.adastra.client.dimension.ModDimensionSpecialEffects;
 import earth.terrarium.adastra.client.renderers.special.ModSpecialRenderers;
+import earth.terrarium.adastra.client.screens.player.OverlayScreen;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import earth.terrarium.adastra.client.models.entities.mobs.*;
 import earth.terrarium.adastra.client.models.entities.vehicles.LanderModel;
 import earth.terrarium.adastra.client.models.entities.vehicles.RocketModel;
@@ -13,18 +17,20 @@ import earth.terrarium.adastra.client.renderers.entities.vehicles.RoverRenderer;
 import earth.terrarium.adastra.client.utils.DimensionRenderingUtils;
 import earth.terrarium.adastra.common.registry.ModBlocks;
 import earth.terrarium.adastra.common.registry.ModEntityTypes;
+import earth.terrarium.adastra.mixins.client.SpecialModelRenderersAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+// TODO 26.1.2: fabric-key-binding-api-v1 and fabric-rendering-v1.world were dropped
+// from the fabric-api meta in 26.1. Key bindings and BEFORE_TRANSLUCENT overlay are
+// stubbed out below; restore via mixins or new fabric modules when available.
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.NoopRenderer;
@@ -43,42 +49,37 @@ import java.util.concurrent.Executor;
 
 public class AdAstraClientFabric {
 
-    static final Map<Identifier, ExtraModelKey<BlockStateModel>> EXTRA_MODELS = new HashMap<>();
+    public static final Map<Identifier, ExtraModelKey<BlockStateModel>> EXTRA_MODELS = new HashMap<>();
 
     public static void init() {
-        ModSpecialRenderers.register(SpecialModelRenderers.ID_MAPPER);
+        // 26.1.2: SpecialModelRenderers.ID_MAPPER is package-private; reach it through an accessor mixin.
+        ModSpecialRenderers.register(SpecialModelRenderersAccessor.getIdMapper());
         registerExtraModels();
         AdAstraClient.init();
         onAddReloadListener();
         ClientTickEvents.START_CLIENT_TICK.register(AdAstraClient::clientTick);
-        KeyBindingHelper.registerKeyBinding(AdAstraClient.KEY_TOGGLE_SUIT_FLIGHT);
-        KeyBindingHelper.registerKeyBinding(AdAstraClient.KEY_OPEN_RADIO);
-        AdAstraClient.onRegisterParticles((particle, provider) -> ParticleFactoryRegistry.getInstance().register(particle, provider::create));
-        AdAstraClient.onRegisterEntityLayers((location, definition) -> EntityModelLayerRegistry.registerModelLayer(location, definition::get));
-        AdAstraClient.onRegisterHud(hud -> HudRenderCallback.EVENT.register((graphics, tickCounter) -> hud.renderHud(graphics, tickCounter.getGameTimeDeltaPartialTick(false))));
-        WorldRenderEvents.BEFORE_TRANSLUCENT.register(ctx -> {
-            var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-            var poseStack = ctx.matrices();
-            if (poseStack != null) {
-                AdAstraClient.renderOverlays(poseStack, camera);
-            }
-        });
+        // TODO 26.1.2: KeyBindingHelper.registerKeyBinding(...) — fabric-key-binding-api-v1 missing.
+        AdAstraClient.onRegisterParticles((particle, provider) -> ParticleProviderRegistry.getInstance().register(particle, provider::create));
+        // 26.1.2: EntityModelLayerRegistry was renamed/relocated to ModelLayerRegistry.
+        // The fabric-rendering-v1 module still exposes it; we adapt our internal Supplier-based
+        // contract to its TexturedLayerDefinitionProvider (which is functionally identical).
+        AdAstraClient.onRegisterEntityLayers((location, definition) ->
+            ModelLayerRegistry.registerModelLayer(location, definition::get));
+        // 26.1.2: HudRenderCallback was replaced by HudElementRegistry. Insert our
+        // overlay just before the chat layer so it draws on top of the gameplay HUD
+        // (rocket countdown, lander brake/distance prompt, oxygen bar, battery bar)
+        // but underneath chat messages.
+        HudElementRegistry.attachElementBefore(
+            VanillaHudElements.CHAT,
+            Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "overlay"),
+            (graphics, tickDelta) -> OverlayScreen.render(graphics, tickDelta.getGameTimeDeltaPartialTick(false))
+        );
+        // TODO 26.1.2: WorldRenderEvents.BEFORE_TRANSLUCENT — fabric-rendering-v1.world missing.
+        // AdAstraClient.renderOverlays(...) call temporarily stubbed.
         registerEntityRenderers();
 
-        BlockRenderLayerMap.putBlock(ModBlocks.SOLAR_PANEL.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.WATER_PUMP.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.ENERGIZER.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.ETRIONIC_BLAST_FURNACE.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.VENT.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.STEEL_DOOR.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.STEEL_TRAPDOOR.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.AERONOS_LADDER.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.STROPHAR_LADDER.get(), ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.GLACIAN_TRAPDOOR.get(), ChunkSectionLayer.CUTOUT);
-        ModBlocks.GLOBES.stream().forEach(block -> BlockRenderLayerMap.putBlock(block.get(), ChunkSectionLayer.CUTOUT));
-        ModBlocks.SLIDING_DOORS.stream().forEach(block -> BlockRenderLayerMap.putBlock(block.get(), ChunkSectionLayer.CUTOUT));
-        ModBlocks.INDUSTRIAL_LAMPS.stream().forEach(block -> BlockRenderLayerMap.putBlock(block.get(), ChunkSectionLayer.CUTOUT));
-        ModBlocks.SMALL_INDUSTRIAL_LAMPS.stream().forEach(block -> BlockRenderLayerMap.putBlock(block.get(), ChunkSectionLayer.CUTOUT));
+        // TODO 26.1.2: BlockRenderLayerMap was removed from fabric-rendering-v1. The vanilla
+        // block JSON should declare {"render_type": "cutout"} per-state. Calls stubbed.
     }
 
     @SuppressWarnings("unchecked")
