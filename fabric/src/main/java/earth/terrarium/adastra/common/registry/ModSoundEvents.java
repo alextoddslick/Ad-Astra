@@ -35,4 +35,7 @@ public class ModSoundEvents {
 
     public static final RegistryEntry<SoundEvent> GRAVITY_NORMALIZER_IDLE = SOUND_EVENTS.register("gravity_normalizer_idle", () ->
         SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "gravity_normalizer_idle")));
+
+    public static final RegistryEntry<SoundEvent> STORM_WIND = SOUND_EVENTS.register("storm_wind", () ->
+        SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "storm_wind")));
 }

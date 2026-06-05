@@ -37,7 +37,7 @@ public class GuiUtils {
     public static final Identifier SNOWFLAKE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/gui/sprites/snowflake.png");
     public static final Identifier FIRE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/gui/sprites/fire.png");
     public static final Identifier ARROW = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/gui/sprites/arrow.png");
-    public static final Identifier SUN = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "sun");
+    public static final Identifier SUN = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "sun_icon");
     public static final Identifier SLIDER = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "slider");
 
     public static final WidgetSprites SETTINGS_BUTTON_SPRITES = createPressableButtonSprites("settings_button");
@@ -47,6 +47,7 @@ public class GuiUtils {
 
     public static final WidgetSprites CRAFTING_BUTTON_SPRITES = createPressableButtonSprites("crafting_button");
     public static final WidgetSprites FURNACE_BUTTON_SPRITES = createPressableButtonSprites("furnace_button");
+    public static final WidgetSprites SUIT_UPGRADE_BUTTON_SPRITES = createPressableButtonSprites("suit_upgrade_button");
 
     public static final WidgetSprites NONE_BUTTON_SPRITES = createPressableButtonSprites("side_config/none");
     public static final WidgetSprites PUSH_BUTTON_SPRITES = createPressableButtonSprites("side_config/push");

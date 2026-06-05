@@ -1,0 +1,23 @@
+{
+  "type": "ad_astra:nasa_workbench",
+  "ingredients": [
+    "ad_astra:jet_suit_boots",
+    "ad_astra:etrionic_core",
+    "ad_astra:etrionic_core",
+    "ad_astra:steel_plate",
+    "ad_astra:steel_plate",
+    "ad_astra:steel_plate",
+    "ad_astra:etrium_ingot",
+    "ad_astra:etrium_ingot",
+    "ad_astra:calorite_engine"
+  ],
+  "result": {
+    "id": "ad_astra:jet_suit_boots",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "boost_mode": true
+      }
+    }
+  }
+}

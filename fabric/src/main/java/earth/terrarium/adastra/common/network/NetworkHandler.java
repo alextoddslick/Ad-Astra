@@ -14,6 +14,7 @@ public final class NetworkHandler {
         CHANNEL.register(ClientboundSyncLocalPlanetDataPacket.TYPE);
         CHANNEL.register(ClientboundSendStationsPacket.TYPE);
         CHANNEL.register(ClientboundPlayStationPacket.TYPE);
+        CHANNEL.register(ClientboundSyncStormPacket.TYPE);
 
         CHANNEL.register(ServerboundRequestStationsPacket.TYPE);
         CHANNEL.register(ServerboundSetStationPacket.TYPE);
@@ -30,5 +31,6 @@ public final class NetworkHandler {
         CHANNEL.register(ServerboundConstructSpaceStationPacket.TYPE);
         CHANNEL.register(ServerboundSyncKeybindPacket.TYPE);
         CHANNEL.register(ServerboundExtractFromMachineSlotPacket.TYPE);
+        CHANNEL.register(ServerboundOpenNasaWorkbenchMenuPacket.TYPE);
     }
 }

@@ -42,7 +42,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
 
@@ -64,6 +66,11 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
         Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "planets/plus_button_highlighted")
     );
 
+    public static final WidgetSprites MOONS_BUTTON_SPRITES = new WidgetSprites(
+        Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "planets/moons_button"),
+        Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "planets/moons_button_highlighted")
+    );
+
     private final List<Button> buttons = new ArrayList<>();
     private Button backButton;
     private double scrollAmount;
@@ -83,6 +90,14 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     @Nullable
     private Planet selectedPlanet;
 
+    // When non-null, the left list shows the moons of this parent body instead
+    // of the solar system's planets (entered via the Moons side button).
+    @Nullable
+    private Planet moonsParent;
+    // Inline "view moons" buttons keyed by their planet-row button (only for
+    // planets that have moons, when not already in the moons sub-list).
+    private final Map<Button, Button> rowMoonsButtons = new HashMap<>();
+
     public PlanetsScreen(PlanetsMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, 0, 0);
 
@@ -97,6 +112,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     protected void init() {
         super.init();
         buttons.clear();
+        rowMoonsButtons.clear();
         spaceStationButtons.clear();
         spaceStationScrollAmount = 0;
         landButton = null;
@@ -111,11 +127,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
             }
         }
 
-        backButton = addRenderableWidget(new LabeledImageButton(10, height / 2 - 85, 12, 12, BACK_BUTTON_SPRITES, b -> {
-            if (pageIndex != 2) this.scrollAmount = 0;
-            pageIndex--;
-            rebuildWidgets();
-        }));
+        backButton = addRenderableWidget(new LabeledImageButton(10, height / 2 - 85, 12, 12, BACK_BUTTON_SPRITES, b -> goBack()));
 
         addSpaceStatonButton = addRenderableWidget(new LabeledImageButton(114, height / 2 - 41, 12, 12, PLUS_BUTTON_SPRITES, b -> {
             if (selectedPlanet == null) return;
@@ -149,7 +161,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
             }
         }
 
-        backButton.visible = pageIndex > (hasMultipleSolarSystems ? 0 : 1);
+        backButton.visible = moonsParent != null || pageIndex > (hasMultipleSolarSystems ? 0 : 1);
         addSpaceStatonButton.visible = pageIndex == 2 && selectedPlanet != null;
     }
 
@@ -169,20 +181,46 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
     }
 
     private void createPlanetButtons() {
-        for (var planet : menu.getSortedPlanets()) {
+        // When a parent is selected via the Moons button, list its moons instead
+        // of the solar system's planets.
+        List<Planet> source = moonsParent != null
+            ? AdAstraData.moonsOf(moonsParent.dimension())
+            : menu.getSortedPlanets();
+        for (var planet : source) {
             if (CadmusIntegration.cadmusLoaded()) {
                 CadmusIntegration.addClientListeners(planet.dimension());
             }
             if (planet.isSpace()) continue;
             if (menu.tier() < planet.tier()) continue;
-            if (!planet.solarSystem().equals(selectedSolarSystem)) continue;
+            if (menu.disabledPlanets().contains(planet.dimension().identifier())) continue;
+            if (moonsParent == null) {
+                // Main list: hide moons (they live under their parent) and keep the
+                // current solar system only.
+                if (planet.moonOf().isPresent()) continue;
+                if (!planet.solarSystem().equals(selectedSolarSystem)) continue;
+            }
             final var fp = planet;
-            buttons.add(addWidget(new LabeledImageButton(10, 0, 99, 20, BUTTON_SPRITES, b -> {
+            // Inline "view moons" button on the right of the row, for planets that
+            // have moons (and only in the main list, not when already viewing moons).
+            // Added BEFORE the planet button so it wins clicks on its 16px region.
+            Button moonsBtn = null;
+            if (moonsParent == null && AdAstraData.hasMoons(planet.dimension())) {
+                moonsBtn = addWidget(new LabeledImageButton(95, 0, 12, 12, MOONS_BUTTON_SPRITES, b -> {
+                    moonsParent = fp;
+                    this.scrollAmount = 0;
+                    rebuildWidgets();
+                }));
+                moonsBtn.setTooltip(Tooltip.create(Component.translatable("tooltip.ad_astra.view_moons",
+                    menu.getPlanetName(fp.dimension())).withStyle(ChatFormatting.AQUA)));
+            }
+            Button planetBtn = addWidget(new LabeledImageButton(10, 0, 99, 20, BUTTON_SPRITES, b -> {
                 AdAstra.LOGGER.info("[ad_astra] Planet button pressed: {}", fp.dimension().identifier());
                 pageIndex = 2;
                 selectedPlanet = fp;
                 rebuildWidgets();
-            }, menu.getPlanetName(planet.dimension()))));
+            }, menu.getPlanetName(planet.dimension())));
+            buttons.add(planetBtn);
+            if (moonsBtn != null) rowMoonsButtons.put(planetBtn, moonsBtn);
         }
     }
 
@@ -201,6 +239,31 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
             menu.getPlanetName(selectedPlanet.dimension()), pos.getX(), pos.getZ()).withStyle(ChatFormatting.AQUA)));
 
         addSpaceStationButtons(selectedPlanet.orbitIfPresent());
+    }
+
+    /**
+     * Back navigation that understands the moons sub-view. From a moon's page it
+     * returns to the moons list; from the moons list it returns to the parent
+     * planet's page; otherwise it walks the normal page stack.
+     */
+    private void goBack() {
+        if (moonsParent != null) {
+            if (pageIndex == 2) {
+                // viewing a specific moon -> back to the moons list
+                selectedPlanet = null;
+                this.scrollAmount = 0;
+                pageIndex = 1;
+            } else {
+                // viewing the moons list -> back to the planet list (page stays 1)
+                moonsParent = null;
+                this.scrollAmount = 0;
+            }
+            rebuildWidgets();
+            return;
+        }
+        if (pageIndex != 2) this.scrollAmount = 0;
+        pageIndex--;
+        rebuildWidgets();
     }
 
     private void addSpaceStationButtons(ResourceKey<Level> dimension) {
@@ -276,11 +339,16 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         renderButtons(graphics, mouseX, mouseY, partialTick);
-        backButton.visible = pageIndex > (hasMultipleSolarSystems ? 0 : 1);
+        backButton.visible = moonsParent != null || pageIndex > (hasMultipleSolarSystems ? 0 : 1);
         addSpaceStatonButton.visible = pageIndex == 2 && selectedPlanet != null;
 
         // Prevent buttons from being pressed when outside view area.
-        buttons.forEach(button -> button.active = button.getY() > height / 2 - 63 && button.getY() < height / 2 + 88);
+        buttons.forEach(button -> {
+            boolean inView = button.getY() > height / 2 - 63 && button.getY() < height / 2 + 88;
+            button.active = inView;
+            Button moonsBtn = rowMoonsButtons.get(button);
+            if (moonsBtn != null) moonsBtn.active = inView;
+        });
         // Also activate space station buttons within view area.
         spaceStationButtons.forEach(button -> button.active = button.getY() > height / 2 - 22 && button.getY() < height / 2 + 88);
 
@@ -308,9 +376,18 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
             for (int i = 0; i < buttons.size(); i++) {
                 var button = buttons.get(i);
                 button.setY((i * 24 - scrollPixels) + (height / 2 - 41));
+                Button moonsBtn = rowMoonsButtons.get(button);
+                if (moonsBtn != null) {
+                    moonsBtn.setX(95);
+                    moonsBtn.setY(button.getY() + 4);
+                }
             }
             for (var button : buttons) {
                 button.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                Button moonsBtn = rowMoonsButtons.get(button);
+                if (moonsBtn != null) {
+                    moonsBtn.extractRenderState(graphics, mouseX, mouseY, partialTick);
+                }
             }
         }
 
@@ -362,6 +439,9 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
 
         if (pageIndex == 2 && selectedPlanet != null) {
             var title = Component.translatableWithFallback("planet.%s.%s".formatted(selectedPlanet.dimension().identifier().getNamespace(), selectedPlanet.dimension().identifier().getPath()), title(selectedPlanet.dimension().identifier().getPath()));
+            graphics.centeredText(font, title, 57, height / 2 - 60, 0xFFffffff);
+        } else if (pageIndex == 1 && moonsParent != null) {
+            var title = Component.translatable("text.ad_astra.text.moons_of", menu.getPlanetName(moonsParent.dimension()));
             graphics.centeredText(font, title, 57, height / 2 - 60, 0xFFffffff);
         } else if (pageIndex == 1 && selectedSolarSystem != null) {
             var title = Component.translatableWithFallback("solar_system.%s.%s".formatted(selectedSolarSystem.getNamespace(), selectedSolarSystem.getPath()), title(selectedSolarSystem.getPath()));
@@ -428,10 +508,8 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
 
     @Override
     public void onClose() {
-        if (pageIndex > 0) {
-            if (pageIndex != 2) this.scrollAmount = 0;
-            pageIndex--;
-            rebuildWidgets();
+        if (moonsParent != null || pageIndex > 0) {
+            goBack();
             return;
         }
         Player player = menu.player();
@@ -441,6 +519,7 @@ public class PlanetsScreen extends AbstractContainerScreen<PlanetsMenu> {
 
     protected void close() {
         pageIndex = 0;
+        moonsParent = null;
         onClose();
     }
 

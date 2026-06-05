@@ -1,0 +1,11 @@
+{
+  "type": "ad_astra:europa",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "ad_astra:europa",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "ad_astra:europa"
+    }
+  }
+}

@@ -151,6 +151,12 @@ public class ModEntityTypes {
             .clientTrackingRange(10)
             .build(key("glacian_ram")));
 
+    public static final RegistryEntry<EntityType<BlueVex>> BLUE_VEX = ENTITY_TYPES.register("blue_vex", () ->
+        EntityType.Builder.of(BlueVex::new, MobCategory.MONSTER)
+            .sized(0.4f, 0.8f)
+            .clientTrackingRange(8)
+            .build(key("blue_vex")));
+
     public static final RegistryEntry<EntityType<IceSpit>> ICE_SPIT = ENTITY_TYPES.register("ice_spit", () ->
         EntityType.Builder.<IceSpit>of(IceSpit::new, MobCategory.MISC)
             .sized(0.5f, 0.5f)
@@ -176,6 +182,7 @@ public class ModEntityTypes {
             method.invoke(null, ModEntityTypes.LUNARIAN_WANDERING_TRADER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (SpawnPlacements.SpawnPredicate<LunarianWanderingTrader>) Lunarian::checkMobSpawnRules);
             method.invoke(null, ModEntityTypes.SULFUR_CREEPER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (SpawnPlacements.SpawnPredicate<SulfurCreeper>) SulfurCreeper::checkMonsterSpawnRules);
             method.invoke(null, ModEntityTypes.GLACIAN_RAM.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (SpawnPlacements.SpawnPredicate<GlacianRam>) GlacianRam::checkMobSpawnRules);
+            method.invoke(null, ModEntityTypes.BLUE_VEX.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (SpawnPlacements.SpawnPredicate<BlueVex>) BlueVex::checkBlueVexSpawnRules);
         } catch (Exception e) {
             throw new RuntimeException("Failed to register spawn placements", e);
         }
@@ -194,5 +201,6 @@ public class ModEntityTypes {
         attributes.accept(LUNARIAN_WANDERING_TRADER, Lunarian::createMobAttributes);
         attributes.accept(SULFUR_CREEPER, SulfurCreeper::createMobAttributes);
         attributes.accept(GLACIAN_RAM, GlacianRam::createMobAttributes);
+        attributes.accept(BLUE_VEX, BlueVex::createAttributes);
     }
 }

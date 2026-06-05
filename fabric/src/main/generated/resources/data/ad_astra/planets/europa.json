@@ -1,0 +1,11 @@
+{
+  "dimension": "ad_astra:europa",
+  "gravity": 1.314,
+  "moon_of": "ad_astra:jupiter",
+  "orbit": "ad_astra:europa_orbit",
+  "oxygen": false,
+  "solar_power": 6,
+  "solar_system": "ad_astra:solar_system",
+  "temperature": -160,
+  "tier": 3
+}

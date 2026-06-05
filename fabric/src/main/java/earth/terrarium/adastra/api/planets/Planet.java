@@ -18,7 +18,9 @@ public record Planet(
     float gravity, int solarPower,
     Identifier solarSystem,
     Optional<ResourceKey<Level>> orbit, int tier,
-    List<ResourceKey<Level>> additionalLaunchDimensions
+    List<ResourceKey<Level>> additionalLaunchDimensions,
+    Optional<ResourceKey<Level>> moonOf,
+    Optional<Boolean> hasStorms
 ) {
 
     public static final ResourceKey<Level> EARTH_ORBIT = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "earth_orbit"));
@@ -43,7 +45,9 @@ public record Planet(
         Identifier.CODEC.fieldOf("solar_system").forGetter(Planet::solarSystem),
         ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("orbit").forGetter(Planet::orbit),
         Codec.INT.fieldOf("tier").forGetter(Planet::tier),
-        ResourceKey.codec(Registries.DIMENSION).listOf().optionalFieldOf("additional_launch_dimensions", List.of()).forGetter(Planet::additionalLaunchDimensions)
+        ResourceKey.codec(Registries.DIMENSION).listOf().optionalFieldOf("additional_launch_dimensions", List.of()).forGetter(Planet::additionalLaunchDimensions),
+        ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("moon_of").forGetter(Planet::moonOf),
+        Codec.BOOL.optionalFieldOf("has_storms").forGetter(Planet::hasStorms)
     ).apply(instance, Planet::new));
 
     public ResourceKey<Level> orbitIfPresent() {
@@ -52,6 +56,15 @@ public record Planet(
 
     public boolean isSpace() {
         return orbit.isEmpty();
+    }
+
+    /**
+     * Whether this dimension runs the dynamic planet-storm system (per-dimension
+     * weather scheduler + wind + HUD alerts). Driven by the optional {@code has_storms}
+     * field so it is data-driven and synced to clients via {@code ClientboundSyncPlanetsPacket}.
+     */
+    public boolean hasStormsEnabled() {
+        return hasStorms.orElse(false);
     }
 
     public Optional<ResourceKey<Level>> getOrbitPlanet() {

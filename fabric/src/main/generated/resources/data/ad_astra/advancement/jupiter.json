@@ -1,0 +1,31 @@
+{
+  "parent": "ad_astra:tier_3_rocket",
+  "criteria": {
+    "entered_jupiter": {
+      "conditions": {
+        "to": "ad_astra:jupiter"
+      },
+      "trigger": "minecraft:changed_dimension"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ad_astra.jupiter.description"
+    },
+    "icon": {
+      "id": "minecraft:orange_terracotta"
+    },
+    "title": {
+      "translate": "advancements.ad_astra.jupiter.title"
+    }
+  },
+  "requirements": [
+    [
+      "entered_jupiter"
+    ]
+  ],
+  "rewards": {
+    "experience": 300
+  },
+  "sends_telemetry_event": true
+}

@@ -34,6 +34,9 @@ public class SpaceSuitModel extends HumanoidModel<HumanoidRenderState> {
     public static final Identifier SPACE_SUIT_TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/armor/space_suit.png");
     public static final Identifier NETHERITE_SPACE_SUIT_TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/armor/netherite_space_suit.png");
     public static final Identifier JET_SUIT_TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/armor/jet_suit.png");
+    /** Worn-armor variants used when the NASA-Workbench upgrades are applied (boost boots / analysis visor). */
+    public static final Identifier JET_SUIT_BOOST_TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/armor/jet_suit_boost.png");
+    public static final Identifier JET_SUIT_ANALYSIS_TEXTURE = Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, "textures/entity/armor/jet_suit_analysis.png");
 
     private final ModelPart visor;
     private final ModelPart belt;

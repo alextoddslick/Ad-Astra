@@ -16,4 +16,5 @@ public class ModParticleTypes {
     public static final RegistryEntry<SimpleParticleType> LARGE_FLAME = PARTICLE_TYPES.register("large_flame", () -> new SimpleParticleType(true) {});
     public static final RegistryEntry<SimpleParticleType> LARGE_SMOKE = PARTICLE_TYPES.register("large_smoke", () -> new SimpleParticleType(true) {});
     public static final RegistryEntry<SimpleParticleType> OXYGEN_BUBBLE = PARTICLE_TYPES.register("oxygen_bubble", () -> new SimpleParticleType(true) {});
+    public static final RegistryEntry<SimpleParticleType> STORM_GAS = PARTICLE_TYPES.register("storm_gas", () -> new SimpleParticleType(true) {});
 }

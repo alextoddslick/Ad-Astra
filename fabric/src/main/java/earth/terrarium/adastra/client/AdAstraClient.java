@@ -39,6 +39,9 @@ import earth.terrarium.adastra.common.network.packets.ServerboundSyncKeybindPack
 import earth.terrarium.adastra.common.registry.*;
 import earth.terrarium.adastra.common.tags.ModItemTags;
 import earth.terrarium.adastra.common.utils.KeybindManager;
+import earth.terrarium.adastra.common.utils.StormWind;
+import earth.terrarium.adastra.client.utils.ClientStormData;
+import earth.terrarium.adastra.client.audio.StormAmbientSoundInstance;
 import earth.terrarium.adastra.common.entities.vehicles.Vehicle;
 import earth.terrarium.adastra.common.utils.radio.RadioHolder;
 // TODO: CSL migration - botarium ClientHooks provided registerBlockEntityRenderers, registerEntityRenderer,
@@ -68,6 +71,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -121,6 +125,7 @@ public class AdAstraClient {
         MenuScreens.register(ModMenus.GRAVITY_NORMALIZER.get(), GravityNormalizerScreen::new);
         MenuScreens.register(ModMenus.CRYO_FREEZER.get(), CryoFreezerScreen::new);
         MenuScreens.register(ModMenus.NASA_WORKBENCH.get(), NasaWorkbenchScreen::new);
+        MenuScreens.register(ModMenus.NASA_WORKBENCH_UPGRADE.get(), NasaWorkbenchUpgradeScreen::new);
 
         MenuScreens.register(ModMenus.ROCKET.get(), RocketScreen::new);
         MenuScreens.register(ModMenus.ROVER.get(), RoverScreen::new);
@@ -200,6 +205,7 @@ public class AdAstraClient {
         consumer.accept(ModParticleTypes.LARGE_FLAME.get(), LargeFlameParticle.Provider::new);
         consumer.accept(ModParticleTypes.LARGE_SMOKE.get(), LargeFlameParticle.Provider::new);
         consumer.accept(ModParticleTypes.OXYGEN_BUBBLE.get(), OxygenBubbleParticle.Provider::new);
+        consumer.accept(ModParticleTypes.STORM_GAS.get(), earth.terrarium.adastra.client.particle.StormGasParticle.Provider::new);
     }
 
     public static void onRegisterModels(Consumer<Identifier> consumer) {
@@ -346,5 +352,45 @@ public class AdAstraClient {
             KeybindManager.set(player, false, false, false);
             NetworkHandler.CHANNEL.sendToServer(new ServerboundSyncKeybindPacket(false, false, false));
         }
+
+        applyStormWind(player);
+        manageStormAmbience(minecraft);
+        earth.terrarium.adastra.client.utils.StormParticles.tick(player);
+    }
+
+    private static StormAmbientSoundInstance stormAmbient = null;
+
+    /**
+     * Starts the looping storm-wind ambience when a storm begins and lets it self-stop (via its
+     * own tick()) when the storm ends or the player leaves the dimension. The null/isStopped guard
+     * ensures we never stack duplicate loops.
+     */
+    private static void manageStormAmbience(Minecraft minecraft) {
+        if (minecraft.player == null) return;
+        if (ClientStormData.isStorming()) {
+            if (stormAmbient == null || stormAmbient.isStopped()) {
+                stormAmbient = new StormAmbientSoundInstance(ModSoundEvents.STORM_WIND.get(), minecraft.player.getRandom());
+                minecraft.getSoundManager().play(stormAmbient);
+            }
+        } else if (stormAmbient != null) {
+            stormAmbient = null;
+        }
+    }
+
+    /**
+     * Client-side wind for the local player during a planet storm. Applied here (rather than
+     * server-side) because the local player's movement is client-authoritative in Ad Astra —
+     * a server {@code setDeltaMovement} wouldn't stick. Other entities are pushed server-side
+     * in {@code PlanetStormHandler}. The push is additive, so the player keeps full control.
+     */
+    private static void applyStormWind(LocalPlayer player) {
+        if (!ClientStormData.isStorming()) return;
+        if (player.isSpectator() || player.getAbilities().flying || player.getVehicle() != null) return;
+        // The storm is a surface phenomenon — no wind when sheltered underground.
+        float exposure = ClientStormData.skyExposure();
+        if (exposure <= 0.05f) return;
+        Vec3 wind = StormWind.windImpulse(player.level().getGameTime(), ClientStormData.intensity() * exposure, !player.onGround());
+        if (wind.lengthSqr() == 0) return;
+        player.setDeltaMovement(player.getDeltaMovement().add(wind));
     }
 }

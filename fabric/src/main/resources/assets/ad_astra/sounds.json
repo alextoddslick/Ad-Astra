@@ -1,4 +1,13 @@
 {
+  "storm_wind": {
+    "sounds": [
+      {
+        "name": "ad_astra:storm/wind",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.ad_astra.ambient.storm_wind"
+  },
   "rocket_launch": {
     "sounds": [
       "ad_astra:rocket_launch"

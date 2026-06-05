@@ -1,6 +1,7 @@
 {
   "dimension": "ad_astra:moon",
   "gravity": 1.622,
+  "moon_of": "minecraft:overworld",
   "orbit": "ad_astra:moon_orbit",
   "oxygen": false,
   "solar_power": 24,

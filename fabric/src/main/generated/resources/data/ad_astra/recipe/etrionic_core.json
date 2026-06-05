@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": "ad_astra:etrium_ingot",
+    "R": "minecraft:redstone",
+    "G": "minecraft:glowstone_dust"
+  },
+  "pattern": [
+    "ERE",
+    "RGR",
+    "ERE"
+  ],
+  "result": {
+    "id": "ad_astra:etrionic_core"
+  }
+}

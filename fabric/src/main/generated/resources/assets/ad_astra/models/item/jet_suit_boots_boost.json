@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ad_astra:item/jet_suit_boots",
+    "layer1": "ad_astra:item/jet_suit_boots_soles"
+  }
+}

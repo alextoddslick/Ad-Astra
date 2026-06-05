@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import earth.terrarium.adastra.client.dimension.ModDimensionSpecialEffects;
 import earth.terrarium.adastra.client.fabric.AdAstraClientFabric;
+import earth.terrarium.adastra.client.models.armor.SpaceSuitModel;
+import earth.terrarium.adastra.common.utils.UpgradeUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.model.HumanoidModel;
@@ -32,6 +34,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -149,7 +154,17 @@ public class ClientPlatformUtils {
 
                 // Copy transforms from the parent model to the armor model, then render
                 armorModel.setupAnim(renderState);
-                RenderType renderLayer = armorModel.renderType(texture);
+                // Swap to an upgrade-variant texture for the worn piece so NASA-Workbench upgrades are
+                // visible in third person: boost boots get Etrium-blue soles, the analysis visor gets a
+                // tinted visor. Each slot only draws its own parts, so swapping the base texture (rather
+                // than a second overlay submit) shows the upgrade with no z-fighting.
+                Identifier tex = texture;
+                if (slot == EquipmentSlot.FEET && UpgradeUtils.hasBoostMode(stack)) {
+                    tex = SpaceSuitModel.JET_SUIT_BOOST_TEXTURE;
+                } else if (slot == EquipmentSlot.HEAD && UpgradeUtils.hasAnalysisVisor(stack)) {
+                    tex = SpaceSuitModel.JET_SUIT_ANALYSIS_TEXTURE;
+                }
+                RenderType renderLayer = armorModel.renderType(tex);
                 ArmorRenderer.submitTransformCopyingModel(
                     contextModel, renderState,     // source model + state
                     armorModel, renderState,        // delegate model + state
@@ -159,13 +174,29 @@ public class ClientPlatformUtils {
                     renderLayer,                    // RenderType
                     light,                          // light
                     OverlayTexture.NO_OVERLAY,      // overlay
-                    -1,                             // tintedColor (0xFFFFFFFF = white/no tint)
+                    vibrantDyeTint(stack),          // tintedColor: dye color (saturation-boosted) on worn suits; -1 if undyed
                     null,                           // sprite (null = use render layer texture)
                     renderState.outlineColor,       // outlineColor from entity render state
                     null                            // no crumbling overlay
                 );
             };
         }, items);
+    }
+
+    /**
+     * Tint color for a worn (dyeable) suit. Returns -1 (white / no tint) when undyed, otherwise the dye
+     * color with its saturation pushed up so dyes read vividly on the suit textures instead of muted.
+     */
+    private static int vibrantDyeTint(ItemStack stack) {
+        int color = DyedItemColor.getOrDefault(stack, 0xFFFFFFFF);
+        if ((color & 0xFFFFFF) == 0xFFFFFF) return -1; // undyed default (white) -> no tint
+        int r = ARGB.red(color), g = ARGB.green(color), b = ARGB.blue(color);
+        float lum = 0.299f * r + 0.587f * g + 0.114f * b;
+        float sat = 1.7f; // push channels away from luminance to boost saturation
+        r = Mth.clamp(Math.round(lum + (r - lum) * sat), 0, 255);
+        g = Mth.clamp(Math.round(lum + (g - lum) * sat), 0, 255);
+        b = Mth.clamp(Math.round(lum + (b - lum) * sat), 0, 255);
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     public static void registerPlanetRenderers(Map<ResourceKey<Level>, ModDimensionSpecialEffects> renderers) {

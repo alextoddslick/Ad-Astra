@@ -1,12 +1,34 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "ad_astra:item/jet_suit_boots",
-    "tints": [
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "minecraft:custom_data",
+    "cases": [
       {
-        "type": "minecraft:dye",
-        "default": -1
+        "when": {
+          "boost_mode": true
+        },
+        "model": {
+          "type": "minecraft:model",
+          "model": "ad_astra:item/jet_suit_boots_boost",
+          "tints": [
+            {
+              "type": "minecraft:dye",
+              "default": -1
+            }
+          ]
+        }
       }
-    ]
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ad_astra:item/jet_suit_boots",
+      "tints": [
+        {
+          "type": "minecraft:dye",
+          "default": -1
+        }
+      ]
+    }
   }
 }

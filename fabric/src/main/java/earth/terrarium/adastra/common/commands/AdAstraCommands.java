@@ -9,5 +9,6 @@ public class AdAstraCommands {
         RadioCommand.register(dispatcher);
         PlanetsCommand.register(dispatcher);
         VelocityDebugCommand.register(dispatcher);
+        UpgradeCommand.register(dispatcher);
     }
 }

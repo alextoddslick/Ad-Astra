@@ -12,6 +12,7 @@
     "minecraft:blaze",
     "minecraft:magma_cube",
     "minecraft:zombified_piglin",
-    "minecraft:zoglin"
+    "minecraft:zoglin",
+    "ad_astra:blue_vex"
   ]
 }

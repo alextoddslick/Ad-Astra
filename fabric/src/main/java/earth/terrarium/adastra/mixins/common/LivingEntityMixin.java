@@ -13,7 +13,9 @@ import earth.terrarium.adastra.common.items.armor.SpaceSuitItem;
 import earth.terrarium.adastra.common.registry.ModDamageSources;
 import earth.terrarium.adastra.common.tags.ModBiomeTags;
 import earth.terrarium.adastra.common.tags.ModEntityTypeTags;
+import earth.terrarium.adastra.common.tags.ModItemTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -83,6 +85,10 @@ public abstract class LivingEntityMixin extends Entity {
             }
         }
 
+        // Mobs tagged ignores_planet_gravity (e.g. the blue vex) keep vanilla physics on every planet —
+        // Ad Astra's heavy planet gravity would otherwise drag flying mobs out of the sky on Jupiter.
+        if (getType().builtInRegistryHolder().is(ModEntityTypeTags.IGNORES_PLANET_GRAVITY)) return;
+
         var movementAffectingPos = getBlockPosBelowThatAffectsMyMovement();
         if (gravity <= PlanetConstants.ZERO_GRAVITY_THRESHOLD) {
             if (AdAstraEvents.ZeroGravityTickEvent.fire(level(), entity, travelVector, movementAffectingPos)) {
@@ -90,9 +96,17 @@ public abstract class LivingEntityMixin extends Entity {
                 ci.cancel();
             }
         } else if (AdAstraEvents.GravityTickEvent.fire(level(), entity, travelVector, movementAffectingPos)) {
+            // Fall-flying normally keeps vanilla Earth-like physics. But the Ad Astra jet suit's
+            // boost (fullFlight) goes fall-flying via startFallFlying(), and players expect it to be
+            // affected by planet gravity — heavy on Jupiter, floaty on the Moon. So we apply the
+            // gravity differential during fall-flight ONLY for jet-suit wearers, leaving plain
+            // vanilla elytra untouched. On Earth (gravity == 1) the term is 0.08 - 0.08 == 0, so
+            // nothing changes anywhere.
+            boolean jetSuitFlight = entity instanceof Player player
+                && player.getItemBySlot(EquipmentSlot.CHEST).is(ModItemTags.JET_SUITS);
             if (this.isInWater()
                 || this.isInLava()
-                || entity.isFallFlying()
+                || (entity.isFallFlying() && !jetSuitFlight)
                 || entity.hasEffect(MobEffects.SLOW_FALLING)) {
                 return;
             }

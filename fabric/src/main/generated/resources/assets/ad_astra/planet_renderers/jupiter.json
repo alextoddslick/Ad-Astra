@@ -1,0 +1,69 @@
+{
+  "custom_clouds": true,
+  "custom_sky": true,
+  "custom_weather": true,
+  "dimension": "ad_astra:jupiter",
+  "has_fog": true,
+  "has_thick_fog": true,
+  "render_in_rain": false,
+  "sky_renderables": [
+    {
+      "back_light_color": -9543,
+      "back_light_scale": 14.0,
+      "blend": false,
+      "global_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "movement_type": "TIME_OF_DAY",
+      "scale": 3.0,
+      "texture": "ad_astra:textures/environment/sun.png"
+    },
+    {
+      "back_light_color": -3614488,
+      "back_light_scale": 24.0,
+      "blend": false,
+      "global_rotation": [
+        70.0,
+        0.0,
+        20.0
+      ],
+      "local_rotation": [
+        0.0,
+        -5.0,
+        0.0
+      ],
+      "movement_type": "STATIC",
+      "scale": 9.0,
+      "texture": "ad_astra:textures/environment/europa.png"
+    }
+  ],
+  "star_brightness": 0.12,
+  "star_colors": [
+    {
+      "data": -726785,
+      "weight": 100
+    },
+    {
+      "data": -3038977,
+      "weight": 80
+    },
+    {
+      "data": -7697665,
+      "weight": 150
+    },
+    {
+      "data": -2817,
+      "weight": 60
+    }
+  ],
+  "stars": 2500,
+  "sunrise_angle": 0,
+  "sunrise_color": 13740900
+}

@@ -6,6 +6,8 @@ import earth.terrarium.adastra.AdAstra;
 import earth.terrarium.adastra.api.systems.PlanetData;
 import earth.terrarium.adastra.client.config.AdAstraConfigClient;
 import earth.terrarium.adastra.client.utils.ClientData;
+import earth.terrarium.adastra.client.utils.ClientStormData;
+import earth.terrarium.adastra.common.network.packets.ClientboundSyncStormPacket;
 import earth.terrarium.adastra.common.config.AdAstraConfig;
 import earth.terrarium.adastra.common.entities.vehicles.Lander;
 import earth.terrarium.adastra.common.entities.vehicles.Rocket;
@@ -139,6 +141,40 @@ public class OverlayScreen {
                 0, 30, distanceColor);
 
             poseStack.popMatrix();
+        }
+
+        // Storm overlay (Jupiter et al.). ClientStormData is gated to the player's current
+        // dimension, so it only has data on storm planets.
+        byte stormPhase = ClientStormData.phase();
+        boolean storming = ClientStormData.isStorming();
+        if (storming || stormPhase != ClientboundSyncStormPacket.PHASE_NONE) {
+            long time = level.getGameTime();
+
+            // Persistent status line at the top while a storm is active.
+            if (storming) {
+                int pct = Mth.clamp(Math.round(ClientStormData.intensity() * 100), 0, 100);
+                poseStack.pushMatrix();
+                poseStack.translate(width / 2f, 4);
+                graphics.centeredText(font, Component.translatable("hud.ad_astra.storm", pct), 0, 0, 0xFFff5555);
+                poseStack.popMatrix();
+            }
+
+            // Pulsing transition alert ("storm approaching" / "skies clearing").
+            if (stormPhase != ClientboundSyncStormPacket.PHASE_NONE) {
+                float pulse = Mth.clamp(0.55f + 0.45f * (float) Math.sin(time * 0.2), 0, 1);
+                int alpha = (int) (pulse * 255) << 24;
+                boolean approaching = stormPhase == ClientboundSyncStormPacket.PHASE_APPROACHING;
+                Component alert = Component.translatable(approaching
+                    ? "message.ad_astra.storm.approaching"
+                    : "message.ad_astra.storm.clearing");
+                int rgb = approaching ? 0xffaa00 : 0x55ff55;
+
+                poseStack.pushMatrix();
+                poseStack.translate(width / 2f, height / 4f);
+                poseStack.scale(1.5f, 1.5f);
+                graphics.centeredText(font, alert, 0, 0, rgb | alpha);
+                poseStack.popMatrix();
+            }
         }
     }
 }

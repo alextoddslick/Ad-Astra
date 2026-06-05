@@ -82,7 +82,7 @@ public record AlloyingRecipe(
 
     @Override
     public @NotNull PlacementInfo placementInfo() {
-        return PlacementInfo.NOT_PLACEABLE;
+        return PlacementInfo.create(ingredients);
     }
 
     @Override

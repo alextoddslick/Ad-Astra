@@ -1,9 +1,14 @@
 package earth.terrarium.adastra.client.screens.machines;
 
 import earth.terrarium.adastra.AdAstra;
+import earth.terrarium.adastra.client.components.PressableImageButton;
+import earth.terrarium.adastra.client.components.machines.OptionsBarWidget;
 import earth.terrarium.adastra.client.screens.base.MachineScreen;
+import earth.terrarium.adastra.client.utils.GuiUtils;
 import earth.terrarium.adastra.common.blockentities.machines.NasaWorkbenchBlockEntity;
 import earth.terrarium.adastra.common.menus.machines.NasaWorkbenchMenu;
+import earth.terrarium.adastra.common.network.NetworkHandler;
+import earth.terrarium.adastra.common.network.packets.ServerboundOpenNasaWorkbenchMenuPacket;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -21,8 +26,21 @@ public class NasaWorkbenchScreen extends MachineScreen<NasaWorkbenchMenu, NasaWo
     }
 
     @Override
+    public OptionsBarWidget.Builder createOptionsBar() {
+        // Suit-upgrade button, top-right alongside the settings button. Opens the dedicated
+        // upgrade view (a separate menu + screen) for this workbench. Menus open server-side,
+        // so we ask the server to (re)open the upgrade menu for this block entity.
+        return super.createOptionsBar().addElement(new PressableImageButton(0, 0, 18, 18,
+            GuiUtils.SUIT_UPGRADE_BUTTON_SPRITES,
+            button -> NetworkHandler.CHANNEL.sendToServer(
+                new ServerboundOpenNasaWorkbenchMenuPacket(this.entity.getBlockPos(), true)),
+            Component.translatable("tooltip.ad_astra.suit_upgrade")));
+    }
+
+    @Override
     public void extractContents(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
+
         if (this.sideConfigWidget.isActive()) {
             graphics.fill(leftPos + 54, topPos + 18, leftPos + 73, topPos + 19, 0xFF00FF00);
             graphics.fill(leftPos + 73, topPos + 18, leftPos + 74, topPos + 36, 0xFF00FF00);

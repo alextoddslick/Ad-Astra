@@ -1,0 +1,21 @@
+{
+  "type": "ad_astra:nasa_workbench",
+  "ingredients": [
+    "ad_astra:jet_suit_helmet",
+    "minecraft:glass_pane",
+    "ad_astra:etrionic_core",
+    "ad_astra:etrionic_core",
+    "ad_astra:steel_plate",
+    "ad_astra:steel_plate",
+    "ad_astra:steel_plate"
+  ],
+  "result": {
+    "id": "ad_astra:jet_suit_helmet",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "analysis_visor": true
+      }
+    }
+  }
+}

@@ -2,9 +2,12 @@ package earth.terrarium.adastra.common.items.armor;
 
 import earth.terrarium.adastra.api.planets.Planet;
 import earth.terrarium.adastra.api.planets.PlanetApi;
+import earth.terrarium.adastra.api.systems.GravityApi;
 import earth.terrarium.adastra.common.config.AdAstraConfig;
 import earth.terrarium.adastra.common.constants.ConstantComponents;
+import earth.terrarium.adastra.common.constants.PlanetConstants;
 import earth.terrarium.adastra.common.planets.AdAstraData;
+import earth.terrarium.adastra.common.utils.UpgradeUtils;
 import earth.terrarium.adastra.common.registry.ModFluids;
 import earth.terrarium.adastra.common.utils.EnergyUtils;
 import earth.terrarium.adastra.common.utils.FluidUtils;
@@ -98,6 +101,20 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
             }
         }
 
+        // Jet Boots "boost mode" hover: on a planet, HOLD SNEAK while airborne to hover in place.
+        // This is deliberate — when you're neither boosting (jump) nor hovering (sneak), full planet
+        // gravity applies, so on heavy worlds like Jupiter you fall normally instead of slow-falling.
+        if (!KeybindManager.jumpDown(player)
+            && player.isShiftKeyDown()
+            && UpgradeUtils.hasBoostMode(player.getItemBySlot(EquipmentSlot.FEET))
+            && !player.onGround()
+            && !PlanetApi.API.isSpace(player.level())
+            && canFly(player, stack)) {
+            hover(player);
+            consume(player, stack, 20);
+            return;
+        }
+
         if (!KeybindManager.jumpDown(player)) return;
         if (!canFly(player, stack)) return;
 
@@ -108,6 +125,18 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
             upwardsFlight(player);
             consume(player, stack, 50);
         }
+    }
+
+    /**
+     * Jet Boots hover (boost upgrade): hold altitude while the player sneaks in mid-air. Releasing sneak
+     * drops them back to full planet gravity (the caller gates this on isShiftKeyDown). Horizontal
+     * momentum is lightly damped so the player settles into a controllable hover.
+     */
+    private void hover(Player player) {
+        Vec3 v = player.getDeltaMovement();
+        player.setDeltaMovement(v.x * 0.92, 0.0, v.z * 0.92);
+        player.fallDistance = 0.0f;
+        player.hurtMarked = true;
     }
 
     private void applySpaceBrake(Player player) {
@@ -151,10 +180,26 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         }
     }
 
+    /** Extra thrust factor from the Jet Boots "boost mode" upgrade on high-gravity worlds. */
+    private static final float BOOST_FACTOR = 2.5f;
+    private static final float BOOST_GRAVITY_THRESHOLD = 15.0f; // m/s²
+
+    /**
+     * Jet Boots boost-mode upgrade: when the player wears boost boots AND the world's gravity is
+     * above {@value #BOOST_GRAVITY_THRESHOLD} m/s² (e.g. Jupiter's 24.79), the suit thrusts much
+     * harder so flight stays viable against the heavy pull. Returns 1.0 (no change) otherwise.
+     */
+    private float boostMultiplier(Player player) {
+        if (!UpgradeUtils.hasBoostMode(player.getItemBySlot(EquipmentSlot.FEET))) return 1.0f;
+        float rawGravity = GravityApi.API.getGravity(player) * PlanetConstants.EARTH_GRAVITY;
+        return rawGravity > BOOST_GRAVITY_THRESHOLD ? BOOST_FACTOR : 1.0f;
+    }
+
     protected void upwardsFlight(Player player) {
+        float boostMul = boostMultiplier(player);
         double acceleration = sigmoidAcceleration(player.tickCount, 5.0, 1.0, 2.0);
         acceleration /= 35.0f;
-        double yBoost = Math.max(0.002, acceleration);
+        double yBoost = Math.max(0.002, acceleration) * boostMul;
 
         Vec3 v = player.getDeltaMovement();
         double lateralSpeed = Math.sqrt(v.x * v.x + v.z * v.z);
@@ -182,7 +227,7 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         // a one-shot impulse so each tap = a noticeable kick. Sustained holds still
         // feel right because the impulse only fires once per press.
         boolean justPressed = KeybindManager.jumpPressedThisTick(player);
-        double impulseY = justPressed ? 0.25 : 0.0;
+        double impulseY = justPressed ? 0.25 * boostMul : 0.0;
         double impulseHoriz = (justPressed && inputMag > 1.0e-4) ? 0.15 : 0.0;
 
         if (PlanetApi.API.isSpace(player.level())) {
@@ -291,7 +336,7 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
                 thrustScale = (hardCap - speed) / (hardCap - softCap);
             }
             if (thrustScale > 0.0) {
-                player.push(look.scale(0.055 * thrustScale));
+                player.push(look.scale(0.055 * thrustScale * boostMultiplier(player)));
             }
         }
 

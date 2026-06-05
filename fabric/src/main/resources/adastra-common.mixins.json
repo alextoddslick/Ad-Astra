@@ -16,6 +16,7 @@
         "common.PlayerMixin",
         "common.ServerGamePacketListenerImplMixin",
         "common.ServerLevelMixin",
+        "common.WeatherCommandMixin",
         "common.SkullBlockEntityInvoker",
         "common.SlotAccessor",
         "common.entities.CreeperMixin",
@@ -39,7 +40,10 @@
     ],
     "client": [
         "client.AbstractContainerScreenMixin",
+        "client.CloudRendererMixin",
         "client.EntityRendererMixin",
+        "client.FogRendererMixin",
+        "client.LightmapRenderStateExtractorMixin",
         "client.HumanoidModelMixin",
         "client.ItemInHandRendererMixin",
         "client.LevelRendererAccessor",

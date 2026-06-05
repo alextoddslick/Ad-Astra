@@ -76,7 +76,7 @@ public record CryoFreezingRecipe(
 
     @Override
     public @NotNull PlacementInfo placementInfo() {
-        return PlacementInfo.NOT_PLACEABLE;
+        return PlacementInfo.create(input);
     }
 
     @Override

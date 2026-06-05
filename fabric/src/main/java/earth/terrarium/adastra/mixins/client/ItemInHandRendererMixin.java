@@ -23,11 +23,15 @@ public abstract class ItemInHandRendererMixin {
 
     @Inject(method = "renderArmWithItem", at = @At(value = "HEAD"), cancellable = true)
     private void adastra$renderArmWithItem(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, CallbackInfo ci) {
+        // The bespoke TI-69 handheld renderer (animated screen + apps) still needs
+        // porting to the 26.1 SubmitNodeCollector API (see Ti69Renderer, which uses
+        // the old MultiBufferSource path). Until that port lands we must NOT cancel
+        // vanilla rendering here: cancelling drew nothing, leaving the held TI-69
+        // invisible. Falling through renders the normal ti_69 item model in hand.
         if (stack.is(ModItems.TI_69.get())) {
             boolean mainHand = hand == InteractionHand.MAIN_HAND;
             HumanoidArm humanoidArm = mainHand ? player.getMainArm() : player.getMainArm().getOpposite();
-            // TODO: Ti69Renderer needs updating for SubmitNodeCollector
-            // Ti69Renderer.renderTi69(poseStack, collector, combinedLight, equippedProgress, humanoidArm, swingProgress, this::renderPlayerArm);
+            Ti69Renderer.renderTi69(poseStack, collector, combinedLight, equippedProgress, humanoidArm, swingProgress, this::renderPlayerArm);
             ci.cancel();
         }
     }

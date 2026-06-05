@@ -71,6 +71,7 @@ public class AdAstra {
 
     public static void onDatapackSync(ServerPlayer player) {
         NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncPlanetsPacket(AdAstraData.planets()), player);
+        earth.terrarium.adastra.common.handlers.PlanetStormHandler.syncToPlayer(player);
     }
 
     public static void onServerTick(MinecraftServer server) {
@@ -84,6 +85,7 @@ public class AdAstra {
         });
         earth.terrarium.adastra.common.events.VelocityDebugTicker.onServerTick(server);
         earth.terrarium.adastra.common.events.AtmosphereLeaveTicker.onServerTick(server);
+        earth.terrarium.adastra.common.handlers.PlanetStormHandler.onServerTick(server);
     }
 
     public static void onServerStarted(MinecraftServer server) {

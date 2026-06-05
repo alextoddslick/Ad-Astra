@@ -16,6 +16,9 @@ public final class ModEntityTypeTags {
 
     public static final TagKey<EntityType<?>> IGNORES_AIR_VORTEX = tag("ignores_air_vortex");
 
+    /** Entities exempt from Ad Astra's per-planet gravity (e.g. flying mobs that should fly normally on Jupiter). */
+    public static final TagKey<EntityType<?>> IGNORES_PLANET_GRAVITY = tag("ignores_planet_gravity");
+
     private static TagKey<EntityType<?>> tag(String name) {
         return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(AdAstra.MOD_ID, name));
     }

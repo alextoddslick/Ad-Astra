@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "etrium_nugget",
+  "ingredients": [
+    "ad_astra:etrium_ingot"
+  ],
+  "result": {
+    "count": 4,
+    "id": "ad_astra:etrium_nugget"
+  }
+}

@@ -89,6 +89,43 @@ public class AdAstraData extends SimpleJsonResourceReloadListener<Planet> {
         return PLANETS.values().stream().map(Planet::solarSystem).collect(Collectors.toUnmodifiableSet());
     }
 
+    /**
+     * All planets that declare the given dimension as their parent body via
+     * {@code moon_of} (e.g. the Moon for the overworld, Europa for Jupiter),
+     * sorted by tier then name for stable display order.
+     */
+    public static List<Planet> moonsOf(ResourceKey<Level> parent) {
+        return PLANETS.values().stream()
+            .filter(p -> p.moonOf().isPresent() && p.moonOf().get().equals(parent))
+            .sorted(Comparator.<Planet>comparingInt(Planet::tier)
+                .thenComparing(p -> p.dimension().identifier().getPath()))
+            .toList();
+    }
+
+    public static boolean hasMoons(ResourceKey<Level> parent) {
+        return PLANETS.values().stream()
+            .anyMatch(p -> p.moonOf().isPresent() && p.moonOf().get().equals(parent));
+    }
+
+    /**
+     * All planet dimensions that opt into the dynamic storm system via {@code has_storms}.
+     * The server scheduler ticks exactly these dimensions.
+     */
+    public static List<Planet> stormPlanets() {
+        return PLANETS.values().stream()
+            .filter(Planet::hasStormsEnabled)
+            .toList();
+    }
+
+    /**
+     * Whether the given dimension runs the storm system. Works on both server and client
+     * (planet data is synced via {@link earth.terrarium.adastra.common.network.packets.ClientboundSyncPlanetsPacket}).
+     */
+    public static boolean hasStorms(ResourceKey<Level> dimension) {
+        Planet planet = getPlanet(dimension);
+        return planet != null && planet.hasStormsEnabled();
+    }
+
     public static void setPlanets(Map<ResourceKey<Level>, Planet> planets) {
         PLANETS.clear();
         PLANETS.putAll(planets);

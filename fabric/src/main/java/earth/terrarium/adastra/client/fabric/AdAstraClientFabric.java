@@ -103,6 +103,7 @@ public class AdAstraClientFabric {
         EntityRendererRegistry.register(ModEntityTypes.SULFUR_CREEPER.get(), SulfurCreeperRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.LUNARIAN_WANDERING_TRADER.get(), LunarianWanderingTraderRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.GLACIAN_RAM.get(), GlacianRamRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.BLUE_VEX.get(), BlueVexRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.ICE_SPIT.get(), ThrownItemRenderer::new);
     }
 

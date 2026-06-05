@@ -37,6 +37,7 @@ public class ModMenus {
     public static final RegistryEntry<MenuType<GravityNormalizerMenu>> GRAVITY_NORMALIZER = MENUS.register("gravity_normalizer_menu", () -> createMenuType(GravityNormalizerMenu::new, GravityNormalizerBlockEntity.class));
     public static final RegistryEntry<MenuType<CryoFreezerMenu>> CRYO_FREEZER = MENUS.register("cryo_freezer_menu", () -> createMenuType(CryoFreezerMenu::new, CryoFreezerBlockEntity.class));
     public static final RegistryEntry<MenuType<NasaWorkbenchMenu>> NASA_WORKBENCH = MENUS.register("nasa_workbench_menu", () -> createMenuType(NasaWorkbenchMenu::new, NasaWorkbenchBlockEntity.class));
+    public static final RegistryEntry<MenuType<NasaWorkbenchUpgradeMenu>> NASA_WORKBENCH_UPGRADE = MENUS.register("nasa_workbench_upgrade_menu", () -> createMenuType(NasaWorkbenchUpgradeMenu::new, NasaWorkbenchBlockEntity.class));
 
     public static final RegistryEntry<MenuType<RoverMenu>> ROVER = MENUS.register("rover_menu", () -> MenuContentHelper.create(
         (id, inventory, content) -> new RoverMenu(id, inventory, content.map(EntityIdContent::entityId).orElse(-1)),

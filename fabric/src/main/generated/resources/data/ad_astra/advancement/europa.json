@@ -1,0 +1,31 @@
+{
+  "parent": "ad_astra:tier_3_rocket",
+  "criteria": {
+    "entered_europa": {
+      "conditions": {
+        "to": "ad_astra:europa"
+      },
+      "trigger": "minecraft:changed_dimension"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ad_astra.europa.description"
+    },
+    "icon": {
+      "id": "minecraft:packed_ice"
+    },
+    "title": {
+      "translate": "advancements.ad_astra.europa.title"
+    }
+  },
+  "requirements": [
+    [
+      "entered_europa"
+    ]
+  ],
+  "rewards": {
+    "experience": 200
+  },
+  "sends_telemetry_event": true
+}

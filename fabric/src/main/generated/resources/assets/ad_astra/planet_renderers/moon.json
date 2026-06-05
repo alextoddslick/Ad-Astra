@@ -1,11 +1,11 @@
 {
-  "custom_clouds": true,
+  "custom_clouds": false,
   "custom_sky": true,
   "custom_weather": false,
   "dimension": "ad_astra:moon",
   "has_fog": false,
   "has_thick_fog": false,
-  "render_in_rain": true,
+  "render_in_rain": false,
   "sky_renderables": [
     {
       "back_light_color": -39,
@@ -26,13 +26,13 @@
       "texture": "ad_astra:textures/environment/sun.png"
     },
     {
-      "back_light_color": -12813094,
-      "back_light_scale": 42.0,
+      "back_light_color": -12609537,
+      "back_light_scale": 52.0,
       "blend": false,
       "global_rotation": [
-        80.0,
+        72.0,
         0.0,
-        30.0
+        28.0
       ],
       "local_rotation": [
         0.0,
@@ -40,54 +40,54 @@
         0.0
       ],
       "movement_type": "STATIC",
-      "scale": 14.0,
+      "scale": 22.0,
       "texture": "ad_astra:textures/environment/earth.png"
     }
   ],
-  "star_brightness": 0.6,
+  "star_brightness": 0.85,
   "star_colors": [
     {
       "data": -1447239681,
-      "weight": 3
+      "weight": 2
     },
     {
       "data": -1143472129,
-      "weight": 5
+      "weight": 3
     },
     {
       "data": -726785,
-      "weight": 100
+      "weight": 140
     },
     {
       "data": -3038977,
-      "weight": 80
+      "weight": 90
     },
     {
       "data": -7697665,
-      "weight": 150
+      "weight": 200
     },
     {
       "data": -12254977,
-      "weight": 10
+      "weight": 8
     },
     {
       "data": -2817,
-      "weight": 60
-    },
-    {
-      "data": -464897,
       "weight": 40
     },
     {
+      "data": -464897,
+      "weight": 30
+    },
+    {
       "data": -256,
-      "weight": 20
+      "weight": 12
     },
     {
       "data": -65536,
       "weight": 1
     }
   ],
-  "stars": 13000,
+  "stars": 15000,
   "sunrise_angle": 0,
   "sunrise_color": 14180147
 }
