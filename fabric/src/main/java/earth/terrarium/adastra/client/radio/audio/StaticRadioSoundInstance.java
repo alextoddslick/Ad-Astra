@@ -13,7 +13,7 @@ public final class StaticRadioSoundInstance extends RadioSoundInstance {
 
     public StaticRadioSoundInstance(String url, RandomSource randomSource, BlockPos source) {
         super(url, randomSource);
-        this.source = source.getCenter();
+        this.source = Vec3.atCenterOf(source);
     }
 
     @Override

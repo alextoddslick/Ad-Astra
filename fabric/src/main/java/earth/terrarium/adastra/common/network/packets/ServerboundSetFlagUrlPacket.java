@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -46,7 +47,7 @@ public record ServerboundSetFlagUrlPacket(BlockPos pos, String url) implements P
         public Consumer<Player> handle(ServerboundSetFlagUrlPacket packet) {
             return player -> {
                 if (URL_REGEX.matcher(packet.url()).matches()
-                    && player.distanceToSqr(packet.pos().getCenter()) <= 64
+                    && player.distanceToSqr(Vec3.atCenterOf(packet.pos())) <= 64
                     && player.level().getBlockEntity(packet.pos()) instanceof FlagBlockEntity flag
                     && flag.getOwner() != null
                     && player.getUUID().equals(flag.getOwner().id())

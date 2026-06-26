@@ -237,7 +237,7 @@ public class AdAstraClient {
      */
     @FunctionalInterface
     public interface CustomItemRenderer {
-        void renderByItem(ItemStack stack, ItemDisplayContext displayContext, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.MultiBufferSource buffer, int packedLight, int packedOverlay);
+        void renderByItem(ItemStack stack, ItemDisplayContext displayContext, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector, int packedLight, int packedOverlay);
     }
 
     public static void onRegisterItemRenderers(BiConsumer<Item, CustomItemRenderer> consumer) {

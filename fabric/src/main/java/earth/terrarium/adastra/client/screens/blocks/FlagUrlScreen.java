@@ -27,7 +27,7 @@ public class FlagUrlScreen extends Screen {
     }
 
     public static void open(BlockPos pos) {
-        Minecraft.getInstance().setScreen(new FlagUrlScreen(pos));
+        Minecraft.getInstance().setScreenAndShow(new FlagUrlScreen(pos));
     }
 
     @Override

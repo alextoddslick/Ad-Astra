@@ -125,7 +125,7 @@ public class RadioScreen extends BaseCursorScreen {
     }
 
     public static void handleStationUpdates(List<StationInfo> stations) {
-        if (Minecraft.getInstance().screen instanceof RadioScreen screen) {
+        if (Minecraft.getInstance().gui.screen() instanceof RadioScreen screen) {
             screen.list.update(stations, RadioHandler.getPlaying());
             screen.stations.clear();
             screen.stationNames.clear();

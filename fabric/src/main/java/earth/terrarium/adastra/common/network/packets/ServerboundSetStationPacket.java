@@ -13,6 +13,7 @@ import earth.terrarium.adastra.common.utils.radio.StationLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -48,7 +49,7 @@ public record ServerboundSetStationPacket(String url,
         public Consumer<Player> handle(ServerboundSetStationPacket packet) {
             return player -> {
                 if (packet.pos.isPresent()) {
-                    boolean inRange = player.distanceToSqr(packet.pos.get().getCenter()) <= 64;
+                    boolean inRange = player.distanceToSqr(Vec3.atCenterOf(packet.pos.get())) <= 64;
                     if (inRange && player.level().getBlockEntity(packet.pos.get()) instanceof RadioHolder holder) {
                         playStation(holder, packet.url());
                     }

@@ -1,17 +1,15 @@
 package earth.terrarium.adastra.common.world.processor;
 
 import com.mojang.serialization.MapCodec;
-import earth.terrarium.adastra.common.registry.ModStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.jetbrains.annotations.Nullable;
 
-public class StructureVoidProcessor extends StructureProcessor {
+public class StructureVoidProcessor implements StructureProcessor {
 
     public static final MapCodec<StructureVoidProcessor> CODEC = MapCodec.unit(StructureVoidProcessor::new);
 
@@ -20,19 +18,19 @@ public class StructureVoidProcessor extends StructureProcessor {
 
     @Nullable
     @Override
-    public StructureTemplate.StructureBlockInfo processBlock(LevelReader level, BlockPos pos, BlockPos pivot, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings data) {
-        if (structureBlockInfo2.state().getBlock().equals(Blocks.STRUCTURE_VOID)) {
+    public StructureTemplate.StructureBlockInfo processBlock(LevelReader level, BlockPos offset, BlockPos pos, BlockPos pivot, StructureTemplate.StructureBlockInfo blockInfo, StructurePlaceSettings data) {
+        if (blockInfo.state().getBlock().equals(Blocks.STRUCTURE_VOID)) {
             return null;
         }
-        if (level.getBlockState(structureBlockInfo2.pos()).isAir()) {
+        if (level.getBlockState(blockInfo.pos()).isAir()) {
             return null;
         }
 
-        return structureBlockInfo2;
+        return blockInfo;
     }
 
     @Override
-    protected StructureProcessorType<?> getType() {
-        return ModStructures.STRUCTURE_VOID_PROCESSOR.get();
+    public MapCodec<? extends StructureProcessor> codec() {
+        return CODEC;
     }
 }

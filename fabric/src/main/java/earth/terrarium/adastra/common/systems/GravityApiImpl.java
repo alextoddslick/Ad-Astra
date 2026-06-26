@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -117,6 +116,6 @@ public class GravityApiImpl implements GravityApi {
             entity.setDeltaMovement(movementVector.x * speed, downSpeed * 0.98, movementVector.z * speed);
         }
 
-        entity.calculateEntityAnimation(this instanceof FlyingAnimal);
+        entity.calculateEntityAnimation(false);
     }
 }

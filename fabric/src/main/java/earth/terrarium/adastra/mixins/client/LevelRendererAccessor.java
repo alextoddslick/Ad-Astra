@@ -14,9 +14,6 @@ public interface LevelRendererAccessor {
     // TODO 26.1.2: doesMobEffectBlockSky removed from LevelRenderer.
 
     @Accessor
-    int getTicks();
-
-    @Accessor
     SkyRenderer getSkyRenderer();
 
     @Accessor

@@ -55,7 +55,6 @@
         "client.SoundEngineAccessor",
         "client.SoundManagerAccessor",
         "client.SoundManagerMixin",
-        "client.WeatherEffectRendererMixin",
         "client.multipart.ClientLevelEntityCallbacksMixin",
         "client.multipart.EntityRenderDispatcherMixin"
     ],

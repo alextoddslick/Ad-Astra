@@ -418,7 +418,7 @@ public class ModBlocks {
     public static final RegistryEntry<Block> GLACIAN_FENCE_GATE = BLOCKS.register("glacian_fence_gate", () -> new FenceGateBlock(WoodType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).friction(0.5f).mapColor(MapColor.COLOR_PINK)));
     public static final RegistryEntry<Block> GLACIAN_BUTTON = BUTTONS.register("glacian_button", () -> new ButtonBlock(BlockSetType.OAK, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON).mapColor(MapColor.COLOR_PINK)));
     public static final RegistryEntry<Block> GLACIAN_PRESSURE_PLATE = PRESSURE_PLATES.register("glacian_pressure_plate", () -> new PressurePlateBlock(BlockSetType.OAK, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE).friction(0.5f).mapColor(MapColor.COLOR_PINK)));
-    public static final RegistryEntry<Block> GLACIAN_FUR = CUBES.register("glacian_fur", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL).mapColor(MapColor.COLOR_PINK)));
+    public static final RegistryEntry<Block> GLACIAN_FUR = CUBES.register("glacian_fur", () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.WOOL.white()).mapColor(MapColor.COLOR_PINK)));
 
     private static BlockBehaviour.Properties ironProperties() {
         return BlockBehaviour.Properties.of()

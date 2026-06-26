@@ -21,7 +21,7 @@ public abstract class ItemInHandRendererMixin {
     @Shadow
     private void renderPlayerArm(PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, float equippedProgress, float swingProgress, HumanoidArm side) {}
 
-    @Inject(method = "renderArmWithItem", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "submitArmWithItem", at = @At(value = "HEAD"), cancellable = true)
     private void adastra$renderArmWithItem(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, SubmitNodeCollector collector, int combinedLight, CallbackInfo ci) {
         // The bespoke TI-69 handheld renderer (animated screen + apps) still needs
         // porting to the 26.1 SubmitNodeCollector API (see Ti69Renderer, which uses

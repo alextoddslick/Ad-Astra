@@ -8,10 +8,7 @@ import earth.terrarium.adastra.client.ClientPlatformUtils;
 import earth.terrarium.adastra.common.blockentities.GlobeBlockEntity;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -83,7 +80,7 @@ public class GlobeBlockEntityRenderer implements BlockEntityRenderer<GlobeBlockE
         ClientPlatformUtils.submitBlockModel(cubeModel, worldPose, collector, light);
     }
 
-    static void renderStatic(BlockState blockState, float yRot, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    static void renderStatic(BlockState blockState, float yRot, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
         BlockStateModel cubeModel = ClientPlatformUtils.getModel(
             Minecraft.getInstance().getModelManager(), getCubeModelId(blockState));
         if (cubeModel == null) return;
@@ -94,7 +91,7 @@ public class GlobeBlockEntityRenderer implements BlockEntityRenderer<GlobeBlockE
             poseStack.mulPose(Axis.YP.rotationDegrees(-yRot));
             poseStack.translate(-0.5, 0, -0.5);
 
-            ClientPlatformUtils.renderBlockModelImmediate(cubeModel, poseStack, buffer, packedLight, packedOverlay);
+            ClientPlatformUtils.submitBlockModel(cubeModel, poseStack, collector, packedLight);
         } finally {
             poseStack.popPose();
         }
@@ -105,7 +102,7 @@ public class GlobeBlockEntityRenderer implements BlockEntityRenderer<GlobeBlockE
         public ItemRenderer() {
         }
 
-        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
             BlockState state = BuiltInRegistries.BLOCK.getValue(BuiltInRegistries.ITEM.getKey(stack.getItem())).defaultBlockState();
 
             var minecraft = Minecraft.getInstance();
@@ -115,9 +112,9 @@ public class GlobeBlockEntityRenderer implements BlockEntityRenderer<GlobeBlockE
             try {
                 // Render the base block model
                 var model = minecraft.getModelManager().getBlockStateModelSet().get(state);
-                ClientPlatformUtils.renderBlockModelImmediate(model, poseStack, buffer, packedLight, packedOverlay);
+                ClientPlatformUtils.submitBlockModel(model, poseStack, collector, packedLight);
                 // Render the spinning globe cube
-                renderStatic(state, yRot, poseStack, buffer, packedLight, packedOverlay);
+                renderStatic(state, yRot, poseStack, collector, packedLight, packedOverlay);
             } finally {
                 poseStack.popPose();
             }

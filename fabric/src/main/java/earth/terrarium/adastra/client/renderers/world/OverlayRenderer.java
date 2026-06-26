@@ -58,16 +58,19 @@ public class OverlayRenderer {
             );
         }
 
-        poseStack.pushPose();
-        var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        var consumer = bufferSource.getBuffer(RenderTypes.debugQuads());
-
-        poseStack.translate(-camera.position().x(), -camera.position().y(), -camera.position().z());
-        positions.values().forEach(positions -> positions.forEach(pos ->
-            renderCube(poseStack, consumer, pos, positions)));
-
-        bufferSource.endBatch();
-        poseStack.popPose();
+        // TODO 26.2: re-enable the in-world area overlay once the world-render hook is back.
+        // This is invoked from AdAstraClient.renderOverlays(), whose caller in AdAstraClientFabric
+        // is itself stubbed (WorldRenderEvents.BEFORE_TRANSLUCENT — fabric-rendering-v1.world
+        // missing since the 26.1.2 port). In 26.2 the immediate MultiBufferSource was removed
+        // (Minecraft.renderBuffers()/bufferSource() are gone), so the draw path below needs to be
+        // re-expressed against the new submit API (SubmitNodeCollector) threaded from that hook.
+        // The cube-building geometry in renderCube() is preserved for that re-wiring.
+        // poseStack.pushPose();
+        // var consumer = /* SubmitNodeCollector-backed VertexConsumer for RenderTypes.debugQuads() */;
+        // poseStack.translate(-camera.position().x(), -camera.position().y(), -camera.position().z());
+        // positions.values().forEach(positions -> positions.forEach(pos ->
+        //     renderCube(poseStack, consumer, pos, positions)));
+        // poseStack.popPose();
     }
 
     private void renderCube(PoseStack poseStack, VertexConsumer consumer, BlockPos pos, Set<BlockPos> others) {

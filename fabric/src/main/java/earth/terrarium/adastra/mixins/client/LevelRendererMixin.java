@@ -1,11 +1,9 @@
 package earth.terrarium.adastra.mixins.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import earth.terrarium.adastra.common.tags.ModBiomeTags;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 // In 1.21.11, cloud rendering moved to CloudRenderer and weather rendering moved to WeatherEffectRenderer.
@@ -15,12 +13,6 @@ import org.spongepowered.asm.mixin.Unique;
 // See WeatherEffectRendererMixin and CloudRendererMixin for the new implementations.
 @Mixin(value = LevelRenderer.class, priority = 2000)
 public abstract class LevelRendererMixin {
-
-    @Shadow
-    private ClientLevel level;
-
-    @Shadow
-    private int ticks;
 
     @Unique
     @SuppressWarnings("unused")

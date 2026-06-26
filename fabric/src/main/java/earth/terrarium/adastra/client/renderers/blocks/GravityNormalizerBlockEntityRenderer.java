@@ -9,10 +9,7 @@ import earth.terrarium.adastra.common.blockentities.machines.GravityNormalizerBl
 import earth.terrarium.adastra.common.blocks.base.SidedMachineBlock;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -116,7 +113,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
         }
     }
 
-    static void renderStatic(BlockState state, float animation, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    static void renderStatic(BlockState state, float animation, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
         var minecraft = Minecraft.getInstance();
         BlockStateModel topModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOP);
         BlockStateModel toeModel = ClientPlatformUtils.getModel(minecraft.getModelManager(), TOE);
@@ -141,7 +138,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
 
             poseStack.translate(-0.5, 0, -0.5);
 
-            ClientPlatformUtils.renderBlockModelImmediate(topModel, poseStack, buffer, packedLight, packedOverlay);
+            ClientPlatformUtils.submitBlockModel(topModel, poseStack, collector, packedLight);
             poseStack.popPose();
 
             for (int i = 0; i < 4; i++) {
@@ -155,7 +152,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
                 poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(animation / 50 + i) * 10));
                 poseStack.translate(-0.27, -0.27, -0.27);
 
-                ClientPlatformUtils.renderBlockModelImmediate(toeModel, poseStack, buffer, packedLight, packedOverlay);
+                ClientPlatformUtils.submitBlockModel(toeModel, poseStack, collector, packedLight);
 
                 poseStack.popPose();
             }
@@ -169,7 +166,7 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
         public ItemRenderer() {
         }
 
-        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
             BlockState state = BuiltInRegistries.BLOCK.getValue(BuiltInRegistries.ITEM.getKey(stack.getItem())).defaultBlockState();
 
             var minecraft = Minecraft.getInstance();
@@ -178,8 +175,8 @@ public class GravityNormalizerBlockEntityRenderer implements BlockEntityRenderer
             poseStack.pushPose();
             try {
                 var model = minecraft.getModelManager().getBlockStateModelSet().get(state);
-                ClientPlatformUtils.renderBlockModelImmediate(model, poseStack, buffer, packedLight, packedOverlay);
-                renderStatic(state, yRot, poseStack, buffer, packedLight, packedOverlay);
+                ClientPlatformUtils.submitBlockModel(model, poseStack, collector, packedLight);
+                renderStatic(state, yRot, poseStack, collector, packedLight, packedOverlay);
             } finally {
                 poseStack.popPose();
             }

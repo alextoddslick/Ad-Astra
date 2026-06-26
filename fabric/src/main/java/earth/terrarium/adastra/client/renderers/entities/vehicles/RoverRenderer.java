@@ -1,7 +1,6 @@
 package earth.terrarium.adastra.client.renderers.entities.vehicles;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import earth.terrarium.adastra.AdAstra;
@@ -9,7 +8,6 @@ import earth.terrarium.adastra.client.models.entities.vehicles.RoverModel;
 import earth.terrarium.adastra.common.entities.vehicles.Rover;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -67,16 +65,15 @@ public class RoverRenderer extends EntityRenderer<Rover, VehicleRenderState> {
         public ItemRenderer() {
         }
 
-        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
             if (model == null) {
                 model = new RoverModel(Minecraft.getInstance().getEntityModels().bakeLayer(RoverModel.LAYER));
             }
-            var consumer = buffer.getBuffer(RenderTypes.entityCutoutZOffset(TEXTURE));
             poseStack.pushPose();
             try {
                 poseStack.mulPose(Axis.ZP.rotationDegrees(180));
                 poseStack.translate(0.0, -1.501, 0.0);
-                model.renderToBuffer(poseStack, consumer, packedLight, packedOverlay, -1);
+                collector.submitModelPart(model.root(), poseStack, RenderTypes.entityCutoutZOffset(TEXTURE), packedLight, packedOverlay, null);
             } finally {
                 poseStack.popPose();
             }

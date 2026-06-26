@@ -319,25 +319,30 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
             if (newVel.length() > maxSpeed) newVel = newVel.normalize().scale(maxSpeed);
             player.setDeltaMovement(newVel);
         } else {
-            // Atmospheric: drag/gravity provide the natural deceleration, but the
-            // old hard cutoff at length > 1.5 meant the suit stopped thrusting and
-            // drag won, so the player decelerated mid-burn. Instead, scale thrust
-            // down smoothly: full thrust up to 1.8, fading to zero by 2.4, so the
-            // player can sustain forward velocity but still has a soft top speed.
+            // Atmospheric direct control. The old branch used player.push(look·thrust) and
+            // delegated *steering* to vanilla elytra glide — but elytra redirects existing
+            // velocity toward the look vector, so tilting up to climb dumped all forward
+            // momentum into the Y axis (the "stop forward, shoot straight up" bug). We now
+            // steer like the space path: a turn-assist that FADES as look goes vertical
+            // (lookHoriz), applied via setDeltaMovement so elytra can't stall it.
+            //
+            // Kept deliberately distinct from space: stronger horizontal drag (0.97) and a
+            // lower top speed (1.5 vs space's 1.8). Overworld gravity still acts on `current`
+            // between ticks, so climbing costs sustained thrust and atmospheric flight stays
+            // heavier than the weightless space cruise. startFallFlying() (below) still gives
+            // a glide when you stop thrusting, preserving the atmospheric coast.
+            double lookHoriz = Math.sqrt(look.x * look.x + look.z * look.z);
             double speed = current.length();
-            double softCap = 1.8;
-            double hardCap = 2.4;
-            double thrustScale;
-            if (speed <= softCap) {
-                thrustScale = 1.0;
-            } else if (speed >= hardCap) {
-                thrustScale = 0.0;
-            } else {
-                thrustScale = (hardCap - speed) / (hardCap - softCap);
-            }
-            if (thrustScale > 0.0) {
-                player.push(look.scale(0.055 * thrustScale * boostMultiplier(player)));
-            }
+            double turnRate = 0.16 * lookHoriz;   // horizontal-only steering; ~0 when looking up/down
+            boolean collided = player.horizontalCollision || player.verticalCollision;
+            double thrust = (collided ? 0.5 : 0.085) * boostMultiplier(player);
+            double maxSpeed = 1.5;
+
+            Vec3 redirected = current.scale(1.0 - turnRate).add(look.scale(speed * turnRate));
+            Vec3 newVel = redirected.add(look.scale(thrust));
+            newVel = new Vec3(newVel.x * 0.97, newVel.y, newVel.z * 0.97); // atmospheric drag
+            if (newVel.length() > maxSpeed) newVel = newVel.normalize().scale(maxSpeed);
+            player.setDeltaMovement(newVel);
         }
 
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);

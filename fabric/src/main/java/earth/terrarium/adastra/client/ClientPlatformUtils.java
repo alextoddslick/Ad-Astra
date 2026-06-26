@@ -1,8 +1,6 @@
 package earth.terrarium.adastra.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.QuadInstance;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import earth.terrarium.adastra.client.dimension.ModDimensionSpecialEffects;
 import earth.terrarium.adastra.client.fabric.AdAstraClientFabric;
 import earth.terrarium.adastra.client.models.armor.SpaceSuitModel;
@@ -15,18 +13,15 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -77,13 +72,15 @@ public class ClientPlatformUtils {
     }
 
     /**
-     * 26.1.2 helper: collect the model's BlockStateModelParts and submit them to the
+     * 26.2 helper: collect the model's BlockStateModelParts and submit them to the
      * SubmitNodeCollector for rendering. Replaces the removed {@code ModelBlockRenderer.renderModel}
-     * call shape used by BE renderers. Renders to {@link Sheets#cutoutBlockSheet()}.
+     * call shape used by BE renderers. Renders to the block cutout layer
+     * ({@link RenderTypes#cutoutMovingBlock()}, the replacement for the removed
+     * {@code Sheets.cutoutBlockSheet()}).
      */
     public static void submitBlockModel(BlockStateModel model, PoseStack poseStack,
                                         SubmitNodeCollector collector, int light) {
-        submitBlockModel(model, poseStack, collector, Sheets.cutoutBlockSheet(), light,
+        submitBlockModel(model, poseStack, collector, RenderTypes.cutoutMovingBlock(), light,
             OverlayTexture.NO_OVERLAY);
     }
 
@@ -97,50 +94,6 @@ public class ClientPlatformUtils {
         if (parts.isEmpty()) return;
         collector.submitBlockModel(poseStack, renderType, parts,
             BlockModelRenderState.EMPTY_TINTS, light, overlay, 0);
-    }
-
-    /**
-     * 26.1.2 immediate-mode helper: render a {@link BlockStateModel} directly to a
-     * {@link MultiBufferSource}. Used by item / item-frame / dropped-item render paths
-     * which still hand us a {@code MultiBufferSource} rather than a
-     * {@link SubmitNodeCollector}. Iterates each part's {@link BakedQuad}s and pushes
-     * them into the {@link VertexConsumer} for {@link Sheets#cutoutBlockSheet()}.
-     */
-    public static void renderBlockModelImmediate(BlockStateModel model, PoseStack poseStack,
-                                                 MultiBufferSource buffer, int packedLight,
-                                                 int packedOverlay) {
-        renderBlockModelImmediate(model, poseStack, buffer, Sheets.cutoutBlockSheet(),
-            packedLight, packedOverlay);
-    }
-
-    public static void renderBlockModelImmediate(BlockStateModel model, PoseStack poseStack,
-                                                 MultiBufferSource buffer, RenderType renderType,
-                                                 int packedLight, int packedOverlay) {
-        if (model == null) return;
-        List<BlockStateModelPart> parts = new ArrayList<>();
-        model.collectParts(RandomSource.create(42L), parts);
-        if (parts.isEmpty()) return;
-
-        VertexConsumer vc = buffer.getBuffer(renderType);
-        QuadInstance quadInstance = new QuadInstance();
-        // White (untinted) per-vertex color; quads with a tintIndex would normally pull
-        // their color from a tint source, but for BE item rendering the default white
-        // works for all of these models (globe, oxygen distributor, gravity normalizer).
-        quadInstance.setColor(0xFFFFFFFF);
-        quadInstance.setLightCoords(packedLight);
-        quadInstance.setOverlayCoords(packedOverlay);
-
-        PoseStack.Pose pose = poseStack.last();
-        for (BlockStateModelPart part : parts) {
-            for (Direction direction : Direction.values()) {
-                for (BakedQuad quad : part.getQuads(direction)) {
-                    vc.putBakedQuad(pose, quad, quadInstance);
-                }
-            }
-            for (BakedQuad quad : part.getQuads(null)) {
-                vc.putBakedQuad(pose, quad, quadInstance);
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")

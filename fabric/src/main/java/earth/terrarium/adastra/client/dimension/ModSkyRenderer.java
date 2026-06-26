@@ -1,5 +1,6 @@
 package earth.terrarium.adastra.client.dimension;
 
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import earth.terrarium.adastra.client.utils.DimensionRenderingUtils;
@@ -41,6 +42,11 @@ public class ModSkyRenderer {
 
     private final PlanetRenderer renderer;
 
+    // 26.2: com.mojang.blaze3d.vertex.Tesselator was removed. Tesselator.getInstance() used to
+    // hand out a BufferBuilder backed by a shared, reusable ByteBufferBuilder; we now keep that
+    // backing buffer ourselves and build BufferBuilders against it directly.
+    private static final ByteBufferBuilder STAR_BYTE_BUFFER = new ByteBufferBuilder(1536);
+
     public ModSkyRenderer(PlanetRenderer renderer) {
         this.renderer = renderer;
     }
@@ -75,7 +81,7 @@ public class ModSkyRenderer {
      */
     public MeshData generateStarMesh() {
         var random = RandomSource.create(10842);
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder builder = new BufferBuilder(STAR_BYTE_BUFFER, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         for (int i = 0; i < renderer.stars(); i++) {
             double x = random.nextFloat() * 2 - 1;

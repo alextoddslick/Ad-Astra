@@ -15,13 +15,13 @@ public interface ConfigurationScreen {
     }
 
     static void ifPresent(Consumer<ConfigurationScreen> consumer) {
-        Screen screen = Minecraft.getInstance().screen;
+        Screen screen = Minecraft.getInstance().gui.screen();
         if (screen instanceof ConfigurationScreen configScreen && configScreen.canConfigure()) {
             consumer.accept(configScreen);
         }
     }
 
     static boolean isConfigurable() {
-        return Minecraft.getInstance().screen instanceof ConfigurationScreen screen && screen.canConfigure();
+        return Minecraft.getInstance().gui.screen() instanceof ConfigurationScreen screen && screen.canConfigure();
     }
 }

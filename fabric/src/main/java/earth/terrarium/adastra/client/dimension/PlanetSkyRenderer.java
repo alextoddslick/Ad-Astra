@@ -1,9 +1,9 @@
 package earth.terrarium.adastra.client.dimension;
 
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import earth.terrarium.adastra.client.ClientPlatformUtils;
 import net.minecraft.client.Minecraft;
@@ -27,8 +26,8 @@ import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 /**
  * Draws Ad Astra planet/sun/moon discs on top of the vanilla sky pipeline.
@@ -44,30 +43,14 @@ import java.util.OptionalInt;
  */
 public final class PlanetSkyRenderer {
 
-    /**
-     * Opaque depth-writing pipeline for the planet/sun/moon body discs.
-     *
-     * Mirrors vanilla {@link RenderPipelines#CELESTIAL} (POSITION_TEX + core/position_tex
-     * shader) but enables depth write and uses TRANSLUCENT blend so the texture's alpha
-     * channel still gives soft edges. With {@code withDepthWrite(true)} the disc occludes
-     * any later-drawn celestial geometry at greater depth, which fixes the bug where stars
-     * (drawn first by vanilla, no depth write) and other discs were visible through Earth.
-     *
-     * Stays inside the existing custom sky pass — that pass attaches the main render
-     * target's depth view directly via createRenderPass, so depth write works without
-     * touching the FrameGraph wiring.
-     */
-    private static final RenderPipeline PLANET_DISC_PIPELINE = RenderPipeline.builder()
-        .withLocation(Identifier.fromNamespaceAndPath("adastra", "pipeline/planet_disc"))
-        .withVertexShader("core/position_tex")
-        .withFragmentShader("core/position_tex")
-        .withSampler("Sampler0")
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        // TODO 26.1.2: withBlend / withDepthTestFunction / withDepthWrite removed in 26.1;
-        // pipeline now uses withColorTargetState / withDepthStencilState builders. Stubbed.
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .build();
+    // 26.2: the blaze3d RenderPipeline.Builder was overhauled — withSampler / withUniform /
+    // withVertexFormat were all replaced by bind-group-layout + vertex-binding + primitive-topology
+    // builders, and the global-uniform snippet that the core/position_tex shader needs
+    // (RenderPipelines.GLOBALS_SNIPPET) is private. The old custom PLANET_DISC_PIPELINE only
+    // differed from vanilla CELESTIAL by a depth-write flag that had already been stubbed out in
+    // the 26.1.2 port (see the removed TODO), so it was functionally identical to CELESTIAL. We now
+    // draw the body discs with vanilla RenderPipelines.CELESTIAL — exactly the pipeline vanilla uses
+    // for the sun/moon discs (POSITION_TEX, core/position_tex, OVERLAY blend, QUADS).
 
     @Nullable
     private static GpuBuffer quadBuffer;
@@ -77,7 +60,7 @@ public final class PlanetSkyRenderer {
     private static GpuBuffer getOrCreateQuadBuffer() {
         if (quadBuffer != null) return quadBuffer;
         try (ByteBufferBuilder bytebufferbuilder = ByteBufferBuilder.exactlySized(4 * DefaultVertexFormat.POSITION_TEX.getVertexSize())) {
-            BufferBuilder builder = new BufferBuilder(bytebufferbuilder, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            BufferBuilder builder = new BufferBuilder(bytebufferbuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX);
             Matrix4f m = new Matrix4f();
             // Match vanilla sun/moon orientation: quad lies in the X-Z plane at y=0, normal up.
             // Texture flipped vs the legacy renderer to compensate for the model-view rotation we apply.
@@ -154,7 +137,7 @@ public final class PlanetSkyRenderer {
             // otherwise overpaint it (sun/moon/etc.).
             renderQuad(poseStack, globalRot, renderable.localRotation(),
                 renderable.scale(), renderable.texture(), 0xFFFFFFFF,
-                PLANET_DISC_PIPELINE);
+                RenderPipelines.CELESTIAL);
         }
 
         poseStack.popPose();
@@ -211,20 +194,20 @@ public final class PlanetSkyRenderer {
         GpuBufferSlice transform = RenderSystem.getDynamicUniforms()
             .writeTransform(mvStack, new Vector4f(r, g, b, a), new Vector3f(), new Matrix4f());
 
-        GpuTextureView color = mc.getMainRenderTarget().getColorTextureView();
-        GpuTextureView depth = mc.getMainRenderTarget().getDepthTextureView();
-        var quadIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+        GpuTextureView color = mc.gameRenderer.mainRenderTarget().getColorTextureView();
+        GpuTextureView depth = mc.gameRenderer.mainRenderTarget().getDepthTextureView();
+        var quadIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
         GpuBuffer indexBuffer = quadIndices.getBuffer(6);
 
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder()
-            .createRenderPass(() -> "Ad Astra planet disc", color, OptionalInt.empty(), depth, OptionalDouble.empty())) {
+            .createRenderPass(() -> "Ad Astra planet disc", color, Optional.empty(), depth, OptionalDouble.empty())) {
             pass.setPipeline(pipeline);
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("DynamicTransforms", transform);
             pass.bindTexture("Sampler0", tex.getTextureView(), tex.getSampler());
-            pass.setVertexBuffer(0, getOrCreateQuadBuffer());
+            pass.setVertexBuffer(0, getOrCreateQuadBuffer().slice());
             pass.setIndexBuffer(indexBuffer, quadIndices.type());
-            pass.drawIndexed(0, 0, 6, 1);
+            pass.drawIndexed(6, 1, 0, 0, 0);
         }
 
         mvStack.popMatrix();

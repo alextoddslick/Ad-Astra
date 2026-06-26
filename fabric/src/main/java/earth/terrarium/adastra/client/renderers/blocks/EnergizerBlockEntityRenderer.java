@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import earth.terrarium.adastra.common.blockentities.machines.EnergizerBlockEntity;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -50,7 +50,7 @@ public class EnergizerBlockEntityRenderer implements BlockEntityRenderer<Energiz
             long gameTime = entity.getLevel().getGameTime();
             state.yOffset = Math.sin((gameTime + partialTick) / 8.0) / 8.0;
             state.rotation = (gameTime + partialTick) * 4;
-            state.lightAbove = LevelRenderer.getLightCoords(entity.getLevel(), entity.getBlockPos().above());
+            state.lightAbove = LightCoordsUtil.getLightCoords(entity.getLevel(), entity.getBlockPos().above());
 
             this.itemModelResolver.updateForTopItem(
                 state.itemRenderState, stack, ItemDisplayContext.FIXED, entity.getLevel(), null, 0

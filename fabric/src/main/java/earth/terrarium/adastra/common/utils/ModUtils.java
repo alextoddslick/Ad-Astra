@@ -56,7 +56,7 @@ public final class ModUtils {
     public static Optional<ContainerMachineBlockEntity> getMachineFromMenuPacket(BlockPos pos, Player player, Level level) {
         if (!(player.containerMenu instanceof BaseContainerMenu<?>))
             return Optional.empty(); // ensure the sender has the menu open
-        if (player.distanceToSqr(pos.getCenter()) > 64)
+        if (player.distanceToSqr(Vec3.atCenterOf(pos)) > 64)
             return Optional.empty(); // ensure the sender within 8 blocks of the machine
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (!(blockEntity instanceof ContainerMachineBlockEntity container)) return Optional.empty();

@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.painting.Painting;
 import net.minecraft.world.entity.decoration.painting.PaintingVariant;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,7 +37,7 @@ public class SpacePaintingItem extends HangingEntityItem {
     private final TagKey<PaintingVariant> variants;
 
     public SpacePaintingItem(Properties settings, ResourceKey<PaintingVariant> defaultVariantKey, TagKey<PaintingVariant> variants) {
-        super(EntityType.PAINTING, settings);
+        super(EntityTypes.PAINTING, settings);
         this.defaultVariantKey = defaultVariantKey;
         this.variants = variants;
     }

@@ -9,10 +9,7 @@ import earth.terrarium.adastra.common.blockentities.machines.OxygenDistributorBl
 import earth.terrarium.adastra.common.blocks.base.SidedMachineBlock;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -106,7 +103,7 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
         }
     }
 
-    static void renderStatic(BlockState state, float yRot, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    static void renderStatic(BlockState state, float yRot, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
         BlockStateModel topModel = ClientPlatformUtils.getModel(
             Minecraft.getInstance().getModelManager(), TOP);
         if (topModel == null) return;
@@ -117,7 +114,7 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
             poseStack.mulPose(Axis.YP.rotationDegrees(-yRot));
             poseStack.translate(-0.5, 0, -0.5);
 
-            ClientPlatformUtils.renderBlockModelImmediate(topModel, poseStack, buffer, packedLight, packedOverlay);
+            ClientPlatformUtils.submitBlockModel(topModel, poseStack, collector, packedLight);
         } finally {
             poseStack.popPose();
         }
@@ -128,7 +125,7 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
         public ItemRenderer() {
         }
 
-        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay) {
             BlockState state = BuiltInRegistries.BLOCK.getValue(BuiltInRegistries.ITEM.getKey(stack.getItem())).defaultBlockState();
 
             var minecraft = Minecraft.getInstance();
@@ -137,8 +134,8 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
             poseStack.pushPose();
             try {
                 var model = minecraft.getModelManager().getBlockStateModelSet().get(state);
-                ClientPlatformUtils.renderBlockModelImmediate(model, poseStack, buffer, packedLight, packedOverlay);
-                renderStatic(state, yRot, poseStack, buffer, packedLight, packedOverlay);
+                ClientPlatformUtils.submitBlockModel(model, poseStack, collector, packedLight);
+                renderStatic(state, yRot, poseStack, collector, packedLight, packedOverlay);
             } finally {
                 poseStack.popPose();
             }

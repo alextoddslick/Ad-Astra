@@ -1,8 +1,6 @@
 package earth.terrarium.adastra.client.utils;
 
 import earth.terrarium.adastra.AdAstra;
-import earth.terrarium.adastra.mixins.client.LevelRendererAccessor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 
 import java.util.List;
@@ -35,8 +33,4 @@ public class DimensionRenderingUtils {
         DimensionRenderingUtils.EARTH,
         DimensionRenderingUtils.MARS
     );
-
-    public static int getTicks() {
-        return ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getTicks();
-    }
 }
