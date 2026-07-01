@@ -82,10 +82,22 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         // Check atmosphere leave regardless of flight state
         checkAtmosphereLeave(player);
 
+        tickFlight(player, stack);
+    }
+
+    /**
+     * Core jet-suit flight, restored to the 1.20.1 model. In 1.20.1 Item#inventoryTick ran on
+     * BOTH sides, so the client applied its own flight velocity every tick — that's what made
+     * the suit responsive. 26.x made inventoryTick server-only, which left flight dependent on
+     * a per-tick server velocity sync (rubber-banding). This method is therefore called from
+     * both the server inventoryTick above AND AdAstraClient.clientTick for the local player;
+     * energy consumption still only happens server-side (consume() no-ops on the client).
+     */
+    public void tickFlight(Player player, ItemStack stack) {
+        if (!hasFullJetSuitSet(player)) return;
         if (player.getAbilities().flying) return;
         if (player.isPassenger()) return;
         if (player.getCooldowns().isOnCooldown(stack)) return;
-
         if (!KeybindManager.suitFlightEnabled(player)) return;
 
         // Space brake: in space, hold sneak while *touching a block* (ground / wall / ceiling)
@@ -136,7 +148,6 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         Vec3 v = player.getDeltaMovement();
         player.setDeltaMovement(v.x * 0.92, 0.0, v.z * 0.92);
         player.fallDistance = 0.0f;
-        player.hurtMarked = true;
     }
 
     private void applySpaceBrake(Player player) {
@@ -146,7 +157,6 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         // touchingBlock, so reaching here means the player is grounded or
         // pressed against a surface — no reason to drift.
         player.setDeltaMovement(Vec3.ZERO);
-        player.hurtMarked = true;
     }
 
     private void checkAtmosphereLeave(Player player) {
@@ -195,158 +205,22 @@ public class JetSuitItem extends SpaceSuitItem implements EnergyProvider.Item {
         return rawGravity > BOOST_GRAVITY_THRESHOLD ? BOOST_FACTOR : 1.0f;
     }
 
+    // Flight physics below are the original 1.20.1 implementation (verbatim math),
+    // with only the boost-mode multiplier layered on for heavy-gravity worlds.
+
     protected void upwardsFlight(Player player) {
-        float boostMul = boostMultiplier(player);
         double acceleration = sigmoidAcceleration(player.tickCount, 5.0, 1.0, 2.0);
-        acceleration /= 35.0f;
-        double yBoost = Math.max(0.002, acceleration) * boostMul;
-
-        Vec3 v = player.getDeltaMovement();
-        double lateralSpeed = Math.sqrt(v.x * v.x + v.z * v.z);
-
-        // WASD input in world space. Vanilla's getInputVector rotates the local
-        // (xxa, zza) input by player yaw — we mirror that so thrust goes in the
-        // actual direction the keys mean (W=look-forward, S=look-back, A=left,
-        // D=right) instead of always look-forward. Without this, only W contributed
-        // meaningful thrust and A/S/D did nothing while space was held.
-        double zza = player.zza;
-        double xxa = player.xxa;
-        double inputMag = Math.sqrt(zza * zza + xxa * xxa);
-        double inputDirX = 0.0;
-        double inputDirZ = 0.0;
-        if (inputMag > 1.0e-4) {
-            double yRotRad = player.getYRot() * (Math.PI / 180.0);
-            double sinYaw = Math.sin(yRotRad);
-            double cosYaw = Math.cos(yRotRad);
-            inputDirX = (xxa * cosYaw - zza * sinYaw) / inputMag;
-            inputDirZ = (zza * cosYaw + xxa * sinYaw) / inputMag;
-        }
-
-        // Tap-to-burst: a single space tap = 1 tick of normal thrust, which is way
-        // too small to feel between coast frames. On the rising edge of jump we add
-        // a one-shot impulse so each tap = a noticeable kick. Sustained holds still
-        // feel right because the impulse only fires once per press.
-        boolean justPressed = KeybindManager.jumpPressedThisTick(player);
-        double impulseY = justPressed ? 0.25 * boostMul : 0.0;
-        double impulseHoriz = (justPressed && inputMag > 1.0e-4) ? 0.15 : 0.0;
-
-        if (PlanetApi.API.isSpace(player.level())) {
-            // No always-on damp in open space — the prior 0.995 (~10%/sec) made
-            // sustained jet flight feel like it was constantly braking. In a vacuum
-            // there is no aerodynamic drag, so when the player isn't pressing space
-            // we let GravityApi's SPACE_FRICTION (0.999, ~2%/sec) handle coast decay.
-            // Touching a surface keeps a small friction so you can grind to a stop
-            // against a wall/floor. Velocity is capped at the same maxSpeed as
-            // fullFlight so upwardsFlight doesn't become the faster mode.
-            boolean touchingBlock = player.onGround()
-                || player.horizontalCollision
-                || player.verticalCollision;
-            double damp = touchingBlock ? 0.99 : 1.0;
-            double thrustMagnitude = inputMag > 1.0e-4 ? 0.03 : 0.0;
-            double newX = v.x * damp + inputDirX * (thrustMagnitude + impulseHoriz);
-            double newZ = v.z * damp + inputDirZ * (thrustMagnitude + impulseHoriz);
-            double horizSpeed = Math.sqrt(newX * newX + newZ * newZ);
-            if (horizSpeed > 1.8) {
-                newX = newX / horizSpeed * 1.8;
-                newZ = newZ / horizSpeed * 1.8;
-            }
-            player.setDeltaMovement(newX, v.y + yBoost + impulseY, newZ);
-        } else {
-            // Atmospheric: counteract vanilla air drag so holding space doesn't bleed
-            // horizontal velocity. Two cases:
-            //   1. WASD pressed: apply real thrust in input direction so space+W keeps
-            //      you moving forward, space+A strafes left, etc. The previous tiny
-            //      maintenance pulse (~0.008 at walking speed) was overwhelmed by
-            //      stacked drag (vanilla 0.91 then our 0.985) and motion died fast.
-            //   2. No input but already moving: smaller maintenance pulse along look so
-            //      a banking turn or coasting glide doesn't bleed off — gated on existing
-            //      speed so pressing space from a standstill doesn't drift you forward.
-            double thrustX = 0.0;
-            double thrustZ = 0.0;
-            double maintenance = 0.0;
-            if (inputMag > 1.0e-4) {
-                thrustX = inputDirX;
-                thrustZ = inputDirZ;
-                maintenance = 0.025;
-            } else if (lateralSpeed > 0.05) {
-                Vec3 look = player.getLookAngle();
-                double horizLen = Math.sqrt(look.x * look.x + look.z * look.z);
-                if (horizLen > 1.0e-4) {
-                    thrustX = look.x / horizLen;
-                    thrustZ = look.z / horizLen;
-                    double rampedSpeed = Math.min(1.0, (lateralSpeed - 0.05) / 0.20);
-                    maintenance = 0.02 * rampedSpeed;
-                }
-            }
-            player.setDeltaMovement(
-                v.x * 0.985 + thrustX * (maintenance + impulseHoriz),
-                v.y + yBoost + impulseY,
-                v.z * 0.985 + thrustZ * (maintenance + impulseHoriz)
-            );
-        }
+        acceleration /= 25.0f;
+        double yBoost = Math.max(0.0025, acceleration) * boostMultiplier(player);
+        player.setDeltaMovement(player.getDeltaMovement().add(0, yBoost, 0));
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
-        player.hurtMarked = true;
     }
 
     protected void fullFlight(Player player) {
-        Vec3 look = player.getLookAngle().normalize();
-        Vec3 current = player.getDeltaMovement();
-
-        if (PlanetApi.API.isSpace(player.level())) {
-            // Space mode: redirect existing momentum toward look direction (turn assist),
-            // plus apply forward thrust. Without this the player just adds vectors and
-            // can't actually steer — looking somewhere else doesn't change where you go.
-            //
-            // Turn assist must fade as look goes vertical, otherwise looking straight down
-            // (e.g. to see the ground while flying horizontally) redirects all horizontal
-            // momentum into the y axis and the player decelerates quickly. lookHoriz is
-            // cos(pitch); 1 when looking horizontally, 0 when looking straight up/down.
-            double lookHoriz = Math.sqrt(look.x * look.x + look.z * look.z);
-            double speed = current.length();
-            double turnRate = 0.18 * lookHoriz;   // 18% of momentum redirected per tick, scaled by look horizontality
-            // Collision-aware thrust: vanilla Entity#collide() zeroes the velocity
-            // component on the axis we hit, so cruising at maxSpeed into a block
-            // drops `current` to ~0 and the next tick rebuilds from 0 + 0.085 — a
-            // near-dead-stop. Bumping thrust massively while colliding lets the player
-            // either punch through (if obstacle clears) or slide along the wall at a
-            // usable speed; they recover to maxSpeed in ~3 ticks instead of ~20.
-            boolean collided = player.horizontalCollision || player.verticalCollision;
-            double thrust = collided ? 0.6 : 0.085;
-            double maxSpeed = 1.8;
-
-            Vec3 redirected = current.scale(1.0 - turnRate).add(look.scale(speed * turnRate));
-            Vec3 newVel = redirected.add(look.scale(thrust));
-            if (newVel.length() > maxSpeed) newVel = newVel.normalize().scale(maxSpeed);
-            player.setDeltaMovement(newVel);
-        } else {
-            // Atmospheric direct control. The old branch used player.push(look·thrust) and
-            // delegated *steering* to vanilla elytra glide — but elytra redirects existing
-            // velocity toward the look vector, so tilting up to climb dumped all forward
-            // momentum into the Y axis (the "stop forward, shoot straight up" bug). We now
-            // steer like the space path: a turn-assist that FADES as look goes vertical
-            // (lookHoriz), applied via setDeltaMovement so elytra can't stall it.
-            //
-            // Kept deliberately distinct from space: stronger horizontal drag (0.97) and a
-            // lower top speed (1.5 vs space's 1.8). Overworld gravity still acts on `current`
-            // between ticks, so climbing costs sustained thrust and atmospheric flight stays
-            // heavier than the weightless space cruise. startFallFlying() (below) still gives
-            // a glide when you stop thrusting, preserving the atmospheric coast.
-            double lookHoriz = Math.sqrt(look.x * look.x + look.z * look.z);
-            double speed = current.length();
-            double turnRate = 0.16 * lookHoriz;   // horizontal-only steering; ~0 when looking up/down
-            boolean collided = player.horizontalCollision || player.verticalCollision;
-            double thrust = (collided ? 0.5 : 0.085) * boostMultiplier(player);
-            double maxSpeed = 1.5;
-
-            Vec3 redirected = current.scale(1.0 - turnRate).add(look.scale(speed * turnRate));
-            Vec3 newVel = redirected.add(look.scale(thrust));
-            newVel = new Vec3(newVel.x * 0.97, newVel.y, newVel.z * 0.97); // atmospheric drag
-            if (newVel.length() > maxSpeed) newVel = newVel.normalize().scale(maxSpeed);
-            player.setDeltaMovement(newVel);
-        }
-
+        if (player.getDeltaMovement().length() > 2.0) return;
+        Vec3 movement = player.getLookAngle().normalize().scale(0.075 * boostMultiplier(player));
+        player.setDeltaMovement(player.getDeltaMovement().add(movement));
         player.fallDistance = Math.max(player.fallDistance / 1.5f, 0.0f);
-        player.hurtMarked = true;
         if (!player.isFallFlying()) {
             player.startFallFlying();
         }

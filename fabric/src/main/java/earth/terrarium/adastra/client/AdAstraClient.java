@@ -333,17 +333,17 @@ public class AdAstraClient {
                 wearingJetSuit && AdAstraConfigClient.jetSuitEnabled
             ));
 
-            // Client-side immediate visual feedback for jet flight. The server-side
-            // velocity is still authoritative (applied in JetSuitItem.inventoryTick),
-            // but the ~50–100 ms round-trip latency between key press → server-tick
-            // boost → motion-packet-back made the suit feel like it "stuttered"
-            // before lifting off. Spawning particles here at clientTick (20 Hz)
-            // gives the player instant confirmation that the jet is firing.
-            // Conditions inside spawnParticles still gate on suitFlightEnabled +
-            // jumpDown + canFly, so no particles for normal vanilla jumping.
+            // Client-side flight tick — restores the 1.20.1 behavior where
+            // Item#inventoryTick ran on both sides and the client applied its own
+            // flight velocity. 26.x made inventoryTick server-only; without this the
+            // suit only moved on the ~50–100 ms server round-trip (stutter/rubber-band).
+            // The server still runs the same logic authoritatively (energy drain,
+            // glide, anti-kick); this call is the local player's responsive copy.
+            // Particles are spawned here too for instant visual confirmation.
             if (wearingJetSuit) {
                 ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
                 if (chest.getItem() instanceof JetSuitItem suit) {
+                    suit.tickFlight(player, chest);
                     suit.spawnParticles(player.level(), player, chest);
                 }
             }
