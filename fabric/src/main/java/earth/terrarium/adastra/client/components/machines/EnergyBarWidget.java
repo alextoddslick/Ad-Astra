@@ -17,9 +17,15 @@ import java.time.Duration;
 
 public class EnergyBarWidget extends ConfigurationWidget implements CursorWidget, TickableWidget {
 
+    private static final int RATE_WINDOW_TICKS = 20;
+
     protected final ValueStorage container;
     protected long lastStoredEnergy;
-    protected long difference;
+    protected long windowIn;
+    protected long windowOut;
+    protected long inPerTick;
+    protected long outPerTick;
+    protected int windowTick;
 
     public EnergyBarWidget(EnergyConfiguration configuration) {
         super(configuration, GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT);
@@ -29,9 +35,19 @@ public class EnergyBarWidget extends ConfigurationWidget implements CursorWidget
     @Override
     public void tick() {
         long currentEnergy = this.container.getStoredAmount();
-        if (currentEnergy != this.lastStoredEnergy) {
-            this.difference = currentEnergy - this.lastStoredEnergy;
-            this.lastStoredEnergy = currentEnergy;
+        long delta = currentEnergy - this.lastStoredEnergy;
+        this.lastStoredEnergy = currentEnergy;
+        if (delta > 0) this.windowIn += delta;
+        else if (delta < 0) this.windowOut -= delta;
+
+        // A single net delta per tick can't reveal simultaneous in+out flow, so accumulate
+        // each direction separately over a short window and report both once it fills.
+        if (++this.windowTick >= RATE_WINDOW_TICKS) {
+            this.inPerTick = this.windowIn / RATE_WINDOW_TICKS;
+            this.outPerTick = this.windowOut / RATE_WINDOW_TICKS;
+            this.windowIn = 0;
+            this.windowOut = 0;
+            this.windowTick = 0;
         }
     }
 
@@ -51,7 +67,8 @@ public class EnergyBarWidget extends ConfigurationWidget implements CursorWidget
         if (this.isHoveredOrFocused()) {
             setTooltip(Tooltip.create(CommonComponents.joinLines(
                 TooltipUtils.getEnergyComponent(energy, capacity),
-                TooltipUtils.getEnergyDifferenceComponent(this.difference),
+                TooltipUtils.getEnergyInComponent(this.inPerTick),
+                TooltipUtils.getEnergyOutComponent(this.outPerTick),
                 TooltipUtils.getMaxEnergyInComponent(container.getCapacity()),
                 TooltipUtils.getMaxEnergyOutComponent(container.getCapacity())
             )));

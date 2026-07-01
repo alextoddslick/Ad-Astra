@@ -70,10 +70,10 @@ public class OxygenDistributorBlockEntityRenderer implements BlockEntityRenderer
             default -> 0f;
         };
         float facingYRot = switch (state.direction) {
+            case NORTH -> 180f;
             case EAST -> 90f;
-            case SOUTH -> 180f;
             case WEST -> 270f;
-            default -> 0f;
+            default -> 0f; // SOUTH
         };
         if (state.face == AttachFace.CEILING) facingYRot = (facingYRot + 180f) % 360f;
 

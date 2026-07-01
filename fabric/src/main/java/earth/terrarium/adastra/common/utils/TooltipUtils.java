@@ -36,9 +36,14 @@ public class TooltipUtils {
             getFormattedAmount(capacity)).withStyle(ChatFormatting.GOLD);
     }
 
-    public static Component getEnergyDifferenceComponent(long energy) {
-        return Component.translatable("tooltip.ad_astra.energy_%s".formatted(energy < 0 ? "out" : "in"),
-            getFormattedAmount(Math.abs(energy))).withStyle(ChatFormatting.GOLD);
+    public static Component getEnergyInComponent(long energyPerTick) {
+        return Component.translatable("tooltip.ad_astra.energy_in",
+            getFormattedAmount(energyPerTick)).withStyle(ChatFormatting.GOLD);
+    }
+
+    public static Component getEnergyOutComponent(long energyPerTick) {
+        return Component.translatable("tooltip.ad_astra.energy_out",
+            getFormattedAmount(energyPerTick)).withStyle(ChatFormatting.GOLD);
     }
 
     public static Component getMaxEnergyInComponent(long maxIn) {
@@ -117,9 +122,14 @@ public class TooltipUtils {
         ).withStyle(ChatFormatting.GOLD);
     }
 
-    public static Component getFluidDifferenceComponent(long fluid) {
-        return Component.translatable("tooltip.ad_astra.fluid_%s".formatted(fluid < 0 ? "out" : "in"),
-            getFormattedAmount(Math.abs(fluid) / 81L)).withStyle(ChatFormatting.GOLD);
+    public static Component getFluidInComponent(long fluidPerTick) {
+        return Component.translatable("tooltip.ad_astra.fluid_in",
+            getFormattedAmount(fluidPerTick / 81L)).withStyle(ChatFormatting.GOLD);
+    }
+
+    public static Component getFluidOutComponent(long fluidPerTick) {
+        return Component.translatable("tooltip.ad_astra.fluid_out",
+            getFormattedAmount(fluidPerTick / 81L)).withStyle(ChatFormatting.GOLD);
     }
 
     public static Component getMaxFluidInComponent(long maxIn) {
