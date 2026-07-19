@@ -401,6 +401,8 @@ public class ModBlocks {
     public static final RegistryEntry<Block> PERMAFROST_BRICK_WALL = WALLS.register("permafrost_brick_wall", () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICK_WALL).mapColor(MapColor.COLOR_LIGHT_BLUE)));
 
     public static final RegistryEntry<Block> GLACIO_ICE_SHARD_ORE = CUBES.register("glacio_ice_shard_ore", () -> new DropExperienceBlock(UniformInt.of(2, 5), BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_ORE)));
+    // Europa-exclusive etrium ore: diamond-ore look on glacio stone (Europa's underground), tiny veins.
+    public static final RegistryEntry<Block> EUROPA_ETRIUM_ORE = CUBES.register("europa_etrium_ore", () -> new DropExperienceBlock(UniformInt.of(3, 7), BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE)));
     public static final RegistryEntry<Block> GLACIO_COAL_ORE = CUBES.register("glacio_coal_ore", () -> new DropExperienceBlock(UniformInt.of(0, 2), BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_ORE)));
     public static final RegistryEntry<Block> GLACIO_COPPER_ORE = CUBES.register("glacio_copper_ore", () -> new DropExperienceBlock(ConstantInt.of(0), BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_ORE)));
     public static final RegistryEntry<Block> GLACIO_IRON_ORE = CUBES.register("glacio_iron_ore", () -> new DropExperienceBlock(ConstantInt.of(0), BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_ORE)));

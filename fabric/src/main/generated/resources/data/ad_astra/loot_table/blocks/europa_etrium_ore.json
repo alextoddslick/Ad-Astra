@@ -26,16 +26,25 @@
                   }
                 }
               ],
-              "name": "ad_astra:mercury_stone"
+              "name": "ad_astra:europa_etrium_ore"
             },
             {
               "type": "minecraft:item",
-              "conditions": [
+              "functions": [
                 {
-                  "condition": "minecraft:survives_explosion"
+                  "function": "minecraft:set_count",
+                  "count": 2.0
+                },
+                {
+                  "enchantment": "minecraft:fortune",
+                  "formula": "minecraft:ore_drops",
+                  "function": "minecraft:apply_bonus"
+                },
+                {
+                  "function": "minecraft:explosion_decay"
                 }
               ],
-              "name": "ad_astra:mercury_cobblestone"
+              "name": "ad_astra:etrium_nugget"
             }
           ]
         }
@@ -43,5 +52,5 @@
       "rolls": 1.0
     }
   ],
-  "random_sequence": "ad_astra:blocks/mercury_stone"
+  "random_sequence": "ad_astra:blocks/europa_etrium_ore"
 }

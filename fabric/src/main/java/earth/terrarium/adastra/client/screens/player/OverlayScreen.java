@@ -150,8 +150,10 @@ public class OverlayScreen {
         if (storming || stormPhase != ClientboundSyncStormPacket.PHASE_NONE) {
             long time = level.getGameTime();
 
-            // Persistent status line at the top while a storm is active.
-            if (storming) {
+            // Persistent status line at the top while a storm is active. The precise intensity
+            // readout is Analysis Visor telemetry: only shown while the upgraded helmet is worn
+            // (gamemode-independent — creative players with the visor still get it).
+            if (storming && ClientStormData.localHasAnalysisVisor()) {
                 int pct = Mth.clamp(Math.round(ClientStormData.intensity() * 100), 0, 100);
                 poseStack.pushMatrix();
                 poseStack.translate(width / 2f, 4);

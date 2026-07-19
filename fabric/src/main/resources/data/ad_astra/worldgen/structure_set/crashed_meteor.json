@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "ad_astra:crashed_meteor",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "salt": 738492617,
+    "spacing": 28,
+    "separation": 12,
+    "type": "minecraft:random_spread"
+  }
+}

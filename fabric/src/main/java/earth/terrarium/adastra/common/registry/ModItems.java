@@ -482,6 +482,7 @@ public class ModItems {
     public static final RegistryEntry<Item> GLACIO_STONE_BRICK_WALL = ITEMS.register("glacio_stone_brick_wall", () -> new BlockItem(ModBlocks.GLACIO_STONE_BRICK_WALL.get(), new Item.Properties()));
 
     public static final RegistryEntry<Item> GLACIO_ICE_SHARD_ORE = ITEMS.register("glacio_ice_shard_ore", () -> new BlockItem(ModBlocks.GLACIO_ICE_SHARD_ORE.get(), new Item.Properties()));
+    public static final RegistryEntry<Item> EUROPA_ETRIUM_ORE = ITEMS.register("europa_etrium_ore", () -> new BlockItem(ModBlocks.EUROPA_ETRIUM_ORE.get(), new Item.Properties()));
     public static final RegistryEntry<Item> GLACIO_COAL_ORE = ITEMS.register("glacio_coal_ore", () -> new BlockItem(ModBlocks.GLACIO_COAL_ORE.get(), new Item.Properties()));
     public static final RegistryEntry<Item> GLACIO_COPPER_ORE = ITEMS.register("glacio_copper_ore", () -> new BlockItem(ModBlocks.GLACIO_COPPER_ORE.get(), new Item.Properties()));
     public static final RegistryEntry<Item> GLACIO_IRON_ORE = ITEMS.register("glacio_iron_ore", () -> new BlockItem(ModBlocks.GLACIO_IRON_ORE.get(), new Item.Properties()));

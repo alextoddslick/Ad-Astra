@@ -6,6 +6,7 @@ import com.teamresourceful.resourcefullib.common.registry.ResourcefulRegistry;
 import earth.terrarium.adastra.AdAstra;
 import earth.terrarium.adastra.common.utils.EnergyUtils;
 import earth.terrarium.adastra.common.utils.FluidUtils;
+import earth.terrarium.adastra.common.utils.UpgradeUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -52,6 +53,14 @@ public class ModCreativeTab {
         list.add(EnergyUtils.energyFilledItem(ModItems.ENERGIZER));
         list.add(FluidUtils.fluidFilledItem(ModItems.GAS_TANK, ModFluids.OXYGEN));
         list.add(FluidUtils.fluidFilledItem(ModItems.LARGE_GAS_TANK, ModFluids.OXYGEN));
+
+        // Upgraded gear variants (NASA Workbench suit upgrades).
+        ItemStack boostBoots = new ItemStack(ModItems.JET_SUIT_BOOTS.get());
+        UpgradeUtils.set(boostBoots, UpgradeUtils.BOOST_MODE, true);
+        list.add(boostBoots);
+        ItemStack visorHelmet = new ItemStack(ModItems.JET_SUIT_HELMET.get());
+        UpgradeUtils.set(visorHelmet, UpgradeUtils.ANALYSIS_VISOR, true);
+        list.add(visorHelmet);
 
         return list.stream();
     }

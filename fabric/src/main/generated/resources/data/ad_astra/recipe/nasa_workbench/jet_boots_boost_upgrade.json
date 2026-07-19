@@ -19,5 +19,6 @@
         "boost_mode": true
       }
     }
-  }
+  },
+  "shapeless": true
 }

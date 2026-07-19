@@ -54,6 +54,8 @@ public final class PlanetSkyRenderer {
 
     @Nullable
     private static GpuBuffer quadBuffer;
+    @Nullable
+    private static GpuBuffer colorQuadBuffer;
 
     private PlanetSkyRenderer() {}
 
@@ -73,6 +75,23 @@ public final class PlanetSkyRenderer {
             }
         }
         return quadBuffer;
+    }
+
+    // Same quad in POSITION_TEX_COLOR (white verts) for the END_SKY pipeline used by body discs.
+    private static GpuBuffer getOrCreateColorQuadBuffer() {
+        if (colorQuadBuffer != null) return colorQuadBuffer;
+        try (ByteBufferBuilder bytebufferbuilder = ByteBufferBuilder.exactlySized(4 * DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize())) {
+            BufferBuilder builder = new BufferBuilder(bytebufferbuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            Matrix4f m = new Matrix4f();
+            builder.addVertex(m, -1.0F, 0.0F, -1.0F).setUv(0.0F, 0.0F).setColor(-1);
+            builder.addVertex(m, 1.0F, 0.0F, -1.0F).setUv(1.0F, 0.0F).setColor(-1);
+            builder.addVertex(m, 1.0F, 0.0F, 1.0F).setUv(1.0F, 1.0F).setColor(-1);
+            builder.addVertex(m, -1.0F, 0.0F, 1.0F).setUv(0.0F, 1.0F).setColor(-1);
+            try (MeshData meshData = builder.buildOrThrow()) {
+                colorQuadBuffer = RenderSystem.getDevice().createBuffer(() -> "Ad Astra planet color quad", 40, meshData.vertexBuffer());
+            }
+        }
+        return colorQuadBuffer;
     }
 
     /**
@@ -132,12 +151,12 @@ public final class PlanetSkyRenderer {
                     RenderPipelines.CELESTIAL);
             }
 
-            // Body disc on the opaque, depth-writing pipeline so it occludes stars (drawn
-            // before with no depth write) and any later-drawn celestial body that would
-            // otherwise overpaint it (sun/moon/etc.).
+            // Body disc on END_SKY (normal alpha blending) so its opaque texels fully cover
+            // the stars behind it. CELESTIAL's OVERLAY blend is additive — meant for the
+            // sun — and lets the starfield shine through the darker parts of a planet.
             renderQuad(poseStack, globalRot, renderable.localRotation(),
                 renderable.scale(), renderable.texture(), 0xFFFFFFFF,
-                RenderPipelines.CELESTIAL);
+                RenderPipelines.END_SKY);
         }
 
         poseStack.popPose();
@@ -191,8 +210,13 @@ public final class PlanetSkyRenderer {
         float b = ARGB.blueFloat(colorArgb);
         float a = ARGB.alphaFloat(colorArgb);
 
+        // Pass a COPY of the model-view stack, never the live Matrix4fStack. DynamicUniformStorage
+        // keeps the last-written Transform record for dedup comparison; handing it a reference to
+        // the shared global stack (which pops back to identity after this call) made that record
+        // later compare equal to the GUI item renderer's identity transform, falsely deduping every
+        // GUI item onto this disc's uniform slice — blanking all item icons in space dimensions.
         GpuBufferSlice transform = RenderSystem.getDynamicUniforms()
-            .writeTransform(mvStack, new Vector4f(r, g, b, a), new Vector3f(), new Matrix4f());
+            .writeTransform(new Matrix4f(mvStack), new Vector4f(r, g, b, a), new Vector3f(), new Matrix4f());
 
         GpuTextureView color = mc.gameRenderer.mainRenderTarget().getColorTextureView();
         GpuTextureView depth = mc.gameRenderer.mainRenderTarget().getDepthTextureView();
@@ -205,7 +229,8 @@ public final class PlanetSkyRenderer {
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("DynamicTransforms", transform);
             pass.bindTexture("Sampler0", tex.getTextureView(), tex.getSampler());
-            pass.setVertexBuffer(0, getOrCreateQuadBuffer().slice());
+            GpuBuffer quad = pipeline == RenderPipelines.END_SKY ? getOrCreateColorQuadBuffer() : getOrCreateQuadBuffer();
+            pass.setVertexBuffer(0, quad.slice());
             pass.setIndexBuffer(indexBuffer, quadIndices.type());
             pass.drawIndexed(6, 1, 0, 0, 0);
         }

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -75,5 +76,22 @@ public class NasaWorkbenchUpgradeMenu extends BaseContainerMenu<NasaWorkbenchBlo
         if (slotIndex == OUTPUT_SLOT && entity.canCraft()) {
             entity.craft();
         }
+    }
+
+    @Override
+    public void removed(@NotNull Player player) {
+        super.removed(player);
+        if (player.level().isClientSide()) return;
+        // Crafting-table semantics: closing the upgrade view returns any staged inputs (armor
+        // slot + 3x3 grid, container slots 0-9) to the player instead of leaving them in the
+        // bench. The result preview (container slot 14) is a phantom stack — never returned.
+        for (int i = 0; i <= 9; i++) {
+            ItemStack stack = entity.getItem(i);
+            if (stack.isEmpty()) continue;
+            entity.setItem(i, ItemStack.EMPTY);
+            player.getInventory().placeItemBackInInventory(stack);
+        }
+        entity.setItem(14, ItemStack.EMPTY);
+        entity.update();
     }
 }

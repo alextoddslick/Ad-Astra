@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -111,8 +112,19 @@ public abstract class LivingEntityMixin extends Entity {
                 return;
             }
             float newGravity = 0.08f * gravity;
+            // During fall-flying (jet suit fullFlight), vanilla's elytra physics only apply a
+            // pitch-dependent fraction of gravity: -g * (1 - 0.75*cos²(pitch)) — 25% at horizontal
+            // look, 100% straight up/down. The compensation differential must scale by the SAME
+            // factor, or horizontal flight overcompensates: on the Moon the full +0.08-0.08g
+            // exceeded the 25% gravity vanilla applied and the player slowly floated upward
+            // (and on Jupiter horizontal flight was over-heavy).
+            float factor = 1.0f;
+            if (entity.isFallFlying()) {
+                float cosPitch = Mth.cos(entity.getXRot() * ((float) Math.PI / 180.0f));
+                factor = 1.0f - 0.75f * cosPitch * cosPitch;
+            }
             Vec3 velocity = this.getDeltaMovement();
-            this.setDeltaMovement(velocity.x(), velocity.y() + 0.08f - newGravity, velocity.z());
+            this.setDeltaMovement(velocity.x(), velocity.y() + (0.08f - newGravity) * factor, velocity.z());
         }
     }
 

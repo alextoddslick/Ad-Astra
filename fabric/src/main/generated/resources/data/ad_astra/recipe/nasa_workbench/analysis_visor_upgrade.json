@@ -17,5 +17,6 @@
         "analysis_visor": true
       }
     }
-  }
+  },
+  "shapeless": true
 }
