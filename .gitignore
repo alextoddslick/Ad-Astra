@@ -116,6 +116,3 @@ run/
 
 # Architectury Garbage
 *.architectury-transformer
-
-# Claude Code
-.claude/
